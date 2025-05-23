@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %} 
+  <article class = "post featured">
+    <header class = "major">
+      <section class = "post">
+        <header class = "major">
+          <h1> Sign Up </h1>
+        </header>
+        <form method = "post">
+          <div class = "row gtr-uniform">
+            <div class = "col-6 col-12-small">
+              <label> NÚMERO DA NOVA CONTA: </label>
+              <input 
+                type = "number" name = "account_id" id = "account_id" value = "" 
+                placeholder = "1234567" step = "1" required = true/>
+            </div>
+            <div class = "col-6 col-12-small">
+              <label> NOME DA NOVA CONTA: </label>
+              <input 
+                type = "text" name = "name" id = "name" value = "" 
+                placeholder = "Lázaro Martins" required = true/>
+            </div>
+  
+            <div class = "col-6 col-12-small">
+              <label> SENHA DA NOVA CLIENTE: </label>
+                <input 
+                  type = "text" name = "password" id = "password" value = "" 
+                  placeholder = "*******" required = true/>
+            </div>
+            <div class = "col-6 col-12-small">
+              <label> SENHA DO ADMINISTRADOR: </label>
+              <input 
+                type = "password" name = "password_admin" id = "password_admin" 
+                value = "" placeholder = "*******" required = true/>
+            </div>
+  
+            <div class="col-12">
+              <ul class = "actions">
+                <li><input type = "submit" value = "Envia" class="primary" /></li>
+                <li><input type = "reset" value = "Reiniciar" /></li>
+              </ul>
+            </div>
+          </div>
+        </form>
+      </section>
+    </header>
+  </article>
+
+{% endblock %}

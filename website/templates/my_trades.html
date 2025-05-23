@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %} 
+  <article class = "post featured">
+    <header class = "major">
+      <section class = "post">
+        <header class = "major">
+          <h1> Minhas Negociações </h1>
+        </header>
+        <div class = "table-wrapper">
+          <table class = "alt">
+            <thead>
+              <tr>
+                <th> Data (UTC) </th>
+                <th> Mercado </th>
+                <th> Lado </th>
+                <th> Quantity </th>
+                <th> Preço </th>
+                <th> Taxa </th>
+                <th> Valor Total </th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in trades %}
+                <tr>
+                  <td> {{ row[0] }} </td>
+                  <td> {{ row[1] }} </td>
+                  <td> {{ row[2] }} </td>
+                  <td> {{ row[3] }} </td>
+                  <td> {{ row[4] }} </td>
+                  <td> {{ row[5] }} </td>
+                  <td> {{ row[6] }} </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </header>
+  </article>
+
+{% endblock %}
