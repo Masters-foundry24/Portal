@@ -1,0 +1,127 @@
+<!DOCTYPE HTML>
+<!--
+  Massively by HTML5 UP html5up.net | @ajlkn
+  Free for personal and commercial 
+  Use under the CCA 3.0 license (html5up.net/license)
+
+  This is our base template laying out a default page all our other pages extend
+  from here. There are 5 blocks where child files can insert their own code.
+    -> block title: This is to change the name that appears in the tab inside a
+     browser. Currently, no pages change this from the default "The Portal".
+  -> block intro: This is currently only utilised by the home page to increase
+     the space for the title sequence above the navigation bar.
+  -> block navbar: By default we have a navbar where none of the tabs are
+     active. Each page takes a copy of this in order to change the class of 
+     their specific tab to "active". Unfortunately, this means that each page
+     needs it's own copy of the navbar code which is annoying to maintain.
+  -> block content: this is where the meat of each page in added.
+  -> block scripts: we have a list of scripts that are common to all pages, 
+     which I got from the website template and then there is one script of my
+     own (for updating account names in forms) which I add on to two of the 
+     pages.
+-->
+<html>
+  <head>
+    <title> {% block title %} The Portal {% endblock %} </title>
+    <meta charset = "utf-8" />
+    <meta name = "viewport" content = "width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel = "stylesheet" href = "{{ url_for('static', filename='css/main.css') }}" />
+    <link rel = "stylesheet" href = "{{ url_for('static', filename='css/alerts.css') }}" />
+    <link rel = "stylesheet" href = "{{ url_for('static', filename='css/balance.css') }}" />
+    <noscript><link rel = "stylesheet" href = "{{ url_for('static', filename='css/noscript.css') }}" /></noscript>
+    <!-- 
+      This next line puts the icon on top of all of our tabs. What I have now is
+      just a placeholder. There are plenty of icons available at 
+      https://www.freepik.com/ 
+    -->
+    <link rel = "icon" type = "image/x-icon" href = "{{ url_for('static', filename='images/icon.png') }}">
+    <!-- 
+      This style puts a background image on a test page but doesn't work here. 
+    -->
+    <style>
+      body {
+        background: url("{{url_for('static',filename='images/bg6.webp')}}");
+        background-repeat: no-repeat;
+        background-size: cover;
+      }
+      navbar_tab {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+    </style>
+  </head>
+  <body class = "is-preload">
+
+    <!-- Wrapper -->
+    <div id = "wrapper" class = "fade-in">
+
+      {% block intro %} {% endblock %}
+
+      <!-- Header -->
+      <header id = "header">
+        <a href = "/" class = "logo"> The Portal </a>
+      </header>
+
+      <!-- Navbar -->
+      <nav id = "nav">
+        <ul class = "links">
+          {% block navbar %}
+            <li><a class = "navbar_tab" href = "/"> Casa </a></li>
+            <li><a class = "navbar_tab" href = "/market"> EUR/STN </a></li>
+            <li><a class = "navbar_tab" href = "/how_it_works"> Como Funciona </a></li>
+            {% if user.is_authenticated %}
+              <li><a class = "navbar_tab" href = "/my_account"> Minha Conta </a></li>
+              <li><a class = "navbar_tab" href = "/transfers"> Depósitos </a></li>
+              <li><a class = "navbar_tab" href = "/transfers"> Retiradas </a></li>
+              <li><a class = "navbar_tab" href = "/send"> Enviar Dinheiro </a></li>
+              <li><a class = "navbar_tab" href = "/logout"> Logout </a></li>
+            {% endif%}
+          {% endblock %}
+        </ul>
+      </nav>
+
+      <!-- Main -->
+      <div id = "main">
+
+        <!-- Loop through our flash messages to display below the navbar. -->
+        {% with messages = get_flashed_messages(with_categories = true) %}
+          {% if messages %}
+            {% for c, m in messages %}
+              {% if c == 'e' %}
+                <div class="alert_red">
+                  <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+                  {{ m }}
+                </div>
+              {% else %}
+                <div class="alert_green">
+                  <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+                  {{ m }}
+                </div>
+              {% endif %}
+            {% endfor%}
+          {% endif %}
+        {% endwith %}
+
+        <!-- Here is where the action happens -->
+        {% block content %} {% endblock %}
+      </div>
+
+      <!-- Copyright -->
+      <div id = "copyright">
+        <ul><li> The Portal is a division of the Black Dragon Society </li></ul>
+      </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src = "{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src = "{{ url_for('static', filename='js/jquery.scrollex.min.js') }}"></script>
+    <script src = "{{ url_for('static', filename='js/jquery.scrolly.min.js') }}"></script>
+    <script src = "{{ url_for('static', filename='js/browser.min.js') }}"></script>
+    <script src = "{{ url_for('static', filename='js/breakpoints.min.js') }}"></script>
+    <script src = "{{ url_for('static', filename='js/util.js') }}"></script>
+    <script src = "{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %} {% endblock %}
+
+  </body>
+</html>

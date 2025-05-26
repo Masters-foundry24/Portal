@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+  <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/"> Casa </a></li>
+  <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/market"> EUR/STN </a></li>
+  <li class = "active"><a style = "padding-left: 20px; padding-right: 20px;" href = "/how_it_works"> Como Funciona </a></li>
+  {% if user.is_authenticated %}
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/my_account"> Minha Conta </a></li>
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/transfers"> Depósitos </a></li>
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/transfers"> Retiradas </a></li>
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/send"> Enviar Dinheiro </a></li>
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/logout"> Logout </a></li>
+  {% endif%}
+{% endblock %}
+
+{% block content %} 
+<article class = "post featured">
+  <header class = "major">
+  	<section class = "post">
+  		<header>
+		  	<h2> Como Usar o Portal </h2>
+		  </header>
+  	</section>
+  </header>
+  <header>
+		<!-- h2 style = "text-align: left;"> Como Enviar Dinheiro </h2>
+		<p>
+      Lorem ipsum dolor sit amet nullam id egestas urna aliquam
+    </p>
+	</header>
+  <header>
+		<h2 style = "text-align: left;"> Como Mudar Moedas (Básico) </h2>
+		<p> 
+      happy go lucky
+    </p>
+	</header -->
+  <header>
+		<h2 style = "text-align: left;"> Como Mudar Moedas (Avançado) </h2>
+		<p> 
+      When you exchange money on the Portal you don't trade with an intermediary. 
+      Instead you trade directly with other users of the platform. Currently, the
+      Portal has only one currency market, between Euros (EUR) and Dobras (STN).
+    </p>
+    <p>
+      You are able to place an offer in the market at any time, either to buy
+      Euros using Dobras or to sell Euros in exchange for Dobras. You simply 
+      specify the amount that you would like to buy or sell and your reserve 
+      price. Then your orders are matched with the best available orders from the
+      oppersite side. Let's look at some examples now:
+    </p>
+    <div class = "table-wrapper">
+			<table class = "alt">
+				<thead>
+					<tr>
+						<th style = "color: darkgreen"> Quant. </th>
+						<th style = "color: darkgreen"> Preço </th>
+						<th style = "color: darkred"> Preço </th>
+            <th style = "color: darkred"> Quant. </th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 8.00 </td>
+						<td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 26.00 </td>
+						<td style = "color: darkred; background-color: rgb(238, 207, 207);"> 26.10 </td>
+            <td style = "color: darkred; background-color: rgb(238, 207, 207);"> 5.00 </td>
+					</tr>
+          <tr>
+						<td style = "color: darkgreen;"> 15.00 </td>
+						<td style = "color: darkgreen"> 25.80 </td>
+						<td style = "color: darkred"> 26.50 </td>
+            <td style = "color: darkred"> 30.00 </td>
+					</tr>
+          <tr>
+						<td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 25.00 </td>
+						<td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 25.00 </td>
+						<td style = "color: darkred; background-color: rgb(238, 207, 207);"> - </td>
+            <td style = "color: darkred; background-color: rgb(238, 207, 207);"> - </td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+    <p>
+      On the left of this market, in green, we can see the orders seeking to buy
+      Euros. There is one person who wants to buy 25 Euros for 25.00 Dobras each,
+      one person who wants to buy 15 Euros for 25.80 Dobras each and one person 
+      who wants to buy 8 Euros 26.00 Dobras each. Those who are offering to buy
+      for the best (highest) prices are listed first and they will be able to 
+      trade ahead of those offering lower prices.
+    </p>
+    <p>
+      On the right of this market, in red, we can see the orders seeking to sell
+      Euros. There is one person who wants to sell 5 Euros for 26.10 Dobras each
+      and one person who wants to buy 30 Euros for 26.5 Dobras each. This time, 
+      those who are demanding to sell for the best (lowest) prices are listed 
+      first and they will be able to trade before people demanding higher prices.
+    </p>
+    <p>
+      Now let's imagine that you want to buy Euros and so you place an order to 
+      purchase 10 Euros for 27.00 Dobras each. This price is higher than the 
+      price of the first seller so you trade instantly buying 5 Euros for 26.10
+      Dobras each. At this point you still want to buy 5 more Euros so you will
+      also match with the second seller buying 5 Euros from them for 26.50 Dobras
+      each. So in total you will pay 263.5 Dobras even though you were willing to
+      pay up to 270 Dobras (27 &times; 10). After your trade the market will look
+      like this:
+    </p>
+    <div class = "row gtr-uniform">
+      <div class = "col-6 col-12-small">
+  		  <div class = "row gtr-uniform">
+          <div class = "col-6">
+			    	<input type = "radio" id = "bid_eg1" name = "eg1" checked>
+			    	<label for = "bid_eg1"> COMPRA </label>
+			    </div>
+			    <div class = "col-6">
+			    	<input type = "radio" id = "ask_eg1" name = "eg1">
+			    	<label for = "ask_eg1"> VENDE </label>
+			    </div>
+
+          <div class = "col-12">
+  			    <label> QUANTIDADE (DE EUR): </label>
+            <div class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+							<p> 10.00 </p>
+						</div>
+  			  </div>
+
+          <div class = "col-12">
+  			    <label> PREÇO (DE EUR EM STN): </label>
+            <div class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+							<p> 27.00 </p>
+						</div>
+  			  </div>
+  	    </div>
+      </div>
+  		<div class = "col-6 col-12-small">
+        <div class = "table-wrapper">
+		    	<table class = "alt">
+		    		<thead>
+		    			<tr>
+		    				<th style = "color: darkgreen"> Quant. </th>
+		    				<th style = "color: darkgreen"> Preço </th>
+		    				<th style = "color: darkred"> Preço </th>
+                <th style = "color: darkred"> Quant. </th>
+		    			</tr>
+		    		</thead>
+		    		<tbody>
+		    			<tr>
+		    				<td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 8.00 </td>
+		    				<td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 26.00 </td>
+		    				<td style = "color: darkred; background-color: rgb(238, 207, 207);"> 26.50 </td>
+                <td style = "color: darkred; background-color: rgb(238, 207, 207);"> 25.00 </td>
+		    			</tr>
+              <tr>
+		    				<td style = "color: darkgreen;"> 15.00 </td>
+		    				<td style = "color: darkgreen"> 25.80 </td>
+		    				<td style = "color: darkred"> - </td>
+                <td style = "color: darkred"> - </td>
+		    			</tr>
+              <tr>
+		    				<td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 25.00 </td>
+		    				<td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 25.00 </td>
+		    				<td style = "color: darkred; background-color: rgb(238, 207, 207);"> - </td>
+                <td style = "color: darkred; background-color: rgb(238, 207, 207);"> - </td>
+		    			</tr>
+              <tr>
+		    				<td style = "color: darkgreen;"> - </td>
+		    				<td style = "color: darkgreen"> - </td>
+		    				<td style = "color: darkred"> - </td>
+                <td style = "color: darkred"> - </td>
+		    			</tr>
+		    		</tbody>
+		    	</table>
+		    </div>
+      </div>
+    </div>
+    <p>
+      In this next example let's imagine that you want you still want to buy 10 
+      Euros but this time you specify a maximum price of 26.20 Dobras. Like 
+      before your price is higher than the price of the first seller so you match
+      with them, buying 5 Euros for 26.10 Dobras each. However, this time you are
+      not willing to pay enough to trade with the second seller. So the rest of 
+      your order will remain in the market until someone agrees to sell at 26.20
+      Dobras or until you cancel the order. This is how the market looks after 
+      your trade: 
+    </p>
+    <div class = "row gtr-uniform">
+      <div class = "col-6 col-12-small">
+  		  <div class = "row gtr-uniform">
+          <div class = "col-6">
+			    	<input type = "radio" id = "bid_eg2" name = "eg2" checked>
+			    	<label for = "bid_eg2"> COMPRA </label>
+			    </div>
+			    <div class = "col-6">
+			    	<input type = "radio" id = "ask_eg2" name = "eg2">
+			    	<label for = "ask_eg2"> VENDE </label>
+			    </div>
+
+          <div class = "col-12">
+  			    <label> QUANTIDADE (DE EUR): </label>
+            <div class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+							<p> 10.00 </p>
+						</div>
+  			  </div>
+
+          <div class = "col-12">
+  			    <label> PREÇO (DE EUR EM STN): </label>
+            <div class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+							<p> 26.20 </p>
+						</div>
+  			  </div>
+  	    </div>
+      </div>
+  		<div class = "col-6 col-12-small">
+        <div class = "table-wrapper">
+		    	<table class = "alt">
+		    		<thead>
+		    			<tr>
+		    				<th style = "color: darkgreen"> Quant. </th>
+		    				<th style = "color: darkgreen"> Preço </th>
+		    				<th style = "color: darkred"> Preço </th>
+                <th style = "color: darkred"> Quant. </th>
+		    			</tr>
+		    		</thead>
+		    		<tbody>
+		    			<tr>
+		    				<td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> <b> 5.00 </b> </td>
+		    				<td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> <b> 26.20 </b> </td>
+		    				<td style = "color: darkred; background-color: rgb(238, 207, 207);"> 26.50 </td>
+                <td style = "color: darkred; background-color: rgb(238, 207, 207);"> 30.00 </td>
+		    			</tr>
+              <tr>
+		    				<td style = "color: darkgreen;"> 8.00 </td>
+		    				<td style = "color: darkgreen"> 26.00 </td>
+		    				<td style = "color: darkred"> - </td>
+                <td style = "color: darkred"> - </td>
+		    			</tr>
+              <tr>
+		    				<td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 15.00 </td>
+		    				<td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 25.80 </td>
+		    				<td style = "color: darkred; background-color: rgb(238, 207, 207);"> - </td>
+                <td style = "color: darkred; background-color: rgb(238, 207, 207);"> - </td>
+		    			</tr>
+              <tr>
+		    				<td style = "color: darkgreen;"> 25.00 </td>
+		    				<td style = "color: darkgreen"> 25.00 </td>
+		    				<td style = "color: darkred"> - </td>
+                <td style = "color: darkred"> - </td>
+		    			</tr>
+		    		</tbody>
+		    	</table>
+		    </div>
+      </div>
+    </div>
+    <p>
+      Since your order is now the first buyer you probably won't have to wait 
+      long until someone trades with you. Once you trade you will have paid 261.5 
+      Dobras for your 10 Euros.
+    </p>
+    <p>
+      Finally, let's suppose that you still want to buy 10 Euros but you are very 
+      patient and really want to trade at a favourable (low) price. One strategy
+      is to insert an order to buy for 25.01 Dobras. This order will not trade 
+      immediately because there are not currently any sellers willing to accept a 
+      price that low. Instead, the order will sit in the market as you can see 
+      here:
+    </p>
+    <div class = "row gtr-uniform">
+      <div class = "col-6 col-12-small">
+  		  <div class = "row gtr-uniform">
+          <div class = "col-6">
+			    	<input type = "radio" id = "bid_eg2" name = "eg2" checked>
+			    	<label for = "bid_eg2"> COMPRA </label>
+			    </div>
+			    <div class = "col-6">
+			    	<input type = "radio" id = "ask_eg2" name = "eg2">
+			    	<label for = "ask_eg2"> VENDE </label>
+			    </div>
+
+          <div class = "col-12">
+  			    <label> QUANTIDADE (DE EUR): </label>
+            <div class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+							<p> 10.00 </p>
+						</div>
+  			  </div>
+
+          <div class = "col-12">
+  			    <label> PREÇO (DE EUR EM STN): </label>
+            <div class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+							<p> 25.01 </p>
+						</div>
+  			  </div>
+  	    </div>
+      </div>
+  		<div class = "col-6 col-12-small">
+        <div class = "table-wrapper">
+		    	<table class = "alt">
+		    		<thead>
+		    			<tr>
+		    				<th style = "color: darkgreen"> Quant. </th>
+		    				<th style = "color: darkgreen"> Preço </th>
+		    				<th style = "color: darkred"> Preço </th>
+                <th style = "color: darkred"> Quant. </th>
+		    			</tr>
+		    		</thead>
+		    		<tbody>
+		    			<tr>
+		    				<td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 8.00 </td>
+		    				<td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 26.00 </td>
+		    				<td style = "color: darkred; background-color: rgb(238, 207, 207);"> 26.10 </td>
+                <td style = "color: darkred; background-color: rgb(238, 207, 207);"> 5.00 </td>
+		    			</tr>
+              <tr>
+		    				<td style = "color: darkgreen;"> 15.00 </td>
+		    				<td style = "color: darkgreen"> 25.80 </td>
+		    				<td style = "color: darkred"> 26.50 </td>
+                <td style = "color: darkred"> 30.00 </td>
+		    			</tr>
+              <tr>
+		    				<td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> <b> 10.00 </b> </td>
+		    				<td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> <b> 25.01 </b> </td>
+		    				<td style = "color: darkred; background-color: rgb(238, 207, 207);"> - </td>
+                <td style = "color: darkred; background-color: rgb(238, 207, 207);"> - </td>
+		    			</tr>
+              <tr>
+		    				<td style = "color: darkgreen;"> 25.00 </td>
+		    				<td style = "color: darkgreen"> 25.00 </td>
+		    				<td style = "color: darkred"> - </td>
+                <td style = "color: darkred"> - </td>
+		    			</tr>
+		    		</tbody>
+		    	</table>
+		    </div>
+      </div>
+    </div>
+    <p>
+      Your order is currently third in the queue. However, if someone places a 
+      sell order larger than 23 Euros (8 &plus; 15) and their limit is low enough
+      then at least part of your order will trade. It is perfectly alright for 
+      only some of your order to trade and for the rest to trade with someone
+      eles later on. Note that by offering 0.01 Dobras more than the last buyer
+      you are able to rank ahead of them in the queue. If you had only offered 
+      24.99 Dobras then you would only trade if the opposing order was larger 
+      than 48 Euros (8 &plus; 15 &plus; 25).
+    </p>
+    <p>
+      A good rule of thumb to adopt is that if you need to move money though the 
+      Portal quickly, especially if it is a large amount of money, you may have 
+      to do so at an unfavourable exchange rate. However, if you are able to wait
+      for others to come to you and/or move the money in smaller installments 
+      then you are likely to get much better prices.
+    </p>
+    <p>
+      An order will remain active in the market until it is cancelled or traded, 
+      even if you logout of your account or turn off your device. If you change 
+      your mind then you can cancel any order that hasn't traded yet by simply 
+      clicking the &times; icon next to that order.
+    </p>
+    <p>
+      Orders can be inserted by users of the Portal at any time. Remember to 
+      refresh you webpage to get the most current shapshot of the market.
+    </p>
+	</header>
+</article>
+
+{% endblock %}

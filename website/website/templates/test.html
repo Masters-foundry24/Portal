@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<head>
+    <title> Events </title>
+    <style>
+        body {
+            background: url("{{url_for('static',filename='images/bg6.webp')}}");
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+    </style>
+</head>
+<body>
+    <form>
+        <input id = account_id type = "text" placeholder = "username">
+        <p id = account_name> Username will be displayed here </p>
+        <input type = "password" placeholder = "password">
+        <input type = "submit" value = "Submit">
+    </form>
+</body>
+
+<!--script>
+    const usernameInput = document.querySelector('input[type="text"]');
+    usernameInput.addEventListener('blur', (e) => {
+        console.log(e)
+    })
+</script-->
+<script>
+    let account_id = document.getElementById("account_id");
+    let account_name = document.getElementById("account_name");
+
+    account_id.addEventListener("blur", function(event) {
+        // fetch("/get_account_name").then(res => res.json()).then(data => console.log(data.account_name));
+        // account_name.textContent = account_id.value;
+        // fetch("/get_account_name").then(res => res.json()).then(data => {account_name.textContent = data.account_name});
+        fetch(`/get_account_name?account_id=${encodeURIComponent(account_id.value)}`).then(res => res.json()).then(data => {account_name.textContent = data.account_name});
+    })
+</script>
