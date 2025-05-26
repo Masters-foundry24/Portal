@@ -2,8 +2,8 @@ import flask as fl
 import flask_login as fo
 import decimal as de
 
-from .models import Account
-from . import db # A dot will import from __init__.py
+from website.models import Account
+from website import db # A dot will import from __init__.py
 
 auth = fl.Blueprint("auth", __name__)
 
@@ -20,13 +20,13 @@ def login():
         account = Account.query.filter_by(account_id = account_id).first()
         if account:
             if account.password == password:
-                fl.flash("Logged in Successfully", category = "s")
+                fl.flash("Conectado com sucesso", category = "s")
                 fo.login_user(account, remember = True)
                 return fl.redirect("/")
             else:
                 fl.flash("Senha ou número de conta incorretos", category = "e")
         else:
-            fl.flash("Senha incorreta", category = "s")
+            fl.flash("Senha incorreta", category = "e")
         
     return fl.render_template("home.html", user = fo.current_user)
 

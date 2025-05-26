@@ -2,7 +2,7 @@ import flask_login as fo
 from sqlalchemy.sql import func
 # import datetime as dt
 
-from . import db
+from website import db
 
 class Order(db.Model):
     order_id = db.Column(db.Integer, primary_key = True)

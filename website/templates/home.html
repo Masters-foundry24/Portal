@@ -31,7 +31,7 @@
   	  <!-- If the user is logged in show a welcome message and a photo -->
         <h2> Bem Vindo {{ user.name }} </h2>
         <a class = "image main"> 
-          <img src = {{ url_for('static', filename='images/city.jpg') }} alt = "" /> 
+          <img src = {{ url_for('static', filename='images/Sao_Tome.avif') }} alt = "" /> 
         </a>
       {% else %}
         <!-- If the user is not logged in show a login form -->
@@ -49,8 +49,8 @@
                 type = "password" name = "password" id = "password" value = "" 
                 placeholder = "Sua Senha" required = true/>
             </div>
-            <div class="col-12">
-              <ul class="actions">
+            <div class = "col-12">
+              <ul class = "actions">
                 <li><input type = "submit" value = "Login" class = "primary" /></li>
                 <li><input type = "reset" value = "Reiniciar" /></li>
               </ul>

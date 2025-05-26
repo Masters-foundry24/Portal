@@ -86,20 +86,20 @@
               <input 
                 type = "radio" id = "bid" name = "side" value = "bid" 
                 required = true>
-              <label for = "bid"> COMPRA </label>
+              <label for = "bid"> COMPRAR </label>
             </div>
             <div class = "col-6">
               <input 
                 type = "radio" id = "ask" name = "side" value = "ask" 
                 required = true>
-              <label for = "ask"> VENDE </label>
+              <label for = "ask"> VENDER </label>
             </div>
 
             <div class = "col-12">
               <label> QUANTIDADE (DE EUR): </label>
               <input 
                 type = "number" name = "quantity" id = "quantity" value = "" 
-                placeholder = "0.00" step = "0.01" required = true/>
+                placeholder = "0.00" step = "1" required = true/>
             </div>
 
             <div class = "col-12">
@@ -111,7 +111,7 @@
 
             <div class="col-12">
               <ul class = "actions">
-                <li><input type = "submit" value = "Coloca" class="primary" /></li>
+                <li><input type = "submit" value = "Colocar" class="primary" /></li>
                 <li><input type = "reset" value = "Reiniciar" /></li>
               </ul>
             </div>
@@ -150,7 +150,7 @@
                   <td> {{o.asset_1}} {{o.quantity}} </td>
                   <td> {{o.asset_0}} {{ o.price }} </td>
                   <td> 
-                    <a href = "cancel/{{ o.order_id }}?return_path=market">
+                    <a href = "cancel/{{ o.order_id }}">
                       &times;
                     </a> 
                   </td>

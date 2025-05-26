@@ -5,8 +5,8 @@ import datetime as dt
 from sqlalchemy.sql import func, or_
 from sqlalchemy import or_, text
 
-from .models import Account, Payment, Deposit, Order, Trade
-from . import db
+from website.models import Account, Payment, Deposit, Order, Trade
+from website import db
 
 views = fl.Blueprint("views", __name__)
 
@@ -77,6 +77,168 @@ def get_book(asset_0: str, asset_1: str, row_count: int = 7):
 
     return book
 
+def enter_order(data):
+    """
+    Inputs:
+        -> data: result of the form on the market page.
+    """
+    side = data.get("side")
+    quantity = de.Decimal(data.get("quantity"))
+    price = de.Decimal(data.get("price"))
+
+    # We will begin with some basic checks of the order.
+    if quantity <= de.Decimal("0"):
+        # You can't enter a negative quantity or a quantity of zero.
+        fl.flash("Quantidade deve ser positivo", category = "e")
+        # book = get_book("STN", "EUR")
+        # return fl.render_template("market.html", user = fo.current_user, book = book)
+        return fl.redirect("/market")
+    elif price <= de.Decimal("0"):
+        # All prices must be postitive.
+        fl.flash("Preço deve ser positivo", category = "e")
+        # book = get_book("STN", "EUR")
+        # return fl.render_template("market.html", user = fo.current_user, book = book)
+        return fl.redirect("/market")
+
+    # Next, we will check that the user has enough funds to submit this new 
+    # order even after considering any orders they already have in this
+    # market. Note, once we expand to having more than one market this 
+    # function will need to be changed to consider all the user's orders.
+    my_orders = Order.query.filter_by(
+        account_id = fo.current_user.account_id, asset_0 = "STN", 
+        asset_1 = "EUR", side = side, active = True)
+
+    if side == "bid": # Bid order
+        balance_used = price * quantity # balance used by current order
+        for o in my_orders:
+            balance_used += o.quantity * o.price
+        if balance_used > fo.current_user.STN:
+            fl.flash("Saldo insufficent, não tens STN bastante.", category = "e")
+            # book = get_book("STN", "EUR")
+            # return fl.render_template("market.html", user = fo.current_user, book = book)
+            return fl.redirect("/market")
+    else: # Ask order
+        balance_used = quantity # balance used by current order
+        for o in my_orders:
+            balance_used += o.quantity
+        if balance_used > fo.current_user.EUR:
+            fl.flash("Saldo insufficent, não tens EUR bastante.", category = "e")
+            # book = get_book("STN", "EUR")
+            # return fl.render_template("market.html", user = fo.current_user, book = book)
+            return fl.redirect("/market")
+
+    # Okay, we are satisfied that this is a valid order. Now we will check 
+    # if it matches with any current orders, or will be entered as a quote.
+    if side == "bid": # Bid order
+        opp_orders = Order.query.filter_by(
+            asset_0 = "STN", asset_1 = "EUR", side = "ask", active = True
+            ).order_by(Order.price)
+        for o in opp_orders:
+            if o.price > price:
+                # There is no more price overlap.
+                break
+            quantity_traded = min(quantity, o.quantity)
+            quantity -= quantity_traded
+            o.quantity -= quantity_traded
+                
+            # Now we will record the new trade
+            fl.flash("Pedido negociado", category = "s")
+            db.session.add(Trade(
+                asset_0 = "STN", asset_1 = "EUR", 
+                quantity = quantity_traded, price = o.price, 
+                buyer = fo.current_user.account_id, seller = o.account_id
+                ))
+
+            # Now we update the balances of both traders.
+            buyer = Account.query.filter_by(account_id = fo.current_user.account_id).first()
+            seller = Account.query.filter_by(account_id = o.account_id).first()
+
+            buyer.EUR += quantity_traded
+            buyer.STN -= quantity_traded * o.price
+            seller.EUR -= quantity_traded
+            seller.STN += quantity_traded * o.price
+
+            if o.quantity == de.Decimal("0"):
+                o.active = False
+
+            if quantity == de.Decimal("0"):
+                # The new order has fully matched with existing orders so we
+                # will record the order and stop looping.
+                db.session.add(Order(
+                    asset_0 = "STN", asset_1 = "EUR", side = side, 
+                    price = price, quantity = de.Decimal("0"), 
+                    quantity_og = de.Decimal(data.get("quantity")), 
+                    account_id = fo.current_user.account_id, active = False
+                    ))
+                break
+
+        if quantity > de.Decimal("0"):
+            # The order has not fully matched with existing orders so we 
+            # will post it as a quote.
+            db.session.add(Order(
+                asset_0 = "STN", asset_1 = "EUR", side = side, 
+                price = price, quantity = quantity, 
+                quantity_og = de.Decimal(data.get("quantity")), 
+                account_id = fo.current_user.account_id
+                ))
+
+    else: # Ask order
+        opp_orders = Order.query.filter_by(
+            asset_0 = "STN", asset_1 = "EUR", side = "bid", active = True
+            ).order_by(Order.price.desc())
+        for o in opp_orders:
+            if o.price < price:
+                # There is no more price overlap.
+                break
+            quantity_traded = min(quantity, o.quantity)
+            quantity -= quantity_traded
+            o.quantity -= quantity_traded
+
+            # Now we will record the new trade
+            fl.flash("Pedido negociado", category = "s")
+            db.session.add(Trade(
+                asset_0 = "STN", asset_1 = "EUR", 
+                quantity = quantity_traded, price = o.price, 
+                buyer = o.account_id, seller = fo.current_user.account_id
+                ))
+
+            # Now we update the balances of both traders.
+            seller = Account.query.filter_by(account_id = fo.current_user.account_id).first()
+            buyer = Account.query.filter_by(account_id = o.account_id).first()
+
+            buyer.EUR += quantity_traded
+            buyer.STN -= quantity_traded * o.price
+            seller.EUR -= quantity_traded
+            seller.STN += quantity_traded * o.price
+
+            if o.quantity == de.Decimal("0"):
+                o.active = False
+
+            if quantity == de.Decimal("0"):
+                # The new order has fully matched with existing orders so we
+                # will record the order and stop looping.
+                db.session.add(Order(
+                    asset_0 = "STN", asset_1 = "EUR", side = side, 
+                    price = price, quantity = de.Decimal("0"), 
+                    quantity_og = de.Decimal(data.get("quantity")), 
+                    account_id = fo.current_user.account_id, active = False
+                    ))
+                break
+
+        if quantity > de.Decimal("0"):
+            # The order has not fully matched with existing orders so we 
+            # will post it as a quote.
+            db.session.add(Order(
+                asset_0 = "STN", asset_1 = "EUR", side = side, 
+                price = price, quantity = quantity, 
+                quantity_og = de.Decimal(data.get("quantity")), 
+                account_id = fo.current_user.account_id
+                ))
+
+    db.session.commit()
+    fl.flash("Pedido enviado", category = "s")
+    return fl.redirect("/market")
+    
 @views.route("/market", methods = ["GET", "POST"])
 def market():
     """
@@ -89,158 +251,7 @@ def market():
         -> The book defaults to a maximum of 7 entries per side.
     """
     if fl.request.method == "POST":
-        data = fl.request.form
-        side = data.get("side")
-        quantity = de.Decimal(data.get("quantity"))
-        price = de.Decimal(data.get("price"))
-
-        # We will begin with some basic checks of the order.
-        if quantity <= de.Decimal("0"):
-            # You can't enter a negative quantity or a quantity of zero.
-            fl.flash("Quantidade deve ser positivo", category = "e")
-            book = get_book("STN", "EUR")
-            return fl.render_template("market.html", user = fo.current_user, book = book)
-        elif price <= de.Decimal("0"):
-            # All prices must be postitive.
-            fl.flash("Preço deve ser positivo", category = "e")
-            book = get_book("STN", "EUR")
-            return fl.render_template("market.html", user = fo.current_user, book = book)
-
-        # Next, we will check that the user has enough funds to submit this new 
-        # order even after considering any orders they already have in this
-        # market. Note, once we expand to having more than one market this 
-        # function will need to be changed to consider all the user's orders.
-        my_orders = Order.query.filter_by(
-            account_id = fo.current_user.account_id, asset_0 = "STN", 
-            asset_1 = "EUR", side = side, active = True)
-
-        if side == "bid": # Bid order
-            balance_used = price * quantity # balance used by current order
-            for o in my_orders:
-                balance_used += o.quantity * o.price
-            if balance_used > fo.current_user.STN:
-                fl.flash("Saldo insufficent, não tens STN bastante.", category = "e")
-                book = get_book("STN", "EUR")
-                return fl.render_template("market.html", user = fo.current_user, book = book)
-        else: # Ask order
-            balance_used = quantity # balance used by current order
-            for o in my_orders:
-                balance_used += o.quantity
-            if balance_used > fo.current_user.EUR:
-                fl.flash("Saldo insufficent, não tens EUR bastante.", category = "e")
-                book = get_book("STN", "EUR")
-                return fl.render_template("market.html", user = fo.current_user, book = book)
-
-        # Okay, we are satisfied that this is a valid order. Now we will check 
-        # if it matches with any current orders, or will be entered as a quote.
-        if side == "bid": # Bid order
-            opp_orders = Order.query.filter_by(
-                asset_0 = "STN", asset_1 = "EUR", side = "ask", active = True
-                ).order_by(Order.price)
-            for o in opp_orders:
-                if o.price > price:
-                    # There is no more price overlap.
-                    break
-                quantity_traded = min(quantity, o.quantity)
-                quantity -= quantity_traded
-                o.quantity -= quantity_traded
-                
-                # Now we will record the new trade
-                fl.flash("Pedido negociado", category = "s")
-                db.session.add(Trade(
-                    asset_0 = "STN", asset_1 = "EUR", 
-                    quantity = quantity_traded, price = o.price, 
-                    buyer = fo.current_user.account_id, seller = o.account_id
-                    ))
-
-                # Now we update the balances of both traders.
-                buyer = Account.query.filter_by(account_id = fo.current_user.account_id).first()
-                seller = Account.query.filter_by(account_id = o.account_id).first()
-
-                buyer.EUR += quantity_traded
-                buyer.STN -= quantity_traded * o.price
-                seller.EUR -= quantity_traded
-                seller.STN += quantity_traded * o.price
-
-                if o.quantity == de.Decimal("0"):
-                    o.active = False
-
-                if quantity == de.Decimal("0"):
-                    # The new order has fully matched with existing orders so we
-                    # will record the order and stop looping.
-                    db.session.add(Order(
-                        asset_0 = "STN", asset_1 = "EUR", side = side, 
-                        price = price, quantity = de.Decimal("0"), 
-                        quantity_og = de.Decimal(data.get("quantity")), 
-                        account_id = fo.current_user.account_id, active = False
-                        ))
-                    break
-
-            if quantity > de.Decimal("0"):
-                # The order has not fully matched with existing orders so we 
-                # will post it as a quote.
-                db.session.add(Order(
-                    asset_0 = "STN", asset_1 = "EUR", side = side, 
-                    price = price, quantity = de.Decimal("0"), 
-                    quantity_og = de.Decimal(data.get("quantity")), 
-                    account_id = fo.current_user.account_id
-                    ))
-
-        else: # Ask order
-            opp_orders = Order.query.filter_by(
-                asset_0 = "STN", asset_1 = "EUR", side = "bid", active = True
-                ).order_by(Order.price.desc())
-            for o in opp_orders:
-                if o.price < price:
-                    # There is no more price overlap.
-                    break
-                quantity_traded = min(quantity, o.quantity)
-                quantity -= quantity_traded
-                o.quantity -= quantity_traded
-
-                # Now we will record the new trade
-                fl.flash("Pedido negociado", category = "s")
-                db.session.add(Trade(
-                    asset_0 = "STN", asset_1 = "EUR", 
-                    quantity = quantity_traded, price = o.price, 
-                    buyer = o.account_id, seller = fo.current_user.account_id
-                    ))
-
-                # Now we update the balances of both traders.
-                seller = Account.query.filter_by(account_id = fo.current_user.account_id).first()
-                buyer = Account.query.filter_by(account_id = o.account_id).first()
-
-                buyer.EUR += quantity_traded
-                buyer.STN -= quantity_traded * o.price
-                seller.EUR -= quantity_traded
-                seller.STN += quantity_traded * o.price
-
-                if o.quantity == de.Decimal("0"):
-                    o.active = False
-
-                if quantity == de.Decimal("0"):
-                    # The new order has fully matched with existing orders so we
-                    # will record the order and stop looping.
-                    db.session.add(Order(
-                        asset_0 = "STN", asset_1 = "EUR", side = side, 
-                        price = price, quantity = de.Decimal("0"), 
-                        quantity_og = de.Decimal(data.get("quantity")), 
-                        account_id = fo.current_user.account_id, active = False
-                        ))
-                    break
-
-            if quantity > de.Decimal("0"):
-                # The order has not fully matched with existing orders so we 
-                # will post it as a quote.
-                db.session.add(Order(
-                    asset_0 = "STN", asset_1 = "EUR", side = side, 
-                    price = price, quantity = quantity, 
-                    quantity_og = de.Decimal(data.get("quantity")), 
-                    account_id = fo.current_user.account_id
-                    ))
-
-        db.session.commit()
-        fl.flash("Pedido enviado", category = "s")
+        return enter_order(fl.request.form)
 
     book = get_book("STN", "EUR")
     return fl.render_template("market.html", user = fo.current_user, book = book)
@@ -404,6 +415,59 @@ def transfers():
     """
     return fl.render_template("transfers.html", user = fo.current_user)
 
+def send_funds(data):
+    """
+    This function deals with a POST request from the send money page,. It first
+    checks that the transfer is valid and if it is executes it before 
+    redirecting the user to a GET version of the same page.
+    """
+    currency = data.get("currency")
+    quantity = de.Decimal(data.get("quantity"))
+    paid_to_id = int(data.get("paid_to_id"))
+    password = data.get("password")
+
+    paid_to = Account.query.filter_by(account_id = paid_to_id).first()
+    paid_from = Account.query.filter_by(account_id = fo.current_user.account_id).first()
+
+    # Now for a series of checks to confirm that the request is valid.
+    if paid_to_id == fo.current_user.account_id:
+        # Can't send money to yourself
+        fl.flash("Não pode enviar dinheiro da sua conta para a mesma conta", category = "e")
+    elif quantity <= de.Decimal("0"):
+        # Can't take money from other people's accounts
+        fl.flash("O valor deve ser positivo", category = "e")
+    elif currency == "STN" and quantity > fo.current_user.STN:
+        # The person is trying to send more money than they have
+        fl.flash("Saldo de STN insufficent", category = "e")
+    elif currency == "EUR" and quantity > fo.current_user.EUR:
+        # The person is trying to send more money than they have
+        fl.flash("Saldo de EUR insufficent", category = "e")
+    elif not paid_to:
+        # The receipiant does not exist
+        fl.flash("Não existe uma conta com o número fornecido", category = "e")
+    elif password != fo.current_user.password:
+        # Incorrect password
+        fl.flash("Senha incorreta", category = "e")
+    else:
+        # The payment is valid so, now we will process it.
+        db.session.add(Payment(
+            currency = currency, quantity = quantity, 
+            paid_from_id = fo.current_user.account_id, 
+            paid_to_id = paid_to_id
+            ))
+        if currency == "EUR":
+            paid_to.EUR = paid_to.EUR + quantity
+            paid_from.EUR = paid_from.EUR - quantity
+        elif currency == "STN":
+            paid_to.STN = paid_to.STN + quantity
+            paid_from.STN = paid_from.STN - quantity
+            
+        # This commits the new balances as well logging a the new payment.
+        db.session.commit()
+        fl.flash("Dinheiro Enviou", category = "s")
+    
+    return fl.redirect("/send")
+
 @fo.login_required
 @views.route("/send", methods = ["GET", "POST"])
 def send():
@@ -414,53 +478,46 @@ def send():
     original page.
     """
     if fl.request.method == "POST":
-        data = fl.request.form
-        currency = data.get("currency")
-        quantity = de.Decimal(data.get("quantity"))
-        paid_to_id = int(data.get("paid_to_id"))
-        password = data.get("password")
-
-        paid_to = Account.query.filter_by(account_id = paid_to_id).first()
-        paid_from = Account.query.filter_by(account_id = fo.current_user.account_id).first()
-
-        # Now for a series of checks to confirm that the request is valid.
-        if paid_to_id == fo.current_user.account_id:
-            # Can't send money to yourself
-            fl.flash("Não pode enviar dinheiro da sua conta para a mesma conta", category = "e")
-        elif quantity <= de.Decimal("0"):
-            # Can't take money from other people's accounts
-            fl.flash("O valor deve ser positivo", category = "e")
-        elif currency == "STN" and quantity > fo.current_user.STN:
-            # The person is trying to send more money than they have
-            fl.flash("Saldo de STN insufficent", category = "e")
-        elif currency == "EUR" and quantity > fo.current_user.EUR:
-            # The person is trying to send more money than they have
-            fl.flash("Saldo de EUR insufficent", category = "e")
-        elif not paid_to:
-            # The receipiant does not exist
-            fl.flash("Não existe uma conta com o número fornecido", category = "e")
-        elif password != fo.current_user.password:
-            # Incorrect password
-            fl.flash("Senha incorreta", category = "e")
-        else:
-            # The payment is valid so, now we will process it.
-            db.session.add(Payment(
-                currency = currency, quantity = quantity, 
-                paid_from_id = fo.current_user.account_id, 
-                paid_to_id = paid_to_id
-                ))
-            if currency == "EUR":
-                paid_to.EUR = paid_to.EUR + quantity
-                paid_from.EUR = paid_from.EUR - quantity
-            elif currency == "STN":
-                paid_to.STN = paid_to.STN + quantity
-                paid_from.STN = paid_from.STN - quantity
-            
-            # This commits the new balances as well logging a the new payment.
-            db.session.commit()
-            fl.flash("Dinheiro Enviou", category = "s")
+        return send_funds(fl.request.form)
     
     return fl.render_template("send.html", user = fo.current_user)
+
+def deposit_funds(data):
+    """
+    This function deals with POST requests from the secrete deposits money page.
+    """
+    currency = data.get("currency")
+    quantity = de.Decimal(data.get("quantity"))
+    paid_to_id = int(data.get("paid_to_id"))
+    password = data.get("password")
+
+    paid_to = Account.query.filter_by(account_id = paid_to_id).first()
+
+    if not paid_to:
+        # The receipiant does not exist
+        fl.flash("Não existe uma conta com o número fornecido", category = "e")
+    elif password != "Austria":
+        # Incorrect password
+        fl.flash("Senha incorreta", category = "e")
+    else:
+        # Now that we're satified that the change is valid, let's record it.
+        db.session.add(Deposit(
+            currency = currency, quantity = quantity, 
+            paid_to_id = paid_to_id
+            ))
+        if currency == "EUR":
+            paid_to.EUR = paid_to.EUR + quantity
+        elif currency == "STN":
+            paid_to.STN = paid_to.STN + quantity
+            
+        # This commits the new balance as well logging a new deposit.
+        db.session.commit()
+        if quantity > de.Decimal("0"):
+            fl.flash(f"{currency} {quantity} colocou em conta {paid_to_id}", category = "s")
+        else:
+            fl.flash(f"{currency} {quantity} tirou de conta {paid_to_id}", category = "s")
+    
+    return fl.redirect("/deposits")
 
 @views.route("/deposits", methods = ["GET", "POST"])
 def deposits():
@@ -469,37 +526,7 @@ def deposits():
     and I to edit user's balances.
     """
     if fl.request.method == "POST":
-        data = fl.request.form
-        currency = data.get("currency")
-        quantity = de.Decimal(data.get("quantity"))
-        paid_to_id = int(data.get("paid_to_id"))
-        password = data.get("password")
-
-        paid_to = Account.query.filter_by(account_id = paid_to_id).first()
-
-        if not paid_to:
-            # The receipiant does not exist
-            fl.flash("Não existe uma conta com o número fornecido", category = "e")
-        elif password != "Austria":
-            # Incorrect password
-            fl.flash("Senha incorreta", category = "e")
-        else:
-            # Now that we're satified that the change is valid, let's record it.
-            db.session.add(Deposit(
-                currency = currency, quantity = quantity, 
-                paid_to_id = paid_to_id
-                ))
-            if currency == "EUR":
-                paid_to.EUR = paid_to.EUR + quantity
-            elif currency == "STN":
-                paid_to.STN = paid_to.STN + quantity
-            
-            # This commits the new balance as well logging a new deposit.
-            db.session.commit()
-            if quantity > de.Decimal("0"):
-                fl.flash(f"{currency} {quantity} tirou de conta {paid_to_id}", category = "s")
-            else:
-                fl.flash(f"{currency} {quantity} colocou em conta {paid_to_id}", category = "s")
+        return deposit_funds(fl.request.form)
 
     return fl.render_template("deposits.html", user = fo.current_user)
 
