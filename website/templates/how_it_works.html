@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+  <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/"> Casa </a></li>
+  <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/market"> EUR/STN </a></li>
+  <li class = "active"><a style = "padding-left: 20px; padding-right: 20px;" href = "/how_it_works"> Como Funciona </a></li>
+  {% if user.is_authenticated %}
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/my_account"> Minha Conta </a></li>
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/transfers"> Depósitos </a></li>
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/transfers"> Retiradas </a></li>
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/send"> Enviar Dinheiro </a></li>
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/logout"> Logout </a></li>
+  {% endif%}
+{% endblock %}
+
+{% block content %} 
+  <article class = "post featured">
+    <header class = "major">
+      <section class = "post">
+        <header>
+          <h2> Como Usar o Portal </h2>
+        </header>
+      </section>
+    </header>
+    <header>
+      <h2 style = "text-align: left;"> Como Mudar Moedas (Avançado) </h2>
+      <p> 
+        Ao trocar dinheiro no Portal, você não negocia com um intermediário. Em vez disso, negocia diretamente com outros usuários da plataforma. Atualmente, o Portal possui apenas um mercado de moedas, entre Euros (EUR) e Dobras (STN).
+      </p>
+      <p>
+        Você pode fazer uma oferta no mercado a qualquer momento, seja para comprar euros usando Dobras ou para vender euros em troca de Dobras. Basta especificar a quantidade que deseja comprar ou vender e seu preço de reserva. Em seguida, suas ordens serão combinadas com as melhores ordens disponíveis no site do operador. Vejamos alguns exemplos agora:
+      </p>
+      <div class = "table-wrapper">
+        <table class = "alt">
+          <thead>
+            <tr>
+              <th style = "color: darkgreen"> Quant. </th>
+              <th style = "color: darkgreen"> Preço </th>
+              <th style = "color: darkred"> Preço </th>
+              <th style = "color: darkred"> Quant. </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 8.00 </td>
+              <td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 26.00 </td>
+              <td style = "color: darkred; background-color: rgb(238, 207, 207);"> 26.10 </td>
+              <td style = "color: darkred; background-color: rgb(238, 207, 207);"> 5.00 </td>
+            </tr>
+            <tr>
+              <td style = "color: darkgreen;"> 15.00 </td>
+              <td style = "color: darkgreen"> 25.80 </td>
+              <td style = "color: darkred"> 26.50 </td>
+              <td style = "color: darkred"> 30.00 </td>
+            </tr>
+            <tr>
+              <td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 25.00 </td>
+              <td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 25.00 </td>
+              <td style = "color: darkred; background-color: rgb(238, 207, 207);"> - </td>
+              <td style = "color: darkred; background-color: rgb(238, 207, 207);"> - </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        À esquerda deste mercado, em verde, podemos ver as ordens que buscam comprar euros. Há uma pessoa que deseja comprar 25 euros por 25,00 dobras cada, uma pessoa que deseja comprar 15 euros por 25,80 dobras cada e uma pessoa que deseja comprar 8 euros por 26,00 dobras cada. Aqueles que estão oferecendo comprar pelos melhores preços (os mais altos) são listados primeiro e poderão negociar antes daqueles que oferecem preços mais baixos.
+      </p>
+      <p>
+        À direita deste mercado, em vermelho, podemos ver as ordens de venda de euros. Há uma pessoa que quer vender 5 euros por 26,10 dobras cada e uma pessoa que quer comprar 30 euros por 26,5 dobras cada. Desta vez, aqueles que estão exigindo vender pelos melhores (menores) preços são listados primeiro e poderão negociar antes daqueles que exigem preços mais altos.
+      </p>
+      <p>
+        Agora, imagine que você queira comprar euros e, por isso, faça uma ordem de compra de 10 euros por 27,00 Dobras cada. Esse preço é superior ao preço do primeiro vendedor, então você negocia instantaneamente, comprando 5 euros por 26,10 Dobras cada. Nesse ponto, você ainda quer comprar mais 5 euros, então também combinará com o segundo vendedor, que comprará 5 euros dele por 26,50 Dobras cada. Portanto, no total, você pagará 263,5 Dobras, mesmo estando disposto a pagar até 270 Dobras (27 × 10). Após sua negociação, o mercado ficará assim:
+      </p>
+      <div class = "row gtr-uniform">
+        <div class = "col-6 col-12-small">
+          <div class = "row gtr-uniform">
+            <div class = "col-6">
+              <input type = "radio" id = "bid_eg1" name = "eg1" checked>
+              <label for = "bid_eg1"> COMPRA </label>
+            </div>
+            <div class = "col-6">
+              <input type = "radio" id = "ask_eg1" name = "eg1">
+              <label for = "ask_eg1"> VENDE </label>
+            </div>
+  
+            <div class = "col-12">
+              <label> QUANTIDADE (DE EUR): </label>
+              <div class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+                <p> 10.00 </p>
+              </div>
+            </div>
+  
+            <div class = "col-12">
+              <label> PREÇO (DE EUR EM STN): </label>
+              <div class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+                <p> 27.00 </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class = "col-6 col-12-small">
+          <div class = "table-wrapper">
+            <table class = "alt">
+              <thead>
+                <tr>
+                  <th style = "color: darkgreen"> Quant. </th>
+                  <th style = "color: darkgreen"> Preço </th>
+                  <th style = "color: darkred"> Preço </th>
+                  <th style = "color: darkred"> Quant. </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 8.00 </td>
+                  <td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 26.00 </td>
+                  <td style = "color: darkred; background-color: rgb(238, 207, 207);"> 26.50 </td>
+                  <td style = "color: darkred; background-color: rgb(238, 207, 207);"> 25.00 </td>
+                </tr>
+                <tr>
+                  <td style = "color: darkgreen;"> 15.00 </td>
+                  <td style = "color: darkgreen"> 25.80 </td>
+                  <td style = "color: darkred"> - </td>
+                  <td style = "color: darkred"> - </td>
+                </tr>
+                <tr>
+                  <td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 25.00 </td>
+                  <td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 25.00 </td>
+                  <td style = "color: darkred; background-color: rgb(238, 207, 207);"> - </td>
+                  <td style = "color: darkred; background-color: rgb(238, 207, 207);"> - </td>
+                </tr>
+                <tr>
+                  <td style = "color: darkgreen;"> - </td>
+                  <td style = "color: darkgreen"> - </td>
+                  <td style = "color: darkred"> - </td>
+                  <td style = "color: darkred"> - </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <p>
+        No próximo exemplo, imagine que você ainda queira comprar 10 euros, mas desta vez especifica um preço máximo de 26,20 Dobras. Como antes, seu preço é maior que o preço do primeiro vendedor, então você negocia com ele, comprando 5 euros por 26,10 Dobras cada. No entanto, desta vez, você não está disposto a pagar o suficiente para negociar com o segundo vendedor. Portanto, o restante da sua ordem permanecerá no mercado até que alguém concorde em vender a 26,20 Dobras ou até que você cancele a ordem. É assim que o mercado se comporta após a sua negociação:
+      </p>
+      <div class = "row gtr-uniform">
+        <div class = "col-6 col-12-small">
+          <div class = "row gtr-uniform">
+            <div class = "col-6">
+              <input type = "radio" id = "bid_eg2" name = "eg2" checked>
+              <label for = "bid_eg2"> COMPRA </label>
+            </div>
+            <div class = "col-6">
+              <input type = "radio" id = "ask_eg2" name = "eg2">
+              <label for = "ask_eg2"> VENDE </label>
+            </div>
+  
+            <div class = "col-12">
+              <label> QUANTIDADE (DE EUR): </label>
+              <div class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+                <p> 10.00 </p>
+              </div>
+            </div>
+  
+            <div class = "col-12">
+              <label> PREÇO (DE EUR EM STN): </label>
+              <div class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+                <p> 26.20 </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class = "col-6 col-12-small">
+          <div class = "table-wrapper">
+            <table class = "alt">
+              <thead>
+                <tr>
+                  <th style = "color: darkgreen"> Quant. </th>
+                  <th style = "color: darkgreen"> Preço </th>
+                  <th style = "color: darkred"> Preço </th>
+                  <th style = "color: darkred"> Quant. </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> <b> 5.00 </b> </td>
+                  <td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> <b> 26.20 </b> </td>
+                  <td style = "color: darkred; background-color: rgb(238, 207, 207);"> 26.50 </td>
+                  <td style = "color: darkred; background-color: rgb(238, 207, 207);"> 30.00 </td>
+                </tr>
+                <tr>
+                  <td style = "color: darkgreen;"> 8.00 </td>
+                  <td style = "color: darkgreen"> 26.00 </td>
+                  <td style = "color: darkred"> - </td>
+                  <td style = "color: darkred"> - </td>
+                </tr>
+                <tr>
+                  <td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 15.00 </td>
+                  <td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 25.80 </td>
+                  <td style = "color: darkred; background-color: rgb(238, 207, 207);"> - </td>
+                  <td style = "color: darkred; background-color: rgb(238, 207, 207);"> - </td>
+                </tr>
+                <tr>
+                  <td style = "color: darkgreen;"> 25.00 </td>
+                  <td style = "color: darkgreen"> 25.00 </td>
+                  <td style = "color: darkred"> - </td>
+                  <td style = "color: darkred"> - </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <p>
+        Como o seu pedido agora é o primeiro comprador, você provavelmente não precisará esperar muito até que alguém negocie com você. Após a negociação, você terá pago 261,5 Dobras pelos seus 10 euros.
+      </p>
+      <p>
+        Por fim, digamos que você ainda queira comprar 10 euros, mas é muito paciente e realmente quer negociar a um preço favorável (baixo). Uma estratégia é inserir uma ordem de compra por 25,01 Dobras. Essa ordem não será negociada imediatamente, pois não há vendedores dispostos a aceitar um preço tão baixo no momento. Em vez disso, a ordem permanecerá no mercado, como você pode ver aqui:
+      </p>
+      <div class = "row gtr-uniform">
+        <div class = "col-6 col-12-small">
+          <div class = "row gtr-uniform">
+            <div class = "col-6">
+              <input type = "radio" id = "bid_eg2" name = "eg2" checked>
+              <label for = "bid_eg2"> COMPRA </label>
+            </div>
+            <div class = "col-6">
+              <input type = "radio" id = "ask_eg2" name = "eg2">
+              <label for = "ask_eg2"> VENDE </label>
+            </div>
+  
+            <div class = "col-12">
+              <label> QUANTIDADE (DE EUR): </label>
+              <div class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+                <p> 10.00 </p>
+              </div>
+            </div>
+  
+            <div class = "col-12">
+              <label> PREÇO (DE EUR EM STN): </label>
+              <div class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+                <p> 25.01 </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class = "col-6 col-12-small">
+          <div class = "table-wrapper">
+            <table class = "alt">
+              <thead>
+                <tr>
+                  <th style = "color: darkgreen"> Quant. </th>
+                  <th style = "color: darkgreen"> Preço </th>
+                  <th style = "color: darkred"> Preço </th>
+                  <th style = "color: darkred"> Quant. </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 8.00 </td>
+                  <td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> 26.00 </td>
+                  <td style = "color: darkred; background-color: rgb(238, 207, 207);"> 26.10 </td>
+                  <td style = "color: darkred; background-color: rgb(238, 207, 207);"> 5.00 </td>
+                </tr>
+                <tr>
+                  <td style = "color: darkgreen;"> 15.00 </td>
+                  <td style = "color: darkgreen"> 25.80 </td>
+                  <td style = "color: darkred"> 26.50 </td>
+                  <td style = "color: darkred"> 30.00 </td>
+                </tr>
+                <tr>
+                  <td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> <b> 10.00 </b> </td>
+                  <td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> <b> 25.01 </b> </td>
+                  <td style = "color: darkred; background-color: rgb(238, 207, 207);"> - </td>
+                  <td style = "color: darkred; background-color: rgb(238, 207, 207);"> - </td>
+                </tr>
+                <tr>
+                  <td style = "color: darkgreen;"> 25.00 </td>
+                  <td style = "color: darkgreen"> 25.00 </td>
+                  <td style = "color: darkred"> - </td>
+                  <td style = "color: darkred"> - </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <p>
+        Sua ordem está atualmente em terceiro lugar na fila. No entanto, se alguém colocar uma ordem de venda superior a 23 euros (8 &plus; 15) e o limite for baixo o suficiente, pelo menos parte da sua ordem será negociada. É perfeitamente aceitável que apenas parte da sua ordem seja negociada e que o restante seja negociado com outra pessoa posteriormente. Observe que, ao oferecer 0,01 Dobras a mais do que o último comprador, você pode ficar à frente dele na fila. Se você tivesse oferecido apenas 24,99 Dobras, só negociaria se a ordem oposta fosse superior a 48 euros (8 &plus; 15 &plus; 25).
+      </p>
+      <p>
+        Uma boa regra geral a adotar é que, se você precisar transferir dinheiro pelo Portal rapidamente, especialmente se for uma grande quantia, poderá ter que fazê-lo a uma taxa de câmbio desfavorável. No entanto, se você puder esperar que outros venham até você e/ou transferir o dinheiro em parcelas menores, provavelmente conseguirá preços muito melhores.
+      </p>
+      <p>
+        Uma ordem permanecerá ativa no mercado até ser cancelada ou negociada, mesmo que você saia da sua conta ou desligue o seu dispositivo. Se mudar de ideia, você pode cancelar qualquer ordem que ainda não tenha sido negociada simplesmente clicando no ícone &times; ao lado da ordem.
+      </p>
+      <p>
+        Os usuários do Portal podem inserir ordens a qualquer momento. Lembre-se de atualizar sua página para obter as informações mais atualizadas do mercado.
+      </p>
+  	</header>
+  </article>
+{% endblock %}
