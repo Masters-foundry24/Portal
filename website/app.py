@@ -84,3 +84,5 @@ def get_account_name():
     else:
         account_name = "Não existe conta com esse número"
     return fl.jsonify({"account_name": account_name})
+
+app.run()
