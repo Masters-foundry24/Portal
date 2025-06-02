@@ -500,6 +500,39 @@ def deposit_funds(data):
         # Incorrect password
         fl.flash("Senha incorreta", category = "e")
     else:
+        # The order is valid, however, completing a withdrawal may require us to 
+        # cancel some orders that were selling assets that are now being 
+        # withdrawn.
+        if currency == "STN" and quantity < de.Decimal("0"):
+            balance_available = fo.current_user.STN + quantity
+            balance_used = de.Decimal("0")
+            my_orders = Order.query.filter_by(
+                account_id = fo.current_user.account_id, asset_0 = "STN", 
+                asset_1 = "EUR", side = "bid", active = True)
+            for o in my_orders:
+                if o.quantity * o.price + balance_used > balance_available:
+                    # Cancelling an order because the user no longer has the 
+                    # funds for it.
+                    fl.flash(f"Pedido {o.order_id} cancelado, fundos retirados", category = "s")
+                    o.active = False
+                else:
+                    balance_used += o.quantity * o.price
+
+        elif currency == "EUR" and quantity < de.Decimal("0"):
+            balance_available = fo.current_user.EUR + quantity
+            balance_used = de.Decimal("0")
+            my_orders = Order.query.filter_by(
+                account_id = fo.current_user.account_id, asset_0 = "STN", 
+                asset_1 = "EUR", side = "ask", active = True)
+            for o in my_orders:
+                if o.quantity + balance_used > balance_available:
+                    # Cancelling an order because the user no longer has the 
+                    # funds for it.
+                    fl.flash(f"Pedido {o.order_id} cancelado, fundos retirados", category = "s")
+                    o.active = False
+                else:
+                    balance_used += o.quantity
+        
         # Now that we're satified that the change is valid, let's record it.
         db.session.add(Deposit(
             currency = currency, quantity = quantity, 
@@ -530,11 +563,18 @@ def deposits():
 
     return fl.render_template("deposits.html", user = fo.current_user)
 
-# @views.route("/delete/<int:id>")
-# def delete(id):
-#     pass
-#     # order_to_delete = Order.query.get_or_404(id)
-# 
-#     # db.session.delete(order_to_delete)
-#     # db.session.commit()
-#     # fl.flash("Order cancelled")
+@views.route("/accounts")
+def accounts():
+    """
+        Lists all the accounts on the Portal if the user is logged in as the
+        Administrator.
+    """
+    if fo.current_user.account_id == 0000000:
+        account_data = Account.query
+        accounts = []
+        for a in account_data:
+            accounts.append([a.account_id, a.name, a.password, format_de(a.EUR), format_de(a.STN)])
+    else: 
+        accounts = []
+
+    return fl.render_template("accounts.html", user = fo.current_user, accounts = accounts)
