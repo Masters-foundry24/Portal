@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %} 
+  <article class = "post featured">
+    <header class = "major">
+      <section class = "post">
+        <header>
+          <h2> Contas no Portal </h2>
+        </header>
+        {% if user.account_id == 0000000 %}
+          <div class = "table-wrapper">
+            <table class = "alt">
+              <thead>
+                <tr>
+                  <th> Número </th>
+                  <th> Nome </th>
+                  <th> Senha </th>
+                  <th> EUR </th>
+                  <th> STN </th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in accounts %}
+                  <tr>
+                    <td> {{ row[0] }} </td>
+                    <td> {{ row[1] }} </td>
+                    <td> {{ row[2] }} </td>
+                    <td> {{ row[3] }} </td>
+                    <td> {{ row[4] }} </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p> Somente o administrador pode usar esta página. </p>
+        {% endif %}
+      </section>
+    </header>
+  </article>
+
+{% endblock %}
