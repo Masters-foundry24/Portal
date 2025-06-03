@@ -2,6 +2,7 @@
 
 import flask as fl
 import flask_sqlalchemy as fs
+import datetime as dt
 import os
 import flask_login as fo
 
@@ -27,6 +28,7 @@ def create_app():
     app.register_blueprint(auth, url_prefix = "/")
 
     from website.models import Order, Account, Payment, Deposit
+    from website.bots import bot_6000000
 
     create_database(app)
 
@@ -55,12 +57,14 @@ def create_app():
         order_to_cancel = Order.query.get_or_404(id)
 
         order_to_cancel.active = False
-        # TODO: add a time cancelled.
+        order_to_cancel.time_cancelled = dt.datetime.now()
 
         # db.session.delete(order_to_cancel)
         db.session.commit()
         fl.flash("Pedido cancelado")
 
+        if fo.current_user.account_id != 6000000:
+            bot_6000000()
         return fl.redirect(return_path)
     
     @app.route("/cancel_from_account/<int:id>")

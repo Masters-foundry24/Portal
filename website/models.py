@@ -7,8 +7,8 @@ from website import db
 class Order(db.Model):
     order_id = db.Column(db.Integer, primary_key = True)
     time = db.Column(db.DateTime(timezone = False), default = func.now())
-    # time_cancelled = db.Column(db.Datetime(timezone = False), default = func.now())
-    # time_traded = db.Column(db.Datetime(timezone = False), default = func.now())
+    time_cancelled = db.Column(db.DateTime(timezone = False), default = func.now())
+    time_traded = db.Column(db.DateTime(timezone = False), default = func.now())
     asset_0 = db.Column(db.String(6)) # asset used as a currency
     asset_1 = db.Column(db.String(6)) # asset being bought/sold
     side = db.Column(db.String(6)) # "buy" or "sell"

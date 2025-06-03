@@ -12,6 +12,7 @@ def login():
     """
     This is the home page which also serves as the login page.
     """
+    retry = False
     if fl.request.method == "POST":
         data = fl.request.form
         account_id = data.get("account_id")
@@ -24,11 +25,12 @@ def login():
                 fo.login_user(account, remember = True)
                 return fl.redirect("/")
             else:
+                retry = True
                 fl.flash("Senha ou número de conta incorretos", category = "e")
         else:
             fl.flash("Senha incorreta", category = "e")
         
-    return fl.render_template("home.html", user = fo.current_user)
+    return fl.render_template("home.html", user = fo.current_user, retry = retry)
 
 @auth.route('/logout')
 @fo.login_required
