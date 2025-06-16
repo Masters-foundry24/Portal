@@ -125,10 +125,37 @@
           <li><a href = "/" class = "button"> Login </a></li>
         </ul>
       {% endif %}
-	</article>
+    </article>
 
     <article>
-      <!-- The third section shows the user's current orders -->
+      <!-- The third section shows recent trades in the market -->
+      <header>
+        <h2> Negociações Recentes </h2>
+      </header>
+      <div class = "table-wrapper">
+        <table class = "alt">
+          <thead>
+            <tr>
+              <th> Tempo </th>
+              <th> Quant. </th>
+              <th> Preço </th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in trades %}
+              <tr>
+                <td> {{ row[0] }} </td> 
+                <td> {{ row[1] }} </td>
+                <td> {{ row[2] }} </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article>
+      <!-- The fourth section shows the user's current orders -->
       <header>
         <h2> Meus Pedidos Ativos </h2>
       </header>
@@ -162,19 +189,19 @@
       </div>
     </article>
 
-    <article>
-      <!-- The final section shows some general information about the market -->
+    <!-- The final section shows some general information about the market -->
+    <!--article>
       <header>
         <h2> Sobre Este Mercado </h2>
       </header>
       <p>
         Este mercado é para compra e venda de euros em troca de dobra de São 
-		Tomé. Está ativo 24 horas por dia, 7 dias por semana. A taxa de 
-		negociação está 0.00%.
+        Tomé. Está ativo 24 horas por dia, 7 dias por semana. A taxa de 
+        negociação está 0.00%.
       </p>
       <p>
         Caso precisa ajuda, consulte nosso <a href = "/how_it_works">tutorial</a> ou entre em contato com Lázaro (+239 987 5512).
       </p>
-    </article>
+    </article-->
   </section>
 {% endblock %}
