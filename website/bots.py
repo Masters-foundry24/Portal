@@ -209,19 +209,24 @@ class Fixed_Interval_Market_Maker():
                    should be -1.
         """
         # Next we will check out bids from the front.
-        for i in range(max(0, len(self.data[side]) - 1)):
-            order = Order.query.get(self.data[side][i])
+        while True:
+            order = Order.query.get(self.data[side][0])
             if order.active:
                 return
             else:
-                # Our first bid got taken out, so we will put a new bid as the
+                # Our first bid got taken out, so we will put a new bid at the
                 # back of the bank.
                 last_order = Order.query.get(self.data[side][-1])
                 price = last_order.price - d * self.offset_2
+                id = False
                 if price >= self.lower_limit and price <= self.upper_limit:
                     id = bot_order(self.user, side, self.size, price)
-                    if id != False:
-                        self.data[side] = self.data[side][1:] + [id]
+                if id != False:
+                    self.data[side] = self.data[side][1:] + [id]
+                else: 
+                    # If we didn't try to enter an order, or tried to enter one 
+                    # and failed.
+                    self.data[side] = self.data[side][1:]
 
                 # If we have a full bank of asks then cancel the last one.
                 if len(self.data[nide]) == self.depth:
@@ -259,10 +264,10 @@ def bot_6000000():
     """
     return Fixed_Interval_Market_Maker(
         upper_limit = de.Decimal(27.5),
-        lower_limit = de.Decimal(26),
+        lower_limit = de.Decimal(25.5),
         offset_1 = de.Decimal(0.25),
         offset_2 = de.Decimal(0.05),
         depth = 5,
-        size = de.Decimal(50),
+        size = de.Decimal(70),
         user = 6000000
     )

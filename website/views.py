@@ -79,6 +79,39 @@ def get_book(asset_0: str, asset_1: str, row_count: int = 7):
 
     return book
 
+def get_trades(asset_0: str, asset_1: str, row_limit: int = 7):
+    """
+    Formats the recent trades in a market so that they can be displayed on the
+    market page.
+
+    Inputs:
+        -> asset_0: str, name of the asset being used as a currency, initially
+           STN.
+        -> asset_1: str, name of the asset being bought and sold, initially EUR.
+        -> row_limit: the number of rows to display in the table.
+    """
+    trade_data = db.session.execute(text(f"""
+        SELECT *
+        FROM Trade
+        WHERE asset_0="{asset_0}" AND asset_1="{asset_1}" AND buyer!=seller
+        ORDER BY time DESC"""))
+    
+    trades, i = [], 0
+    for o in trade_data:
+        time = dt.datetime.strptime(o.time, "%Y-%m-%d %H:%M:%S")
+        # side = "side"
+        trades.append([
+            time.strftime("%d/%m/%y %H:%M:%S"),
+            # side,
+            format_de(o.quantity),
+            format_de(o.price)
+        ])
+        i += 1
+        if i == row_limit:
+            break
+    
+    return trades
+
 def check_order(user, side: str, quantity: de.Decimal, price: de.Decimal):
     """
     Inputs:
@@ -142,13 +175,14 @@ def market():
         return fl.redirect("/market")
 
     book = get_book("STN", "EUR")
-    return fl.render_template("market.html", user = fo.current_user, book = book)
+    trades = get_trades("STN", "EUR")
+    return fl.render_template("market.html", user = fo.current_user, book = book, trades = trades)
 
 @views.route("/how_it_works")
 def how_it_works():
     return fl.render_template("how_it_works.html", user = fo.current_user)
 
-def get_trades(account_id: int, row_limit: int = 0, long: bool = False):
+def get_my_trades(account_id: int, row_limit: int = 0, long: bool = False):
     """
     Collects the trade history of a user and formats those trades ready to 
     display in a table. The function begins with an SQL query and then converts
@@ -277,14 +311,14 @@ def my_account():
     This function prepares a backend for the 'my account' page where the users
     can see a dashboard summary of their assets.
     """   
-    trades = get_trades(fo.current_user.account_id, 7)
+    trades = get_my_trades(fo.current_user.account_id, 7)
     transfers = get_transfers(fo.current_user.account_id, 7)
     return fl.render_template("my_account.html", user = fo.current_user, trades = trades, transfers = transfers)
 
 @fo.login_required
 @views.route("/my_trades")
 def my_trades():
-    trades = get_trades(fo.current_user.account_id, 0, True)
+    trades = get_my_trades(fo.current_user.account_id, 0, True)
     return fl.render_template("my_trades.html", user = fo.current_user, trades = trades)
 
 @fo.login_required

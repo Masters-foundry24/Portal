@@ -42,6 +42,7 @@ class Account(db.Model, fo.UserMixin):
     EUR = db.Column(db.Numeric(9, 2))
     orders = db.relationship("Order")
     # orders = db.relationship("Deposit")
+    # IBAN_EUR = db.Column(db.Integer, default = 0)
 
 class Trade(db.Model):
     trade_id = db.Column(db.Integer, primary_key = True)
