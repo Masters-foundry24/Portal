@@ -105,7 +105,7 @@ class Fixed_Interval_Market_Maker():
         # mid = (ceil * self.user.EUR * p + floor * self.user.STN) / (self.user.EUR * p + self.user.STN)
         # mid = self.offset_2 * round(mid / self.offset_2)
         # return str(mid)
-        return str("26.00")
+        return "26.90"
 
     def establish_banks(self):
         self.data["bid"] = []
@@ -239,7 +239,7 @@ class Fixed_Interval_Market_Maker():
                 if len(self.data[nide]) > 0:
                     nrder = Order.query.get(self.data[nide][0])
                     
-                    # If our top ask is depleted them we will restore it.
+                    # If our top ask is depleted then we will restore it.
                     nrder.active = False
                     db.session.commit()
                     id = bot_order(self.user, nide, self.size, nrder.price)

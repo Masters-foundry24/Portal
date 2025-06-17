@@ -32,6 +32,7 @@ class Deposit(db.Model):
     currency = db.Column(db.String(6))
     quantity = db.Column(db.Numeric(9, 2)) # Negative quantity indicate a withdrawal
     paid_to_id = db.Column(db.Integer, db.ForeignKey("account.account_id"))
+    # status = db.Column(db.String(10)) # Options are "Pending", "Done" and "Cancelled"
 
 class Account(db.Model, fo.UserMixin):
     id = db.Column(db.Integer, primary_key = True)
@@ -42,6 +43,7 @@ class Account(db.Model, fo.UserMixin):
     EUR = db.Column(db.Numeric(9, 2))
     orders = db.relationship("Order")
     # orders = db.relationship("Deposit")
+    # name_EUR = db.Column(db.String(100))
     # IBAN_EUR = db.Column(db.Integer, default = 0)
 
 class Trade(db.Model):

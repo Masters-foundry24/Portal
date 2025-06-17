@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %} 
+
+<article class = "post featured">
+  <header class = "major">
+    <section class = "post">
+      <header class = "major">
+        <h1> Retiradas </h1>
+      </header>
+      <p> Qual moeada você gostaria retirar? </p>
+        <div class = "row gtr-uniform">
+          <div class = "col-6">
+            <ul class = "actions special">
+              <li><a href = "/withdrawals/EUR" class = "button"> EUR </a></li>
+            </ul>
+          </div>
+          <div class = "col-6">
+            <ul class = "actions special">
+              <li><a href = "/withdrawals/STN" class = "button"> STN </a></li>
+            </ul>
+          </div>
+        </div>
+    </section>
+  </header>
+</article>
+
+{% endblock %}

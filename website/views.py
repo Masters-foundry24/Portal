@@ -6,6 +6,7 @@ from sqlalchemy.sql import func, or_
 from sqlalchemy import or_, text
 
 from website.models import Account, Payment, Deposit, Order, Trade
+from website.deposits import make_deposit
 from website.matching_engine import enter_order
 from website.bots import bot_6000000
 from website import db
@@ -404,76 +405,6 @@ def send():
     
     return fl.render_template("send.html", user = fo.current_user)
 
-def deposit_funds(data):
-    """
-    This function deals with POST requests from the secrete deposits money page.
-    """
-    currency = data.get("currency")
-    quantity = de.Decimal(data.get("quantity"))
-    paid_to_id = int(data.get("paid_to_id"))
-    password = data.get("password")
-
-    paid_to = Account.query.filter_by(account_id = paid_to_id).first()
-
-    if not paid_to:
-        # The receipiant does not exist
-        fl.flash("Não existe uma conta com o número fornecido", category = "e")
-    elif password != "Austria":
-        # Incorrect password
-        fl.flash("Senha incorreta", category = "e")
-    else:
-        # The order is valid, however, completing a withdrawal may require us to 
-        # cancel some orders that were selling assets that are now being 
-        # withdrawn.
-        if currency == "STN" and quantity < de.Decimal("0"):
-            balance_available = fo.current_user.STN + quantity
-            balance_used = de.Decimal("0")
-            my_orders = Order.query.filter_by(
-                account_id = fo.current_user.account_id, asset_0 = "STN", 
-                asset_1 = "EUR", side = "bid", active = True)
-            for o in my_orders:
-                if o.quantity * o.price + balance_used > balance_available:
-                    # Cancelling an order because the user no longer has the 
-                    # funds for it.
-                    fl.flash(f"Pedido {o.order_id} cancelado, fundos retirados", category = "s")
-                    o.active = False
-                else:
-                    balance_used += o.quantity * o.price
-
-        elif currency == "EUR" and quantity < de.Decimal("0"):
-            balance_available = fo.current_user.EUR + quantity
-            balance_used = de.Decimal("0")
-            my_orders = Order.query.filter_by(
-                account_id = fo.current_user.account_id, asset_0 = "STN", 
-                asset_1 = "EUR", side = "ask", active = True)
-            for o in my_orders:
-                if o.quantity + balance_used > balance_available:
-                    # Cancelling an order because the user no longer has the 
-                    # funds for it.
-                    fl.flash(f"Pedido {o.order_id} cancelado, fundos retirados", category = "s")
-                    o.active = False
-                else:
-                    balance_used += o.quantity
-        
-        # Now that we're satified that the change is valid, let's record it.
-        db.session.add(Deposit(
-            currency = currency, quantity = quantity, 
-            paid_to_id = paid_to_id
-            ))
-        if currency == "EUR":
-            paid_to.EUR = paid_to.EUR + quantity
-        elif currency == "STN":
-            paid_to.STN = paid_to.STN + quantity
-            
-        # This commits the new balance as well logging a new deposit.
-        db.session.commit()
-        if quantity > de.Decimal("0"):
-            fl.flash(f"{currency} {quantity} colocou em conta {paid_to_id}", category = "s")
-        else:
-            fl.flash(f"{currency} {quantity} tirou de conta {paid_to_id}", category = "s")
-    
-    return fl.redirect("/deposits")
-
 @views.route("/deposits", methods = ["GET", "POST"])
 def deposits():
     """
@@ -481,14 +412,19 @@ def deposits():
     and I to edit user's balances.
     """
     if fl.request.method == "POST":
-        return deposit_funds(fl.request.form)
+        data = fl.request.form
+        currency = data.get("currency")
+        quantity = de.Decimal(data.get("quantity"))
+        paid_to_id = int(data.get("paid_to_id"))
+        password = data.get("password")
+        return make_deposit(True, currency, quantity, paid_to_id, password)
 
     return fl.render_template("deposits.html", user = fo.current_user)
 
 @views.route("/accounts")
 def accounts():
     """
-        Lists all the accounts on the Portal if the user is logged in as the
+        Lists all the accounts on the Portal if the user is logged in as an
         Administrator.
     """
     if fo.current_user.account_id in [1234567, 9875512]:
@@ -499,3 +435,28 @@ def accounts():
         accounts = []
 
     return fl.render_template("accounts.html", user = fo.current_user, accounts = accounts)
+
+@views.route("/withdrawals")
+def withdrawals():
+    return fl.render_template("withdrawals.html", user = fo.current_user)
+
+@views.route("/withdrawals/STN")
+def withdrawals_STN():
+    return fl.render_template("withdrawals_STN.html", user = fo.current_user)
+
+@views.route("/withdrawals/EUR")
+def withdrawals_EUR():
+    # if fl.request.method == "POST":
+    #     # We will harvest all the information from the form.
+    #     data = fl.request.form
+    #     quantity = data.get("quantity")
+    #     if data.get("account") == "old":
+    #         name = fo.current_user.name_EUR
+    #         iban = fo.current_user.iban_EUR
+    #     else:
+    #         name = data.get("name")
+    #         iban = data.get("iban")
+    #     password = data.get("password")
+    #     withdraw_EUR(quantity, name, iban, password)
+
+    return fl.render_template("withdrawals_EUR.html", user = fo.current_user)
