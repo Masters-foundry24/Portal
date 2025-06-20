@@ -1,9 +1,7 @@
 import decimal as de
-import json
 import math
-import os
 
-from website.models import Account, Payment, Deposit, Order, Trade
+from website.models import Account, Payment, Deposit, Order, Trade, Bot
 from website.matching_engine import enter_order
 from website import db
 
@@ -84,19 +82,13 @@ class Fixed_Interval_Market_Maker():
         self.size = size
         self.user = Account.query.filter_by(account_id = user).first()
 
-        if os.path.exists(f"bots/{self.user.account_id}.json"):
-            with open(f"bots/{self.user.account_id}.json") as f:
-                self.data = json.load(f)
-        else:
-            self.data = {
-                "mid": "",
-                "bid": [],
-                "ask": []
-            }
+        self.bot = Bot.query.filter_by(user_id = user).first()
+        if not self.bot: # The bot doesn't exist so we will create it.
+            db.session.add(Bot(user_id = user, v1 = self.set_mid()))
+            db.session.commit()
+            self.bot = Bot.query.filter_by(user_id = user).first()
             
         self.main()
-        with open(f"bots/{self.user.account_id}.json", "w") as f:
-            json.dump(self.data, f)
         
     def set_mid(self):
         # p = (self.upper_limit + self.lower_limit) / 2
@@ -105,12 +97,10 @@ class Fixed_Interval_Market_Maker():
         # mid = (ceil * self.user.EUR * p + floor * self.user.STN) / (self.user.EUR * p + self.user.STN)
         # mid = self.offset_2 * round(mid / self.offset_2)
         # return str(mid)
-        return "26.90"
+        return de.Decimal("26.90")
 
-    def establish_banks(self):
-        self.data["bid"] = []
-        self.data["ask"] = []
-        mid = de.Decimal(self.data["mid"])
+    def establish_banks(self, bids, asks):
+        mid = self.bot.v1
 
         for i in range(self.depth):
 
@@ -118,17 +108,23 @@ class Fixed_Interval_Market_Maker():
             if price >= self.lower_limit:
                 id = bot_order(self.user, "bid", self.size, price)
                 if id != False:
-                    self.data["bid"].append(id)
+                    bids.append(id)
 
             price = mid + self.offset_1 + i * self.offset_2
             if price <= self.upper_limit:
                 id = bot_order(self.user, "ask", self.size, price)
                 if id != False:
-                    self.data["ask"].append(id)
+                    asks.append(id)
+        
+        self.bot.bids = str(bids)
+        self.bot.asks = str(asks)
+        db.session.commit()
     
     def cancel_all(self, orders):
         for o in orders:
             o.active = False
+        self.bot.bids = "[]"
+        self.bot.asks = "[]"
         db.session.commit()
 
     def main(self):
@@ -140,134 +136,181 @@ class Fixed_Interval_Market_Maker():
         # They were traded with then we have a different method for changing the
         # midpoint.
 
-        if len(self.data["bid"]) == 0 and len(self.data["ask"]) == 0:
+        if len(self.bot.bids) == 2: 
+            bids = [] # Empty bank that the split function would handle poorly.
+        else:
+            bids = [int(i) for i in self.bot.bids[1:-1].split(", ")]
+            bid = Order.query.get(bids[-1])
+        if len(self.bot.asks) == 2:
+            asks = [] # Empty bank that the split function would handle poorly.
+        else:
+            asks = [int(i) for i in self.bot.asks[1:-1].split(", ")]
+            ask = Order.query.get(asks[-1])
+
+        # Are both banks blank requiring a relaunch?
+        if (len(bids) == 0 and len(asks) == 0) or (len(bids) == 0 and len(asks) > 0 and not ask.active) or (len(bids) > 0 and not bid.active and len(asks) == 0) or (len(asks) > 0 and not ask.active and len(bids) > 0 and not bid.active):
             self.cancel_all(orders.filter_by(active = True))
-            self.data["mid"] = self.set_mid()
-            self.establish_banks()
+            bids, asks = [], []
+            self.bot.v1 = self.set_mid()
+            self.establish_banks(bids, asks)
+            return
+                
+        # Was our last bid taken?
+        if len(bids) > 0 and not bid.active:
+            self.cancel_all(orders.filter_by(active = True))
+            bids, asks = [], []
+            self.bot.v1 = bid.price - self.offset_2
+            self.establish_banks(bids, asks)
             return
         
-        elif len(self.data["bid"]) == 0:
-            ask = Order.query.get(self.data["ask"][-1])
-            if ask.active == False and ask.quantity > de.Decimal("0"):
-                self.cancel_all(orders.filter_by(active = True))
-                self.data["mid"] = self.set_mid()
-                self.establish_banks()
-                return
+        # Was our last ask taken?
+        if len(asks) > 0 and not ask.active:
+            self.cancel_all(orders.filter_by(active = True))
+            bids, asks = [], []
+            self.bot.v1 = ask.price + self.offset_2
+            self.establish_banks(bids, asks)
+            return
         
-        elif len(self.data["ask"]) == 0:
-            bid = Order.query.get(self.data["bid"][-1])
-            if bid.active == False and bid.quantity > de.Decimal("0"):
-                self.cancel_all(orders.filter_by(active = True))
-                self.data["mid"] = self.set_mid()
-                self.establish_banks()
-                return
-        
-        else:
-            bid = Order.query.get(self.data["bid"][-1])
-            ask = Order.query.get(self.data["ask"][-1])
-            if ask.active == False and bid.active == False and ask.quantity > de.Decimal("0") and bid.quantity > de.Decimal("0"):
-                self.cancel_all(orders.filter_by(active = True))
-                self.data["mid"] = self.set_mid()
-                self.establish_banks()
-                return
-                
-        if len(self.data["bid"]) > 1:
-            # Was our last bid taken?
-            if bid.active == False:
-                self.cancel_all(orders.filter_by(active = True))
+        if len(bids) > 0:
+            bid = Order.query.get(bids[0])
+            while not bid.active:
+                # Our first bid has been taken out, we will adjust both banks.
+                bids, asks = self.check_bid_bank(bid, bids, asks)
+                if len(bids) == 0:
+                    break
+                else:
+                    bid = Order.query.get(bids[0])
 
-                self.data["mid"] = str(bid.price - self.offset_2)
-                self.establish_banks()
-                return
+        if len(asks) > 0:
+            ask = Order.query.get(asks[0])
+            while not ask.active:
+                # Our first ask has been taken out, we will adjust both banks.
+                bids, asks = self.check_ask_bank(ask, bids, asks)
+                if len(asks) == 0:
+                    break
+                else:
+                    ask = Order.query.get(asks[0])
         
-        if len(self.data["ask"]) > 1:
-            # Was our last asks taken?
-            if ask.active == False:
-                self.cancel_all(orders.filter_by(active = True))
-
-                self.data["mid"] = str(ask.price + self.offset_2)
-                self.establish_banks()
-                return
-        
-        self.check_bank("bid", "ask", 1)
-        self.check_bank("ask", "bid", - 1)
         return
 
-    def check_bank(self, side: str, nide: str, d: int):
-        """
-            The check bank function will move through either the bank of bid or
-            ask orders starting with the most competitive one. For the sake of
-            the reader's sanity, all comments are written as though we are 
-            checking the bid bank.
+    def check_bid_bank(self, bid, bids, asks):
+        # First, we will put a new bid at the back of the bank.
+        last_bid = Order.query.get(bids[-1])
+        price = last_bid.price - self.offset_2
+        id = False
+        if price >= self.lower_limit and price <= self.upper_limit:
+            id = bot_order(self.user, "bid", self.size, price)
+        if id != False:
+            bids = bids[1:] + [id]
+        else: 
+            # If we didn't try to enter an order, or tried and failed.
+            bids = bids[1:]
+        self.bot.bids = str(bids)
+        db.session.commit()
 
-            Inputs:
-                -> side: str, the bank to be examined, either "bid" or "ask".
-                -> nide: str, the not side, if side is "bid" then nide should be 
-                   "ask" and vice versa.
-                -> d: int, helps put our orders in the right direction if side
-                   is "bid" then d should be 1 and if side is "ask" then d 
-                   should be -1.
-        """
-        # Next we will check out bids from the front.
-        while True:
-            order = Order.query.get(self.data[side][0])
-            if order.active:
-                return
-            else:
-                # Our first bid got taken out, so we will put a new bid at the
-                # back of the bank.
-                last_order = Order.query.get(self.data[side][-1])
-                price = last_order.price - d * self.offset_2
-                id = False
-                if price >= self.lower_limit and price <= self.upper_limit:
-                    id = bot_order(self.user, side, self.size, price)
+        # Second, if we have a full bank of asks then cancel the last one.
+        if len(asks) == self.depth:
+            last_ask = Order.query.get(asks[-1])
+            last_ask.active = False
+            asks = asks[:-1]
+            self.bot.asks = str(asks)
+            db.session.commit()
+
+        if len(asks) > 0:
+            ask = Order.query.get(asks[0])
+            
+            # Thirdly, If our top ask is depleted then we will restore it.
+            if ask.quantity != ask.quantity_og:
+                id = bot_order(self.user, "ask", self.size, ask.price)
                 if id != False:
-                    self.data[side] = self.data[side][1:] + [id]
-                else: 
-                    # If we didn't try to enter an order, or tried to enter one 
-                    # and failed.
-                    self.data[side] = self.data[side][1:]
-
-                # If we have a full bank of asks then cancel the last one.
-                if len(self.data[nide]) == self.depth:
-                    last_nrder = Order.query.get(self.data[nide][-1])
-                    last_nrder.active = False
+                    ask.active = False
+                    asks[0] = id
+                    self.bot.asks = str(asks)
                     db.session.commit()
-                    self.data[nide] = self.data[nide][:-1]
 
+            # Next we will place a new ask at the front of the bank.
+            id = bot_order(self.user, "ask", self.size, ask.price - self.offset_2)
+            if id != False:
+                asks = [id] + asks
+                self.bot.asks = str(asks)
+                db.session.commit()
                 
-                if len(self.data[nide]) > 0:
-                    nrder = Order.query.get(self.data[nide][0])
-                    
-                    # If our top ask is depleted then we will restore it.
-                    nrder.active = False
+        else:
+            # We will now start the ask bank.
+            price = bid.price + 2 * self.offset_1
+            if price >= self.lower_limit and price <= self.upper_limit:
+                id = bot_order(self.user, "ask", self.size, price)
+                if id != False:
+                    asks = [id]
+                    self.bot.asks = str(asks)
                     db.session.commit()
-                    id = bot_order(self.user, nide, self.size, nrder.price)
-                    if id != False:
-                        self.data[nide][0] = id
+    
+        return bids, asks
+    
+    def check_ask_bank(self, ask, bids, asks):
+        # First, we will put a new ask at the back of the bank.
+        last_ask = Order.query.get(asks[-1])
+        price = last_ask.price + self.offset_2
+        id = False
+        if price >= self.lower_limit and price <= self.upper_limit:
+            id = bot_order(self.user, "ask", self.size, price)
+        if id != False:
+            asks = asks[1:] + [id]
+        else: 
+            # If we didn't try to enter an order, or tried and failed.
+            asks = asks[1:]
+        self.bot.asks = str(asks)
+        db.session.commit()
 
-                    # Next we will place a new ask at the front of the bank.
-                    id = bot_order(self.user, nide, self.size, nrder.price - d * self.offset_2)
-                    if id != False:
-                        self.data[nide] = [id] + self.data[nide]
+        # Second, if we have a full bank of bids then cancel the last one.
+        if len(bids) == self.depth:
+            last_bid = Order.query.get(bids[-1])
+            last_bid.active = False
+            bids = bids[:-1]
+            self.bot.bids = str(bids)
+            db.session.commit()
+
+        if len(bids) > 0:
+            bid = Order.query.get(bids[0])
+            
+            # Thirdly, If our top bid is depleted then we will restore it.
+            if bid.quantity != bid.quantity_og:
+                id = bot_order(self.user, "bid", self.size, bid.price)
+                if id != False:
+                    bid.active = False
+                    bids[0] = id
+                    self.bot.bids = str(bids)
+                    db.session.commit()
+
+            # Next we will place a new bid at the front of the bank.
+            id = bot_order(self.user, "bid", self.size, bid.price + self.offset_2)
+            if id != False:
+                bids = [id] + bids
+                self.bot.bids = str(bids)
+                db.session.commit()
                 
-                else:
-                    # We will now start the ask bank.
-                    if price >= self.lower_limit and price <= self.upper_limit:
-                        id = bot_order(self.user, nide, self.size, order.price + 2 * d * self.offset_2)
-                        if id != False:
-                            self.data[nide] = [id]
+        else:
+            # We will now start the bid bank.
+            price = ask.price - 2 * self.offset_1
+            if price >= self.lower_limit and price <= self.upper_limit:
+                id = bot_order(self.user, "bid", self.size, price)
+                if id != False:
+                    bids = [id]
+                    self.bot.asks = str(bids)
+                    db.session.commit()
+
+        return bids, asks
 
 def bot_6000000():
     """
     Runs the fixed interval market bot in the EUR/STN market.
     """
     return Fixed_Interval_Market_Maker(
-        upper_limit = de.Decimal(27.5),
-        lower_limit = de.Decimal(25.5),
-        offset_1 = de.Decimal(0.25),
-        offset_2 = de.Decimal(0.05),
+        upper_limit = de.Decimal("27.5"),
+        lower_limit = de.Decimal("25.5"),
+        offset_1 = de.Decimal("0.25"),
+        offset_2 = de.Decimal("0.05"),
         depth = 5,
-        size = de.Decimal(70),
+        size = de.Decimal("70"),
         user = 6000000
     )

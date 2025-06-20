@@ -405,6 +405,7 @@ def send():
     
     return fl.render_template("send.html", user = fo.current_user)
 
+@fo.login_required
 @views.route("/deposits", methods = ["GET", "POST"])
 def deposits():
     """
@@ -421,6 +422,7 @@ def deposits():
 
     return fl.render_template("deposits.html", user = fo.current_user)
 
+@fo.login_required
 @views.route("/accounts")
 def accounts():
     """
@@ -436,14 +438,17 @@ def accounts():
 
     return fl.render_template("accounts.html", user = fo.current_user, accounts = accounts)
 
+@fo.login_required
 @views.route("/withdrawals")
 def withdrawals():
     return fl.render_template("withdrawals.html", user = fo.current_user)
 
+@fo.login_required
 @views.route("/withdrawals/STN")
 def withdrawals_STN():
     return fl.render_template("withdrawals_STN.html", user = fo.current_user)
 
+@fo.login_required
 @views.route("/withdrawals/EUR")
 def withdrawals_EUR():
     # if fl.request.method == "POST":

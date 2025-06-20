@@ -1,7 +1,7 @@
 import flask_login as fo
 from sqlalchemy.sql import func
 # import datetime as dt
-
+# b[1:-1].split(", ")
 from website import db
 
 class Order(db.Model):
@@ -25,14 +25,18 @@ class Payment(db.Model):
     quantity = db.Column(db.Numeric(9, 2))
     paid_from_id = db.Column(db.Integer, db.ForeignKey("account.account_id"))
     paid_to_id = db.Column(db.Integer, db.ForeignKey("account.account_id"))
+    message = db.Column(db.String(100))
 
 class Deposit(db.Model):
     deposit_id = db.Column(db.Integer, primary_key = True)
     time = db.Column(db.DateTime(timezone = False), default = func.now())
+    time_executed = db.Column(db.DateTime(timezone = False))
+    time_cancelled = db.Column(db.DateTime(timezone = False))
     currency = db.Column(db.String(6))
     quantity = db.Column(db.Numeric(9, 2)) # Negative quantity indicate a withdrawal
     paid_to_id = db.Column(db.Integer, db.ForeignKey("account.account_id"))
-    # status = db.Column(db.String(10)) # Options are "Pending", "Done" and "Cancelled"
+    status = db.Column(db.String(10), default = "Pending") # Options are "Pending", "Executed" and "Cancelled"
+    message = db.Column(db.String(100))
 
 class Account(db.Model, fo.UserMixin):
     id = db.Column(db.Integer, primary_key = True)
@@ -43,8 +47,10 @@ class Account(db.Model, fo.UserMixin):
     EUR = db.Column(db.Numeric(9, 2))
     orders = db.relationship("Order")
     # orders = db.relationship("Deposit")
-    # name_EUR = db.Column(db.String(100))
-    # IBAN_EUR = db.Column(db.Integer, default = 0)
+    name_EUR = db.Column(db.String(50))
+    IBAN_EUR = db.Column(db.String(100))
+    name_STN = db.Column(db.String(50))
+    IBAN_STN = db.Column(db.String(100))
 
 class Trade(db.Model):
     trade_id = db.Column(db.Integer, primary_key = True)
@@ -55,3 +61,13 @@ class Trade(db.Model):
     price = db.Column(db.Numeric(9, 2))
     buyer = db.Column(db.Integer, db.ForeignKey("account.account_id"))
     seller = db.Column(db.Integer, db.ForeignKey("account.account_id"))
+    side = db.Column(db.String(6)) # Indicates if the order that took the quote was a bid or an ask order.
+
+class Bot(db.Model):
+    bot_id = db.Column(db.Integer, primary_key = True)
+    user_id = db.Column(db.Integer, db.ForeignKey("account.account_id"))
+    bids = db.Column(db.String(100), default = "[]")
+    asks = db.Column(db.String(100), default = "[]")
+    v1 = db.Column(db.Numeric(9, 2))
+    v2 = db.Column(db.Numeric(9, 2))
+    v3 = db.Column(db.Numeric(9, 2))
