@@ -28,7 +28,7 @@ def create_app():
     app.register_blueprint(views, url_prefix = "/")
     app.register_blueprint(auth, url_prefix = "/")
 
-    from website.models import Order, Account, Payment, Deposit, Bot
+    from website.models import Order, Account, Payment, Flow, Bot
     from website.bots import bot_6000000
 
     create_database(app)
@@ -46,13 +46,13 @@ def create_app():
     @app.route("/cancel/<int:id>")
     def cancel_order(id, return_path = "/market"):
         """
-        This function is triggered when the user cancels and order of theirs. It
+        This function is triggered when the user cancels an order of theirs. It
         simply marks that order inactive in the database.
 
         Inputs:
             -> id: int, the id of the order to be cancelled.
             -> return_path: str, the path where the user is returned after the 
-               their order is cancelled (usually, the same page that the 
+               their order is cancelled (usually, the same page that the order
                cancelled from).
         """
         order_to_cancel = Order.query.get_or_404(id)
@@ -76,6 +76,71 @@ def create_app():
         """
         return cancel_order(id, "/my_account")
     
+    @app.route("/cancel_flow/<int:id>")
+    def cancel_flow(id, return_path = "/flows"):
+        """
+        This function is triggered when the administrator cancels a deposit or
+        withdrawal.
+
+        Inputs:
+            -> id: int, the id of the flow to be cancelled.
+            -> return_path: str, the path where the user is returned after the 
+               their order is cancelled (usually, the same page that the 
+               cancelled from).
+        """
+        flow_to_cancel = Flow.query.get_or_404(id)
+
+        flow_to_cancel.status = "Cancelled"
+        flow_to_cancel.time_cancelled = dt.datetime.now()
+
+        # If this is a withdrawal then we need to put the funds back in the 
+        # user's account.
+        if flow_to_cancel.quantity < de.Decimal("0"):
+            account_id = flow_to_cancel.paid_to_id
+            account = Account.query.filter_by(account_id = account_id).first()
+            if flow_to_cancel.currency == "EUR":
+                account.EUR = account.EUR - flow_to_cancel.quantity
+            elif flow_to_cancel.currency == "STN":
+                account.STN = account.STN - flow_to_cancel.quantity
+
+        # db.session.delete(order_to_cancel)
+        db.session.commit()
+        fl.flash("Deposito cancelado")
+
+        return fl.redirect(return_path)
+    
+    @app.route("/approve_flow/<int:id>")
+    def approve_flow(id, return_path = "/flows"):
+        """
+        This function is triggered when the administrator executes on a deposit 
+        or withdrawal.
+
+        Inputs:
+            -> id: int, the id of the flow to be excuted.
+            -> return_path: str, the path where the user is returned after the 
+               their flow is excuted.
+        """
+        flow_to_cancel = Flow.query.get_or_404(id)
+
+        flow_to_cancel.status = "Approved"
+        flow_to_cancel.time_executed = dt.datetime.now()
+
+        # If this is a deposit we now need to put the funds in the user's 
+        # account.
+        if flow_to_cancel.quantity > de.Decimal("0"):
+            account_id = flow_to_cancel.paid_to_id
+            account = Account.query.filter_by(account_id = account_id).first()
+            if flow_to_cancel.currency == "EUR":
+                account.EUR = account.EUR + flow_to_cancel.quantity
+            elif flow_to_cancel.currency == "STN":
+                account.STN = account.STN + flow_to_cancel.quantity
+
+        # db.session.delete(order_to_cancel)
+        db.session.commit()
+        fl.flash("Deposito aprovado")
+
+        return fl.redirect(return_path)
+    
     @app.route("/get_account_name")
     def get_account_name():
         """
@@ -86,27 +151,33 @@ def create_app():
         account = Account.query.filter_by(account_id = account_id).first()
         if account:
             account_name = account.name
+            IBAN_EUR = account.IBAN_EUR
+            name_EUR = account.name_EUR
         else:
             account_name = "Não existe conta com esse número"
-        return fl.jsonify({"account_name": account_name})
+        return fl.jsonify({"account_name": account_name, "IBAN_EUR": IBAN_EUR, "name_EUR": name_EUR})
 
     return app
 
 def create_database(app):
-    if not os.path.exists(f"instance/{db_name}"):
-        from website.models import Order, Account, Payment, Deposit, Bot
+    if os.path.exists(f"instance/{db_name}") or os.path.exists(f"/home/PortalSTP/Portal/instance/{db_name}"):
+        pass # database already exists
+    else:
+        from website.models import Order, Account, Payment, Flow, Bot
         with app.app_context():
             db.create_all() # database created
 
             db.session.add(Account(account_id = 9885140, 
                 name = "Scott Masters", password = "Austria", 
-                EUR = de.Decimal("0.00"), STN = de.Decimal("0.00")))
+                EUR = de.Decimal("0.00"), STN = de.Decimal("0.00"),
+                name_EUR = "Scott Andrew Masters", IBAN_EUR = "BE17 9677 9251 4921"))
             db.session.add(Account(account_id = 9875512, 
                 name = "Lázaro Martins", password = "Lazkatty22", 
                 EUR = de.Decimal("0.00"), STN = de.Decimal("281.25")))
             db.session.add(Account(account_id = 1234567, 
                 name = "Administrador", password = "Austria", 
-                EUR = de.Decimal("0.00"), STN = de.Decimal("0.00")))
+                EUR = de.Decimal("0.00"), STN = de.Decimal("0.00"),
+                name_EUR = "Scott Andrew Masters", IBAN_EUR = "BE17 9677 9251 4921"))
             db.session.add(Account(account_id = 6000000, 
                 name = "EURSTNFIMM", password = "Austria", 
                 EUR = de.Decimal("593.00"), STN = de.Decimal("29721.95")))
@@ -150,5 +221,3 @@ def create_database(app):
                 name = "Regina Cruz", password = "*1533#", 
                 EUR = de.Decimal("0.00"), STN = de.Decimal("5.40")))
             db.session.commit()
-    else:
-        pass # database already exists

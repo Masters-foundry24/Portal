@@ -5,36 +5,14 @@ import datetime as dt
 from sqlalchemy.sql import func, or_
 from sqlalchemy import or_, text
 
-from website.models import Account, Payment, Deposit, Order, Trade
-from website.deposits import make_deposit
+from website.models import Account, Payment, Flow, Order, Trade
+from website.flows import make_flow, get_flow_table
 from website.matching_engine import enter_order
 from website.bots import bot_6000000
+from website.util import format_de, check_IBAN
 from website import db
 
 views = fl.Blueprint("views", __name__)
-
-def format_de(number):
-    """
-    In this function we format decimals so that they can be displayed properly
-    in tables.
-
-    Todo:
-        -> Add full stops at each three digits for very large numbers.
-        -> Round numbers with more decimals rather than truncate them.
-    """
-    number = str(number)
-    number = number.replace(".", ",")
-    if "," in number:
-        pos = len(number) - number.index(",")
-        if pos == 2: # One digit behind the decimal point.
-            number = number + "0"
-        elif pos == 3: # Two digits behind the decimal point.
-            pass
-        else: # cut off excess digits (rather than round them).
-            number = number[:len(number) - (pos - 3)]
-    else:
-        number = number + ",00"
-    return number
 
 def get_book(asset_0: str, asset_1: str, row_count: int = 7):
     """
@@ -258,38 +236,45 @@ def get_transfers(account_id: int, row_limit: int = 0, long: bool = False):
     """
     transfer_data = db.session.execute(text(f"""
         SELECT 
+            flow_id as id,
             time,
             CASE WHEN quantity < 0 THEN 1 ELSE 2 END AS type,
             currency,
             ABS(quantity) AS quantity,
             CASE WHEN quantity < 0 THEN {account_id} ELSE NULL END AS paid_from,
-            CASE WHEN quantity > 0 THEN {account_id} ELSE NULL END AS paid_to
-        FROM Deposit 
+            CASE WHEN quantity > 0 THEN {account_id} ELSE NULL END AS paid_to,
+            status
+        FROM Flow 
         WHERE paid_to_id={account_id}
         UNION
         SELECT 
+            payment_id as id,
             time, 
             0 AS type, 
             currency, 
             quantity, 
             paid_from_id AS paid_from, 
-            paid_to_id AS paid_to
+            paid_to_id AS paid_to,
+            status
         FROM Payment
         WHERE paid_from_id={account_id} OR paid_to_id={account_id}
         ORDER BY time DESC"""))
     
     lables_long = ["Pagamento", "Retirada", "Depósito"]
     lables_short = ["P", "R", "D"]
+    lables_status = ["Pendente", "Aprovado", "Cancelado"]
     transfers, i = [], 0
     for o in transfer_data:
         time = dt.datetime.strptime(o.time, "%Y-%m-%d %H:%M:%S")
         if long:
             transfers.append([
+                o.id,
                 time.strftime("%d/%m/%y %H:%M:%S"), 
                 lables_long[o.type],
                 f"{o.currency} {format_de(o.quantity)}", 
                 "-" if o.paid_from is None else o.paid_from,
-                "-" if o.paid_to is None else o.paid_to
+                "-" if o.paid_to is None else o.paid_to,
+                lables_status[o.status]
             ])
         else:
             transfers.append([
@@ -329,14 +314,14 @@ def my_transfers():
     return fl.render_template("my_transfers.html", user = fo.current_user, transfers = transfers)
 
 @fo.login_required
-@views.route("/transfers")
-def transfers():
+@views.route("/deposits")
+def deposits():
     """
     Eventually, this will be the page where users can make deposits or 
     withdrawals to/from the network however currently it is just some text 
     telling users to contact Lázaro.
     """
-    return fl.render_template("transfers.html", user = fo.current_user)
+    return fl.render_template("deposits/.html", user = fo.current_user)
 
 def send_funds(data):
     """
@@ -387,7 +372,7 @@ def send_funds(data):
             
         # This commits the new balances as well logging a the new payment.
         db.session.commit()
-        fl.flash("Dinheiro Enviou", category = "s")
+        fl.flash("Dinheiro Enviado", category = "s")
     
     return fl.redirect("/send")
 
@@ -406,11 +391,11 @@ def send():
     return fl.render_template("send.html", user = fo.current_user)
 
 @fo.login_required
-@views.route("/deposits", methods = ["GET", "POST"])
-def deposits():
+@views.route("/admin/submit_flow", methods = ["GET", "POST"])
+def submit_flow():
     """
-    This is the backend for the deposit page. It is only to be used by Lázaro
-    and I to edit user's balances.
+    This is the backend for the submit flow page. It is only to be used by 
+    Lázaro and I to edit user's balances.
     """
     if fl.request.method == "POST":
         data = fl.request.form
@@ -418,12 +403,24 @@ def deposits():
         quantity = de.Decimal(data.get("quantity"))
         paid_to_id = int(data.get("paid_to_id"))
         password = data.get("password")
-        return make_deposit(True, currency, quantity, paid_to_id, password)
+        
+        if data.get("name") and currency == "EUR":
+            fo.current_user.name_EUR = data.get("name")
 
-    return fl.render_template("deposits.html", user = fo.current_user)
+        if data.get("iban") and currency == "EUR":
+            IBAN = data.get("iban")
+            if check_IBAN(IBAN):
+                fo.current_user.IBAN_EUR = IBAN
+            else:
+                fl.flash(f"{IBAN} não é um IBAN válido.", category = "e")
+                return fl.render_template("/admin/submit_flow.html", user = fo.current_user)
+        
+        make_flow(True, currency, quantity, paid_to_id, password)
+
+    return fl.render_template("/admin/submit_flow.html", user = fo.current_user)
 
 @fo.login_required
-@views.route("/accounts")
+@views.route("/admin/accounts")
 def accounts():
     """
         Lists all the accounts on the Portal if the user is logged in as an
@@ -436,32 +433,52 @@ def accounts():
     else: 
         accounts = []
 
-    return fl.render_template("accounts.html", user = fo.current_user, accounts = accounts)
+    return fl.render_template("/admin/accounts.html", user = fo.current_user, accounts = accounts)
 
 @fo.login_required
 @views.route("/withdrawals")
 def withdrawals():
-    return fl.render_template("withdrawals.html", user = fo.current_user)
+    return fl.render_template("withdrawals/.html", user = fo.current_user)
 
 @fo.login_required
 @views.route("/withdrawals/STN")
 def withdrawals_STN():
-    return fl.render_template("withdrawals_STN.html", user = fo.current_user)
+    return fl.render_template("withdrawals/STN.html", user = fo.current_user)
 
 @fo.login_required
-@views.route("/withdrawals/EUR")
+@views.route("/withdrawals/EUR", methods = ["GET", "POST"])
 def withdrawals_EUR():
-    # if fl.request.method == "POST":
-    #     # We will harvest all the information from the form.
-    #     data = fl.request.form
-    #     quantity = data.get("quantity")
-    #     if data.get("account") == "old":
-    #         name = fo.current_user.name_EUR
-    #         iban = fo.current_user.iban_EUR
-    #     else:
-    #         name = data.get("name")
-    #         iban = data.get("iban")
-    #     password = data.get("password")
-    #     withdraw_EUR(quantity, name, iban, password)
+    if fl.request.method == "POST":
+        submit_withdrawal = True
+        # We will harvest all the information from the form.
+        data = fl.request.form
+        quantity = data.get("quantity")
+        password = data.get("password")
 
-    return fl.render_template("withdrawals_EUR.html", user = fo.current_user)
+        if data.get("name"):
+            fo.current_user.name_EUR = data.get("name")
+        elif not fo.current_user.name_EUR: # no account name on file:
+            fl.flash(f"Precisamos de um nome de conta para enviar seu dinheiro.", category = "e")
+            submit_withdrawal = False
+
+        if data.get("iban"):
+            IBAN = data.get("iban")
+            if check_IBAN(IBAN):
+                fo.current_user.IBAN_EUR = IBAN
+            else:
+                fl.flash(f"{IBAN} não é um IBAN válido.", category = "e")
+                submit_withdrawal = False
+        elif not fo.current_user.IBAN_EUR: # no iban on file:
+            fl.flash(f"Precisamos de um IBAN para enviar seu dinheiro.", category = "e")
+            submit_withdrawal = False
+
+        if submit_withdrawal:
+            make_flow(False, "EUR", quantity, fo.current_user.account_id, password)
+
+    return fl.render_template("withdrawals/EUR.html", user = fo.current_user)
+
+@fo.login_required
+@views.route("/admin/review_flows")
+def flows():
+    flow_table = get_flow_table()
+    return fl.render_template("admin/review_flows.html", user = fo.current_user, flows = flow_table)

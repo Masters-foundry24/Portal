@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %} 
+  <article class = "post featured">
+    <header class = "major">
+      <section class = "post">
+        {% if user.account_id in [1234567, 9875512] %}
+          <header>
+            <h2> Depósitos e Retiradas Pendentes </h2>
+          </header>
+          <div class = "table-wrapper">
+            <table class = "alt">
+              <thead>
+                <tr>
+                  <th> Data (UTC) </th>
+                  <th> Conta </th>
+                  <th> Moeda </th>
+                  <th> Quant. </th>
+                  <th> Aprovar </th>
+                  <th> Cancelar </th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in flows %}
+                  <tr>
+                    <td> {{ row[1] }} </td>
+                    <td> {{ row[2] }} </td>
+                    <td> {{ row[3] }} </td>
+                    <td> {{ row[4] }} </td>
+                    <td> 
+                        <a href = "approve_flow/{{ row[0] }}"> &plus; </a> 
+                    </td>
+                    <td> 
+                        <a href = "cancel_flow/{{ row[0] }}"> &times; </a> 
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p> Somente o administrador pode usar esta página. </p>
+        {% endif %}
+      </section>
+    </header>
+  </article>
+
+{% endblock %}

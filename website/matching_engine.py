@@ -2,7 +2,7 @@ import flask as fl
 import decimal as de
 import datetime as dt
 
-from website.models import Account, Payment, Deposit, Order, Trade
+from website.models import Account, Payment, Flow, Order, Trade
 from website import db
 
 def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, messages: bool = True):

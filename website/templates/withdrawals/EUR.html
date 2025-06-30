@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+  <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/"> Casa </a></li>
+  <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/market"> EUR/STN </a></li>
+  <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/how_it_works"> Como Funciona </a></li>
+  {% if user.is_authenticated %}
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/my_account"> Minha Conta </a></li>
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/deposits"> Depósitos </a></li>
+    <li class = "active"><a style = "padding-left: 20px; padding-right: 20px;" href = "/withdrawals"> Retiradas </a></li>
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/send"> Enviar Dinheiro </a></li>
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/logout"> Logout </a></li>
+  {% endif%}
+{% endblock %}
+
+{% block content %} 
+  <article class = "post featured">
+    <header class = "major">
+      <section class = "post">
+        <header class = "major">
+          <h1> Retiradas de EUR </h1>
+        </header>
+        <p> 
+          O Portal vai enviar uma transferência bancária eletrônica em euros 
+          para uma conta na Europa. Não será taxas adicionais por um banco no UE
+          contas de Euros fora o UE pode haver taxas adicionais dos bancos lá. 
+          Se você precisa de ajuda enviar uma mensagem para Lázaro 
+          (<a href = "https://wa.me/2399875512">+239 987 5512</a>).
+        </p>
+        <form method = "post">
+          <div class = "row gtr-uniform">
+            <div class = "col-6 col-12-small">
+              <label> VALOR: </label>
+              <input 
+                type = "number" name = "quantity" id = "quantity" value = "" 
+                placeholder = "0.00" step = "0.01" required = true/>
+            </div>
+            <div class="col-6 col-12-small">
+              <label> VALOR DISPONÍVEL: </label>
+              <div class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+                <p> {{ user.EUR }} </p>
+              </div>
+            </div>
+            
+            <!--div class = "col-6">
+              <input 
+                type = "radio" id = "old" name = "account" value = "old" required = true>
+              <label for = "old"> Usar Conta Salva </label>
+            </div>
+            <div class = "col-6">
+              <input 
+                type = "radio" id = "new" name = "account" value = "new" required = true>
+              <label for = "new"> Usar Nova Conta </label>
+            </div-->
+  
+            <div id = "name_space" class = "col-6 col-12-small">
+              {% if user.name_EUR %}
+                <label id = "name_lable"> Nome da Conta <a href = "#" onclick = "change_name();">(mudar)</a>: </label>
+                <div id = "name_box" class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+                  <p> {{ user.name_EUR }} </p>
+                </div>
+              {% else %}
+                <label> Nome da Conta: </label>
+                <input 
+                  type = "text" name = "name" id = "name" value = "" 
+                  placeholder = "James Lancaster"/>
+              {% endif %}
+            </div>
+  
+            <div id = "iban_space" class = "col-6 col-12-small">
+              {% if user.IBAN_EUR %}
+                <label id = "iban_lable"> IBAN da Conta <a href = "#" onclick = "change_iban();">(mudar)</a>: </label>
+                <div id = "iban_box" class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+                  <p> {{ user.IBAN_EUR }} </p>
+                </div>
+              {% else %}
+                <label> IBAN da Conta: </label>
+                <input 
+                  type = "text" name = "iban" id = "iban" value = "" 
+                  placeholder = "GB33 BUKB 2020 1555 5555 55"/>
+              {% endif %}
+            </div>
+  
+            <div class = "col-6 col-12-small">
+              <label> MENSAGEM: </label>
+              <input 
+                type = "text" name = "message" id = "message" value = "" 
+                placeholder = "Mensagem para o destinatário"/>
+            </div>
+    
+            <div class = "col-6 col-12-small">
+              <label> SUA SENHA: </label>
+              <input 
+                type = "password" name = "password" id = "password" value = "" 
+                placeholder = "*******" required = true/>
+            </div>
+    
+            <div class = "col-12">
+              <ul class = "actions">
+                <li><input type = "submit" value = "Retiradar" class = "primary" /></li>
+                <li><input type = "reset" value = "Reiniciar" /></li>
+              </ul>
+            </div>
+          </div>
+        </form>
+      </section>
+    </header>
+  </article>
+{% endblock %}
+
+{% block scripts %} 
+  <script>
+    let name_space = document.getElementById("name_space");
+    let name_lable = document.getElementById("name_lable");
+    let name_box = document.getElementById("name_box");
+
+    let iban_space = document.getElementById("iban_space");
+    let iban_lable = document.getElementById("iban_lable");
+    let iban_box = document.getElementById("iban_box");
+
+    function change_name() {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.name = "name";
+      input.id = "name";
+      input.value = "";
+      input.placeholder = "James Lancaster";
+      name_space.appendChild(input);
+      name_box.remove();
+      name_lable.textContent = "Nome da Conta:"
+    };
+
+    function change_iban() {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.name = "iban";
+      input.id = "iban";
+      input.value = "";
+      input.placeholder = "GB33 BUKB 2020 1555 5555 55";
+      iban_space.appendChild(input);
+      iban_box.remove();
+      iban_lable.textContent = "IBAN da Conta:"
+    };
+  </script>
+{% endblock %}

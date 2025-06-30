@@ -1,7 +1,7 @@
 import decimal as de
 import math
 
-from website.models import Account, Payment, Deposit, Order, Trade, Bot
+from website.models import Account, Payment, Flow, Order, Trade, Bot
 from website.matching_engine import enter_order
 from website import db
 

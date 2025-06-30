@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block content %} 
+
+<article class = "post featured">
+  <header class = "major">
+    <section class = "post">
+      <header class = "major">
+        <h1> Depósitos e Retiradas </h1>
+      </header>
+      <!-- form to add or subtract money from an account -->
+      {% if user.account_id in [1234567, 9875512] %}
+        <form method = "post">
+          <div class = "row gtr-uniform">
+            <div class = "col-6 col-12-small">
+              <label> NÚMERO DO DESTINATÁRIO: </label>
+              <input 
+                type = "number" name = "paid_to_id" id = "paid_to_id" value = "" 
+                placeholder = "1234567" step = "1" required = true/>
+            </div>
+            <div class="col-6 col-12-small">
+              <label> NOME DO DESTINATÁRIO: </label>
+              <div class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+                <p id = "paid_to_name"> Digite o número da conta acima </p>
+              </div>
+            </div>
+          
+            <div class = "col-3 col-6-small">
+              <input 
+                type = "radio" id = "EUR" name = "currency" value = "EUR" 
+                required = true>
+              <label for = "EUR"> EUR </label>
+            </div>
+            <div class = "col-3 col-6-small">
+              <input 
+                type = "radio" id = "STN" name = "currency" value = "STN" required = true>
+              <label for = "STN"> STN </label>
+            </div>
+            <div class = "col-6 col-12-small">
+              <label> VALOR: </label>
+              <input 
+                type = "number" name = "quantity" id = "quantity" value = "" 
+                placeholder = "100" step = "0.01" requried = true/>
+            </div>
+
+            <div id = "name_space" class = "col-6 col-12-small">
+              <label id = "name_lable"> Nome da Conta <a href = "#" onclick = "change_name();">(mudar)</a>: </label>
+              <div id = "name_box" class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+                <p id = "EUR_name"> Digite o número da conta acima </p>
+              </div>
+            </div>
+  
+            <div id = "iban_space" class = "col-6 col-12-small">
+              <label id = "iban_lable"> IBAN da Conta <a href = "#" onclick = "change_iban();">(mudar)</a>: </label>
+              <div id = "iban_box" class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+                <p id = "EUR_iban"> Digite o número da conta acima </p>
+              </div>
+            </div>
+
+            <div class = "col-6 col-12-small">
+              <label> MENSAGEM: </label>
+              <input 
+                type = "text" name = "message" id = "message" value = "" 
+                placeholder = "Mensagem para o destinatário" />
+            </div>
+
+            <div class = "col-6 col-12-small">
+              <label> SENHA DO ADMINISTRADOR: </label>
+              <input 
+                type = "password" name = "password" id = "password" value = "" 
+                placeholder = "*******" required = true/>
+            </div>
+  
+            <div class = "col-12">
+              <ul class = "actions">
+                <li><input type = "submit" value = "Colocar" class = "primary" /></li>
+                <li><input type = "reset" value = "Reiniciar" /></li>
+              </ul>
+            </div>
+          </div>
+        </form>
+      {% else %}
+        <p> Somente o administrador pode usar esta página. </p>
+      {% endif %}
+    </section>
+  </header>
+</article>
+
+{% endblock %}
+
+{% block scripts %} 
+  <script>
+    let account_id = document.getElementById("paid_to_id");
+    let account_name = document.getElementById("paid_to_name");
+    let EUR_name = document.getElementById("EUR_name");
+    let EUR_iban = document.getElementById("EUR_iban");
+
+    account_id.addEventListener("blur", function(event) {
+      fetch(`/get_account_name?account_id=${encodeURIComponent(account_id.value)}`).then(res => res.json()).then(data => {
+        account_name.textContent = data.account_name;
+        EUR_name.textContent = data.name_EUR;
+        EUR_iban.textContent = data.IBAN_EUR;
+      });
+    })
+  </script>
+  <script>
+    let name_space = document.getElementById("name_space");
+    let name_lable = document.getElementById("name_lable");
+    let name_box = document.getElementById("name_box");
+
+    let iban_space = document.getElementById("iban_space");
+    let iban_lable = document.getElementById("iban_lable");
+    let iban_box = document.getElementById("iban_box");
+
+    function change_name() {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.name = "name";
+      input.id = "name";
+      input.value = "";
+      input.placeholder = "James Lancaster";
+      name_space.appendChild(input);
+      name_box.remove();
+      name_lable.textContent = "Nome da Conta:"
+    };
+
+    function change_iban() {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.name = "iban";
+      input.id = "iban";
+      input.value = "";
+      input.placeholder = "GB33 BUKB 2020 1555 5555 55";
+      iban_space.appendChild(input);
+      iban_box.remove();
+      iban_lable.textContent = "IBAN da Conta:"
+    };
+  </script>
+{% endblock %}

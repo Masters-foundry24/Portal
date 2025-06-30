@@ -25,17 +25,18 @@ class Payment(db.Model):
     quantity = db.Column(db.Numeric(9, 2))
     paid_from_id = db.Column(db.Integer, db.ForeignKey("account.account_id"))
     paid_to_id = db.Column(db.Integer, db.ForeignKey("account.account_id"))
+    status = db.Column(db.Integer, default = 0) # Options are 0 (Pending), 1 (Approved) and 2 (Cancelled)
     message = db.Column(db.String(100))
 
-class Deposit(db.Model):
-    deposit_id = db.Column(db.Integer, primary_key = True)
+class Flow(db.Model): # Deposit or withdrawal
+    flow_id = db.Column(db.Integer, primary_key = True)
     time = db.Column(db.DateTime(timezone = False), default = func.now())
     time_executed = db.Column(db.DateTime(timezone = False))
     time_cancelled = db.Column(db.DateTime(timezone = False))
     currency = db.Column(db.String(6))
     quantity = db.Column(db.Numeric(9, 2)) # Negative quantity indicate a withdrawal
     paid_to_id = db.Column(db.Integer, db.ForeignKey("account.account_id"))
-    status = db.Column(db.String(10), default = "Pending") # Options are "Pending", "Executed" and "Cancelled"
+    status = db.Column(db.Integer, default = 0) # Options are 0 (Pending), 1 (Approved) and 2 (Cancelled)
     message = db.Column(db.String(100))
 
 class Account(db.Model, fo.UserMixin):

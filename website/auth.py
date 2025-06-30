@@ -42,7 +42,7 @@ def logout():
     fo.logout_user()
     return fl.redirect("/")
 
-@auth.route('/signup', methods = ["GET", "POST"])
+@auth.route('/admin/signup', methods = ["GET", "POST"])
 def signup():
     """
     This is a page for Lázaro to use to sign up new users. We use the admin
@@ -80,4 +80,4 @@ def signup():
             fl.flash(f"Nova conta {account_id} criada para {name}", category = "s")
             return fl.redirect("/")
 
-    return fl.render_template("signup.html", user = fo.current_user)
+    return fl.render_template("/admin/signup.html", user = fo.current_user)

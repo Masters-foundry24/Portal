@@ -6,8 +6,8 @@
   <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/how_it_works"> Como Funciona </a></li>
   {% if user.is_authenticated %}
     <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/my_account"> Minha Conta </a></li>
-    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/transfers"> Depósitos </a></li>
-    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/transfers"> Retiradas </a></li>
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/deposits"> Depósitos </a></li>
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/withdrawals"> Retiradas </a></li>
     <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/send"> Enviar Dinheiro </a></li>
     <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/logout"> Logout </a></li>
   {% endif%}
@@ -60,7 +60,7 @@
         {% if retry %}
           <p>
             Em caso de perder a sua conta, entre em contacto com Lázaro 
-            (+239 987 5512).
+            (<a href = "https://wa.me/2399875512">+239 987 5512</a>).
           </p>
         {% endif %}
       {% endif %}

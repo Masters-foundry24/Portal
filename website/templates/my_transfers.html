@@ -13,19 +13,25 @@
               <tr>
                 <th> Data (UTC) </th>
                 <th> Tipo </th>
-                <th> Quantity </th>
+                <th> Quantidade </th>
                 <th> de </th>
                 <th> para </th>
+                <th> Status </th>
+                <th> </th>
               </tr>
             </thead>
             <tbody>
               {% for row in transfers %}
                 <tr>
-                  <td> {{ row[0] }} </td>
                   <td> {{ row[1] }} </td>
                   <td> {{ row[2] }} </td>
                   <td> {{ row[3] }} </td>
                   <td> {{ row[4] }} </td>
+                  <td> {{ row[5] }} </td>
+                  <td> {{ row[6] }} </td>
+                  <td> 
+                    <a href = "cancel_flow_from_account/{{ row[0] }}"> &times; </a> 
+                  </td>
                 </tr>
               {% endfor %}
             </tbody>
