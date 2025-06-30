@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+  <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/"> Casa </a></li>
+  <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/market"> EUR/STN </a></li>
+  <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/how_it_works"> Como Funciona </a></li>
+  {% if user.is_authenticated %}
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/my_account"> Minha Conta </a></li>
+    <li class = "active"><a style = "padding-left: 20px; padding-right: 20px;" href = "/deposits"> Depósitos </a></li>
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/withdrawals"> Retiradas </a></li>
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/send"> Enviar Dinheiro </a></li>
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/logout"> Logout </a></li>
+  {% endif%}
+{% endblock %}
+
+{% block content %} 
+  <article class = "post featured">
+    <header class = "major">
+      <section class = "post">
+        <header class = "major">
+          <h1> Depósitos </h1>
+        </header>
+        <p> 
+          Para organizar um depósito ou retirada enviar uma mensagem para Lázaro 
+          (<a href = "https://wa.me/2399875512">+239 987 5512</a>). Podemos 
+          enviar e receber transferências bancárias eletrônicas em euros. Dobras 
+          funcionam com entrega de dinheiro. 
+        </p>
+      </section>
+    </header>
+  </article>
+{% endblock %}
