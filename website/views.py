@@ -321,7 +321,7 @@ def deposits():
     withdrawals to/from the network however currently it is just some text 
     telling users to contact Lázaro.
     """
-    return fl.render_template("deposits/.html", user = fo.current_user)
+    return fl.render_template("deposits/main.html", user = fo.current_user)
 
 def send_funds(data):
     """
@@ -438,7 +438,7 @@ def accounts():
 @fo.login_required
 @views.route("/withdrawals")
 def withdrawals():
-    return fl.render_template("withdrawals/.html", user = fo.current_user)
+    return fl.render_template("withdrawals/main.html", user = fo.current_user)
 
 @fo.login_required
 @views.route("/withdrawals/STN")

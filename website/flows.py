@@ -146,7 +146,7 @@ def make_flow(admin: bool, currency: str, quantity: de.Decimal, account_id: int,
             fl.flash(f"{currency} {quantity} retirou da sua conta", category = "s")
     
     db.session.commit()
-    return fl.redirect("/deposits" if admin else "/my_account")
+    return fl.redirect("/admin/review_flows" if admin else "/my_account")
 
 def get_flow_table():
     flows = Flow.query.filter_by(status = 0)
