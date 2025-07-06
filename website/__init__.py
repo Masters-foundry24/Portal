@@ -76,8 +76,8 @@ def create_app():
         """
         return cancel_order(id, "/my_account")
     
-    @app.route("/cancel_flow/<int:id>")
-    def cancel_flow(id, return_path = "/flows"):
+    @app.route("/admin/cancel_flow/<int:id>")
+    def cancel_flow(id, return_path = "/admin/review_flows"):
         """
         This function is triggered when the administrator cancels a deposit or
         withdrawal.
@@ -90,7 +90,7 @@ def create_app():
         """
         flow_to_cancel = Flow.query.get_or_404(id)
 
-        flow_to_cancel.status = "Cancelled"
+        flow_to_cancel.status = 2
         flow_to_cancel.time_cancelled = dt.datetime.now()
 
         # If this is a withdrawal then we need to put the funds back in the 
@@ -109,8 +109,8 @@ def create_app():
 
         return fl.redirect(return_path)
     
-    @app.route("/approve_flow/<int:id>")
-    def approve_flow(id, return_path = "/flows"):
+    @app.route("/admin/approve_flow/<int:id>")
+    def approve_flow(id, return_path = "/admin/review_flows"):
         """
         This function is triggered when the administrator executes on a deposit 
         or withdrawal.
@@ -122,7 +122,7 @@ def create_app():
         """
         flow_to_cancel = Flow.query.get_or_404(id)
 
-        flow_to_cancel.status = "Approved"
+        flow_to_cancel.status = 1
         flow_to_cancel.time_executed = dt.datetime.now()
 
         # If this is a deposit we now need to put the funds in the user's 
@@ -164,6 +164,9 @@ def create_database(app):
         pass # database already exists
     else:
         from website.models import Order, Account, Payment, Flow, Bot
+        from website.bots import bot_6000000
+        from website.views import check_order
+
         with app.app_context():
             db.create_all() # database created
 
@@ -220,4 +223,43 @@ def create_database(app):
             db.session.add(Account(account_id = 9918108, 
                 name = "Regina Cruz", password = "*1533#", 
                 EUR = de.Decimal("0.00"), STN = de.Decimal("5.40")))
+            db.session.add(Account(account_id = 9849464, 
+                name = "Madger Lombá", password = "palavar_passe", 
+                EUR = de.Decimal("0.00"), STN = de.Decimal("0.00")))
             db.session.commit()
+
+            bot_6000000()
+
+            db.session.add(Flow(currency = "STN", quantity = de.Decimal("815"), 
+                paid_to_id = 9849464, status = 1))
+            account_0 = Account.query.filter_by(account_id = 9849464).first()
+            account_0.STN += de.Decimal("815")
+            db.session.add(Flow(currency = "STN", quantity = de.Decimal("1358"), 
+                paid_to_id = 9033424, status = 1))
+            account_1 = Account.query.filter_by(account_id = 9033424).first()
+            account_1.STN += de.Decimal("1358")
+            db.session.commit()
+
+            check_order(Account.query.filter_by(account_id = 9849464).first(), 
+                "bid", de.Decimal("30"), de.Decimal("27.15"))
+            check_order(Account.query.filter_by(account_id = 9033424).first(), 
+                "bid", de.Decimal("40"), de.Decimal("27.15"))
+            check_order(Account.query.filter_by(account_id = 9033424).first(), 
+                "bid", de.Decimal("10"), de.Decimal("27.20"))
+            db.session.commit()
+
+            db.session.add(Flow(currency = "EUR", quantity = de.Decimal("-30"), 
+                paid_to_id = 9849464, status = 1))
+            account_0 = Account.query.filter_by(account_id = 9849464).first()
+            account_0.EUR -= de.Decimal("30")
+            db.session.add(Flow(currency = "EUR", quantity = de.Decimal("-50"), 
+                paid_to_id = 9033424, status = 1))
+            account_1 = Account.query.filter_by(account_id = 9033424).first()
+            account_1.EUR -= de.Decimal("50")
+            db.session.add(Payment(currency = "EUR", quantity = de.Decimal("30"), 
+                paid_from_id = 9885140, paid_to_id = 9875512))
+            account_2 = Account.query.filter_by(account_id = 9875512).first()
+            account_2.EUR += de.Decimal("30")
+            db.session.commit()
+
+            bot_6000000()

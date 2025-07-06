@@ -25,7 +25,7 @@ class Payment(db.Model):
     quantity = db.Column(db.Numeric(9, 2))
     paid_from_id = db.Column(db.Integer, db.ForeignKey("account.account_id"))
     paid_to_id = db.Column(db.Integer, db.ForeignKey("account.account_id"))
-    status = db.Column(db.Integer, default = 0) # Options are 0 (Pending), 1 (Approved) and 2 (Cancelled)
+    status = db.Column(db.Integer, default = 1) # Options are 0 (Pending), 1 (Approved) and 2 (Cancelled)
     message = db.Column(db.String(100))
 
 class Flow(db.Model): # Deposit or withdrawal

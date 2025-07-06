@@ -5,7 +5,7 @@ import datetime as dt
 from website.models import Account, Payment, Flow, Order, Trade
 from website import db
 
-def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, messages: bool = True):
+def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, messages: bool = False):
     """
     An order comes here once it has already passed all its validation checks.
     This function inserts it into the matching engine to check if it matches

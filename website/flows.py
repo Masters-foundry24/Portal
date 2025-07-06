@@ -41,7 +41,7 @@ def user_checks(currency, quantity, password, account):
     elif False:
         # Verify that the IBAN passes a checksum
         return False
-    elif quantity < de.Decimal and password != account.password:
+    elif quantity < de.Decimal("0") and password != account.password:
         # Incorrect password during withdrawal
         fl.flash("Senha incorreta", category = "e")
         return False
@@ -126,7 +126,7 @@ def make_flow(admin: bool, currency: str, quantity: de.Decimal, account_id: int,
     # Now that we're satified that the change is valid, let's record it.
     db.session.add(Flow(
         currency = currency, quantity = quantity, paid_to_id = account_id, 
-        status = "Pending"))
+        status = 0))
     
     # For withdrawals we will take the funds away now, for deposits we will wait
     # until the flow is status: "Approved"
@@ -150,10 +150,16 @@ def make_flow(admin: bool, currency: str, quantity: de.Decimal, account_id: int,
 
 def get_flow_table():
     flows = Flow.query.filter_by(status = 0)
+    flows2 = Flow.query.filter_by(status = "Pending")
     flow_table = [[
         flow.flow_id,
-        flow.time.strftime("%d/%m/%y %H:%M:%S"), 
-        flow.paid_to_id, 
-        flow.currency, 
-        format_de(flow.quantity)] for flow in flows]
+        flow.time.strftime("%d/%m/%y %H:%M:%S"),
+        flow.paid_to_id,
+        flow.currency,
+        format_de(flow.quantity)] for flow in flows] + [[
+        flow.flow_id,
+        flow.time.strftime("%d/%m/%y %H:%M:%S"),
+        flow.paid_to_id,
+        flow.currency,
+        format_de(flow.quantity)] for flow in flows2]
     return flow_table

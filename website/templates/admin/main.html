@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %} 
+  <article class = "post featured">
+    <header class = "major">
+      <section class = "post">
+        <header>
+          <h2> Administrador </h2>
+        </header>
+        {% if user.account_id in [1234567, 9875512] %}
+          <p> Contas </p>
+          <div class = "row gtr-uniform">
+            <div class = "col-6">
+              <ul class = "actions special">
+                <li> <a href = "/admin/accounts" class = "button"> Contas </a> </li>
+              </ul>
+            </div>
+            <div class = "col-6">
+              <ul class = "actions special">
+                <li> <a href = "/admin/signup" class = "button"> Sign Up </a> </li>
+              </ul>
+            </div>
+          </div>
+
+          <p> Depósitos e Retiradas </p>
+          <div class = "row gtr-uniform">
+            <div class = "col-6">
+              <ul class = "actions special">
+                <li> <a href = "/admin/submit_flow" class = "button"> Criar Fluxo </a> </li>
+              </ul>
+            </div>
+            <div class = "col-6">
+              <ul class = "actions special">
+                <li> <a href = "/admin/review_flows" class = "button"> Aprovar Fluxo </a> </li>
+              </ul>
+            </div>
+          </div>
+        {% else %}
+          <p> Somente o administrador pode usar esta página. </p>
+        {% endif %}
+      </section>
+    </header>
+  </article>
+
+{% endblock %}

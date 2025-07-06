@@ -452,7 +452,7 @@ def withdrawals_EUR():
         submit_withdrawal = True
         # We will harvest all the information from the form.
         data = fl.request.form
-        quantity = data.get("quantity")
+        quantity = - de.Decimal(data.get("quantity"))
         password = data.get("password")
 
         if data.get("name"):
@@ -482,3 +482,9 @@ def withdrawals_EUR():
 def flows():
     flow_table = get_flow_table()
     return fl.render_template("admin/review_flows.html", user = fo.current_user, flows = flow_table)
+
+@fo.login_required
+@views.route("/admin")
+def admin():
+    flow_table = get_flow_table()
+    return fl.render_template("admin/main.html", user = fo.current_user, flows = flow_table)
