@@ -9,6 +9,9 @@
     <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/transfers"> Depósitos </a></li>
     <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/withdrawals"> Retiradas </a></li>
     <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/send"> Enviar Dinheiro </a></li>
+    {% if user.account_id in [1234567, 9875512] %}
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/admin"> Admin </a></li>
+    {% endif %}
     <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/logout"> Logout </a></li>
   {% endif%}
 {% endblock %}

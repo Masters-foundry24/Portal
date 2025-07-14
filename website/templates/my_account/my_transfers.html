@@ -1,0 +1,46 @@
+{% extends "my_account/main.html" %}
+
+{% block content %} 
+  <article class = "post featured">
+    <header class = "major">
+      <section class = "post">
+        <header>
+          <h2> Minhas Transferências </h2>
+        </header>
+        <div class = "table-wrapper">
+          <table class = "alt">
+            <thead>
+              <tr>
+                <th> Data (UTC) </th>
+                <th> Tipo </th>
+                <th> Quantidade </th>
+                <th> de </th>
+                <th> para </th>
+                <th> Status </th>
+                <th> </th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in transfers %}
+                <tr>
+                  <td> {{ row[1] }} </td>
+                  <td> {{ row[2] }} </td>
+                  <td> {{ row[3] }} </td>
+                  <td> {{ row[4] }} </td>
+                  <td> {{ row[5] }} </td>
+                  <td> {{ row[6] }} </td>
+                  <td> 
+                    {% if row[6] == "Pendente" %}
+                      <a href = "cancel_flow_from_account/{{ row[0] }}"> &times; </a> 
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </header>
+  </article>
+
+{% endblock %}

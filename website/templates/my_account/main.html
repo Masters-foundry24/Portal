@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+  <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/"> Casa </a></li>
+  <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/market"> EUR/STN </a></li>
+  <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/how_it_works"> Como Funciona </a></li>
+  {% if user.is_authenticated %}
+    <li class = "active"><a style = "padding-left: 20px; padding-right: 20px;" href = "/my_account"> Minha Conta </a></li>
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/deposits"> Depósitos </a></li>
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/withdrawals"> Retiradas </a></li>
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/send"> Enviar Dinheiro </a></li>
+    {% if user.account_id in [1234567, 9875512] %}
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/admin"> Admin </a></li>
+    {% endif %}
+    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/logout"> Logout </a></li>
+  {% endif%}
+{% endblock %}
+
+{% block content %} 
+  <section class="posts">
+    <!-- This dashboard is divided into four windows. -->
+
+    <article>
+	  <!-- The first section shows the user's account details and balances -->
+      <header>
+        <h2> Minha Conta </h2>
+      </header>
+      <div class = "balance_grid">
+
+        <div class = "balance">
+          <p class = "balance_lable"> Número da Conta: </p>
+        </div>
+        <div class = "balance_grid_cell">
+          <p class = "balance_value"> {{ user.account_id }} </p>
+        </div>
+
+        <div class = "balance">
+          <p class = "balance_lable"> Nome da Conta: </p>
+        </div>
+        <div class = "balance_grid_cell">
+          <p class = "balance_value"> {{ user.name }} </p>
+        </div>
+
+        <div class = "balance">
+          <p class = "balance_lable"> IBAN por Euros: </p>
+        </div>
+        <div class = "balance_grid_cell">
+          <p class = "balance_value"> {{ user.IBAN_EUR }} </p>
+        </div>
+
+        <div class = "balance">
+          <p class = "balance_lable"> EUR: </p>
+        </div>
+        <div class = "balance_grid_cell">
+          <p class = "balance_value"> {{ user.EUR }} </p>
+        </div>
+
+        <div class = "balance_grid_cell">
+          <p class = "balance_lable"> STN: </p>
+        </div>
+        <div class = "balance_grid_cell">
+          <p class = "balance_value"> {{ user.STN }} </p>
+        </div>
+
+        <!--div class = "balance_grid_cell">
+          <p class = "balance_lable"> IBAN (EUR): </p>
+        </div>
+        <div class = "balance_grid_cell">
+          <p class = "balance_value"> {{ user.IBAN_EUR }} </p>
+        </div-->
+
+	  </div>
+    </article>
+
+    <article>
+      <!-- The second section shows a record of the user's recent transfers -->
+      <header>
+        <h2> Minhas Transferências </h2>
+      </header>
+      <div class = "table-wrapper">
+        <table class = "alt">
+          <thead>
+            <tr>
+              <th> Data </th>
+              <th> Tipo </th>
+              <th> Quant. </th>
+              <th> de </th>
+              <th> para </th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in transfers %}
+              <tr>
+                <td> {{ row[0] }} </td>
+                <td> {{ row[1] }} </td>
+                <td> {{ row[2] }} </td>
+                <td> {{ row[3] }} </td>
+                <td> {{ row[4] }} </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <ul class = "actions special">
+        <li><a href = "/my_transfers" class = "button"> Ver Todo </a></li>
+      </ul>
+    </article>
+
+    <article>
+      <!-- The third section shows the user's current orders in any market -->
+      <header>
+        <h2> Meus Pedidos Ativos </h2>
+      </header>
+      <div class = "table-wrapper">
+        <table class = "alt">
+          <thead>
+            <tr>
+              <th> Lado </th>
+              <th> Quant. </th>
+              <th> Preço </th>
+              <th>  </th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for o in user.orders %}
+              {% if o.active %}
+                <tr>
+                  <td> {% if o.side == "bid" %} Compra {% else %} Vende {% endif%} </td>
+                  <td> {{o.asset_1}} {{o.quantity}} </td>
+                  <td> {{o.asset_0}} {{ o.price }} </td>
+                  <td> 
+                    <a href = "cancel_from_account/{{ o.order_id }}">
+                      &times;
+                    </a> 
+                  </td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article>
+      <!-- The fourth section shows a record of the user's recent trades -->
+      <header>
+        <h2> Minhas Negociações </h2>
+      </header>
+      <div class = "table-wrapper">
+        <table class = "alt">
+          <thead>
+            <tr>
+              <th> Data </th>
+              <th> Mercado </th>
+              <th> Lado </th>
+              <th> Quant. </th>
+              <th> Preço </th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in trades %}
+              <tr>
+                <td> {{ row[0] }} </td>
+                <td> {{ row[1] }} </td>
+                <td> {{ row[2] }} </td>
+                <td> {{ row[3] }} </td>
+                <td> {{ row[4] }} </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <ul class = "actions special">
+        <li><a href = "/my_trades" class = "button"> Ver Todo </a></li>
+      </ul>
+    </article>
+
+  </section>
+
+{% endblock %}

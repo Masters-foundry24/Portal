@@ -66,16 +66,19 @@
       <nav id = "nav">
         <ul class = "links">
           {% block navbar %}
-            <li><a class = "navbar_tab" href = "/"> Casa </a></li>
-            <li><a class = "navbar_tab" href = "/market"> EUR/STN </a></li>
-            <li><a class = "navbar_tab" href = "/how_it_works"> Como Funciona </a></li>
+            <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/"> Casa </a></li>
+            <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/market"> EUR/STN </a></li>
+            <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/how_it_works"> Como Funciona </a></li>
             {% if user.is_authenticated %}
-              <li><a class = "navbar_tab" href = "/my_account"> Minha Conta </a></li>
-              <li><a class = "navbar_tab" href = "/deposits"> Depósitos </a></li>
-              <li><a class = "navbar_tab" href = "/withdrawals"> Retiradas </a></li>
-              <li><a class = "navbar_tab" href = "/send"> Enviar Dinheiro </a></li>
-              <li><a class = "navbar_tab" href = "/logout"> Logout </a></li>
-            {% endif%}
+              <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/my_account"> Minha Conta </a></li>
+              <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/deposits"> Depósitos </a></li>
+              <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/withdrawals"> Retiradas </a></li>
+              <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/send"> Enviar Dinheiro </a></li>
+              {% if user.account_id in [1234567, 9875512] %}
+                <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/admin"> Admin </a></li>
+              {% endif %}
+              <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/logout"> Logout </a></li>
+            {% endif %}
           {% endblock %}
         </ul>
       </nav>

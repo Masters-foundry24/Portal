@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "admin/main.html" %}
 
 {% block content %} 
   <article class = "post featured">
@@ -16,6 +16,8 @@
                   <th> Conta </th>
                   <th> Moeda </th>
                   <th> Quant. </th>
+                  <th> Nome </th>
+                  <th> IBAN </th>
                   <th> Aprovar </th>
                   <th> Cancelar </th>
                 </tr>
@@ -27,6 +29,8 @@
                     <td> {{ row[2] }} </td>
                     <td> {{ row[3] }} </td>
                     <td> {{ row[4] }} </td>
+                    <td> {{ row[5] }} </td>
+                    <td> {{ row[6] }} </td>
                     <td> 
                         <a href = "approve_flow/{{ row[0] }}"> &plus; </a> 
                     </td>
