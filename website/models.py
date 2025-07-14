@@ -1,5 +1,6 @@
 import flask_login as fo
 from sqlalchemy.sql import func
+import decimal as de
 # import datetime as dt
 # b[1:-1].split(", ")
 from website import db
@@ -44,8 +45,8 @@ class Account(db.Model, fo.UserMixin):
     account_id = db.Column(db.Integer, unique = True)
     name = db.Column(db.String(100))
     password = db.Column(db.String(100))
-    STN = db.Column(db.Numeric(9, 2))
-    EUR = db.Column(db.Numeric(9, 2))
+    STN = db.Column(db.Numeric(9, 2), default = de.Decimal("0"))
+    EUR = db.Column(db.Numeric(9, 2), default = de.Decimal("0"))
     orders = db.relationship("Order")
     # orders = db.relationship("Deposit")
     name_EUR = db.Column(db.String(50))

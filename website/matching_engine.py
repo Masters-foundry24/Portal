@@ -1,9 +1,11 @@
+# This page has received basic logging.
+
 import flask as fl
 import decimal as de
 import datetime as dt
 
 from website.models import Account, Payment, Flow, Order, Trade
-from website import db
+from website import db, logger
 
 def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, messages: bool = False):
     """
@@ -20,7 +22,7 @@ def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, messag
            order matches, generally, manual orders should have messages while 
            bot orders should not.
     """
-    quantity_og = quantity
+    quantity_og = de.Decimal(quantity)
 
     # Okay, we are satisfied that this is a valid order. Now we will check 
     # if it matches with any current orders, or will be entered as a quote.
@@ -35,6 +37,7 @@ def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, messag
             quantity_traded = min(quantity, o.quantity)
             quantity -= quantity_traded
             o.quantity -= quantity_traded
+            logger.info(f"OA order_id = {o.order_id}, quantity = {o.quantity}")
                 
             # Now we will record the new trade
             if messages:
@@ -44,6 +47,7 @@ def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, messag
                 quantity = quantity_traded, price = o.price, 
                 buyer = user.account_id, seller = o.account_id
                 ))
+            logger.info(f"TC asset_0 = STN, asset_1 = EUR, quantity = {quantity_traded}, price = {o.price}, buyer = {user.account_id}, seller = {o.account_id}")
 
             # Now we update the balances of both traders.
             buyer = Account.query.filter_by(account_id = user.account_id).first()
@@ -53,31 +57,18 @@ def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, messag
             buyer.STN -= quantity_traded * o.price
             seller.EUR -= quantity_traded
             seller.STN += quantity_traded * o.price
+            logger.info(f"AA account_id = {buyer.account_id}, EUR = {buyer.EUR}, STN = {buyer.STN}")
+            logger.info(f"AA account_id = {seller.account_id}, EUR = {seller.EUR}, STN = {seller.STN}")
 
             if o.quantity == de.Decimal("0"):
                 o.active = False
                 o.time_traded = dt.datetime.now()
+                logger.info(f"OA order_id = {o.order_id}, active = False, time_traded = {o.time_traded}")
 
             if quantity == de.Decimal("0"):
                 # The new order has fully matched with existing orders so we
-                # will record the order and stop looping.
-                db.session.add(Order(
-                    asset_0 = "STN", asset_1 = "EUR", side = side, 
-                    price = price, quantity = de.Decimal("0"), 
-                    quantity_og = de.Decimal(quantity_og), 
-                    account_id = user.account_id, active = False
-                    ))
+                # will stop looping and record the order.
                 break
-
-        if quantity > de.Decimal("0"):
-            # The order has not fully matched with existing orders so we 
-            # will post it as a quote.
-            db.session.add(Order(
-                asset_0 = "STN", asset_1 = "EUR", side = side, 
-                price = price, quantity = quantity, 
-                quantity_og = de.Decimal(quantity_og), 
-                account_id = user.account_id
-                ))
 
     else: # Ask order
         opp_orders = Order.query.filter_by(
@@ -90,6 +81,7 @@ def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, messag
             quantity_traded = min(quantity, o.quantity)
             quantity -= quantity_traded
             o.quantity -= quantity_traded
+            logger.info(f"OA order_id = {o.order_id}, quantity = {o.quantity}")
 
             # Now we will record the new trade
             if messages:
@@ -99,6 +91,7 @@ def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, messag
                 quantity = quantity_traded, price = o.price, 
                 buyer = o.account_id, seller = user.account_id
                 ))
+            logger.info(f"TC asset_0 = STN, asset_1 = EUR, quantity = {quantity_traded}, price = {o.price}, buyer = {user.account_id}, seller = {o.account_id}")
 
             # Now we update the balances of both traders.
             seller = Account.query.filter_by(account_id = user.account_id).first()
@@ -108,33 +101,27 @@ def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, messag
             buyer.STN -= quantity_traded * o.price
             seller.EUR -= quantity_traded
             seller.STN += quantity_traded * o.price
+            logger.info(f"AA account_id = {buyer.account_id}, EUR = {buyer.EUR}, STN = {buyer.STN}")
+            logger.info(f"AA account_id = {seller.account_id}, EUR = {seller.EUR}, STN = {seller.STN}")
 
             if o.quantity == de.Decimal("0"):
                 o.active = False
                 o.time_traded = dt.datetime.now()
+                logger.info(f"OA order_id = {o.order_id}, active = False, time_traded = {o.time_traded}")
 
             if quantity == de.Decimal("0"):
                 # The new order has fully matched with existing orders so we
-                # will record the order and stop looping.
-                db.session.add(Order(
-                    asset_0 = "STN", asset_1 = "EUR", side = side, 
-                    price = price, quantity = de.Decimal("0"), 
-                    quantity_og = de.Decimal(quantity_og), 
-                    account_id = user.account_id, active = False
-                    ))
+                # will stop looping and record the order.
                 break
 
-        if quantity > de.Decimal("0"):
-            # The order has not fully matched with existing orders so we 
-            # will post it as a quote.
-            db.session.add(Order(
-                asset_0 = "STN", asset_1 = "EUR", side = side, 
-                price = price, quantity = quantity, 
-                quantity_og = de.Decimal(quantity_og), 
-                account_id = user.account_id
-                ))
-
+    active = (quantity > de.Decimal("0"))        
+    db.session.add(Order(
+        asset_0 = "STN", asset_1 = "EUR", side = side, price = price, 
+        quantity = quantity, quantity_og = quantity_og, 
+        account_id = user.account_id, active = active))
+    logger.info(f"TC asset_0 = STN, asset_1 = EUR, side = {side}, price = {o.price}, quantity = {quantity}, quantity_og = {quantity_og}, account_id = {user.account_id}, active = {active}")
     db.session.commit()
+    logger.info(f"Database Commit")
     if messages:
         fl.flash("Pedido enviado", category = "s")
     return

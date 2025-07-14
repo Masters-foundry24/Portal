@@ -1,9 +1,11 @@
+# This page has received basic logging.
+
 import flask as fl
 import flask_login as fo
 import decimal as de
 
 from website.models import Account
-from website import db # A dot will import from __init__.py
+from website import db, logger # A dot will import from __init__.py
 
 auth = fl.Blueprint("auth", __name__)
 
@@ -73,10 +75,10 @@ def signup():
         else:
             # Now that the account is valid we will add it to the database.
             db.session.add(Account(
-                account_id = account_id, name = name, password = password, 
-                STN = de.Decimal("0.00"), EUR = de.Decimal("0.00")
-                ))
+                account_id = account_id, name = name, password = password))
+            logger.info(f"AC account_id = {account_id}, name = {name}, password = {password}")
             db.session.commit()
+            logger.info(f"Database Commit")
             fl.flash(f"Nova conta {account_id} criada para {name}", category = "s")
             return fl.redirect("/")
 

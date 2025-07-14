@@ -1,8 +1,7 @@
 # Database Logging Codes
 
 # OC: Order Created
-# OA: Order Amended/Cancelled
-# OT: Order Taken
+# OA: Order Amended/Cancelled/Taken
 
 # PC: Payment Created
 # PA: Payment Amended
@@ -16,5 +15,7 @@
 
 # TC: Trade Created
 # TA: Trade Amended
+
+# Where possible we want to log something right AFTER we did the thing.
 
 # create_db_from_log()

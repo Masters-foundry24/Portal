@@ -1,9 +1,11 @@
+# This page has received basic logging.
+
 import decimal as de
 import math
 
 from website.models import Account, Payment, Flow, Order, Trade, Bot
 from website.matching_engine import enter_order
-from website import db
+from website import db, logger
 
 def bot_order(user, side: str, quantity: de.Decimal, price: de.Decimal):
     """
@@ -119,13 +121,16 @@ class Fixed_Interval_Market_Maker():
         self.bot.bids = str(bids)
         self.bot.asks = str(asks)
         db.session.commit()
+        logger.info(f"Database Commit")
     
     def cancel_all(self, orders):
         for o in orders:
             o.active = False
+            logger.info(f"OA order_id = {o.order_id}, active = False")
         self.bot.bids = "[]"
         self.bot.asks = "[]"
         db.session.commit()
+        logger.info(f"Database Commit")
 
     def main(self):
         orders = Order.query.filter_by(account_id = self.user.account_id)
@@ -207,14 +212,17 @@ class Fixed_Interval_Market_Maker():
             bids = bids[1:]
         self.bot.bids = str(bids)
         db.session.commit()
+        logger.info(f"Database Commit")
 
         # Second, if we have a full bank of asks then cancel the last one.
         if len(asks) == self.depth:
             last_ask = Order.query.get(asks[-1])
             last_ask.active = False
+            logger.info(f"OA order_id = {last_ask.order_id}, active = False")
             asks = asks[:-1]
             self.bot.asks = str(asks)
             db.session.commit()
+            logger.info(f"Database Commit")
 
         if len(asks) > 0:
             ask = Order.query.get(asks[0])
@@ -224,9 +232,11 @@ class Fixed_Interval_Market_Maker():
                 id = bot_order(self.user, "ask", self.size, ask.price)
                 if id != False:
                     ask.active = False
+                    logger.info(f"OA order_id = {ask.order_id}, active = False")
                     asks[0] = id
                     self.bot.asks = str(asks)
                     db.session.commit()
+                    logger.info(f"Database Commit")
 
             # Next we will place a new ask at the front of the bank.
             id = bot_order(self.user, "ask", self.size, ask.price - self.offset_2)
@@ -234,6 +244,7 @@ class Fixed_Interval_Market_Maker():
                 asks = [id] + asks
                 self.bot.asks = str(asks)
                 db.session.commit()
+                logger.info(f"Database Commit")
                 
         else:
             # We will now start the ask bank.
@@ -244,6 +255,7 @@ class Fixed_Interval_Market_Maker():
                     asks = [id]
                     self.bot.asks = str(asks)
                     db.session.commit()
+                    logger.info(f"Database Commit")
     
         return bids, asks
     
@@ -261,14 +273,17 @@ class Fixed_Interval_Market_Maker():
             asks = asks[1:]
         self.bot.asks = str(asks)
         db.session.commit()
+        logger.info(f"Database Commit")
 
         # Second, if we have a full bank of bids then cancel the last one.
         if len(bids) == self.depth:
             last_bid = Order.query.get(bids[-1])
             last_bid.active = False
+            logger.info(f"OA order_id = {last_bid.order_id}, active = False")
             bids = bids[:-1]
             self.bot.bids = str(bids)
             db.session.commit()
+            logger.info(f"Database Commit")
 
         if len(bids) > 0:
             bid = Order.query.get(bids[0])
@@ -278,9 +293,11 @@ class Fixed_Interval_Market_Maker():
                 id = bot_order(self.user, "bid", self.size, bid.price)
                 if id != False:
                     bid.active = False
+                    logger.info(f"OA order_id = {bid.order_id}, active = False")
                     bids[0] = id
                     self.bot.bids = str(bids)
                     db.session.commit()
+                    logger.info(f"Database Commit")
 
             # Next we will place a new bid at the front of the bank.
             id = bot_order(self.user, "bid", self.size, bid.price + self.offset_2)
@@ -288,6 +305,7 @@ class Fixed_Interval_Market_Maker():
                 bids = [id] + bids
                 self.bot.bids = str(bids)
                 db.session.commit()
+                logger.info(f"Database Commit")
                 
         else:
             # We will now start the bid bank.
@@ -298,6 +316,7 @@ class Fixed_Interval_Market_Maker():
                     bids = [id]
                     self.bot.asks = str(bids)
                     db.session.commit()
+                    logger.info(f"Database Commit")
 
         return bids, asks
 

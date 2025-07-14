@@ -6,9 +6,20 @@ import datetime as dt
 import os
 import flask_login as fo
 import decimal as de
+import logging
 
 db = fs.SQLAlchemy()
 db_name = "database.db"
+
+logging.basicConfig(
+    filename = "database.log",
+    format = '%(asctime)s: %(name)s - %(levelname)s: %(message)s'
+)
+logger = logging.getLogger(__name__) # __name__
+logging.getLogger('werkzeug').setLevel(logging.CRITICAL + 1)
+logging.getLogger('website').setLevel(logging.DEBUG)
+
+logger.info("Initial message to test our logger")
 
 def create_app():
     """
@@ -55,13 +66,15 @@ def create_app():
                their order is cancelled (usually, the same page that the order
                cancelled from).
         """
-        order_to_cancel = Order.query.get_or_404(id)
+        o = Order.query.get_or_404(id) # order to cancel
 
-        order_to_cancel.active = False
-        order_to_cancel.time_cancelled = dt.datetime.now()
+        o.active = False
+        o.time_cancelled = dt.datetime.now()
+        logger.info(f"OA order_id = {o.order_id}, active = False, time_cancelled = {o.time_cancelled}")
 
-        # db.session.delete(order_to_cancel)
+        # db.session.delete(o)
         db.session.commit()
+        logger.info(f"Database Commit")
         fl.flash("Pedido cancelado")
 
         if fo.current_user.account_id != 6000000:
@@ -88,26 +101,38 @@ def create_app():
                their order is cancelled (usually, the same page that the 
                cancelled from).
         """
-        flow_to_cancel = Flow.query.get_or_404(id)
+        f = Flow.query.get_or_404(id) # flow to cancel
 
-        flow_to_cancel.status = 2
-        flow_to_cancel.time_cancelled = dt.datetime.now()
+        f.status = 2
+        f.time_cancelled = dt.datetime.now()
+        logger.info(f"FA flow_id = {f.flow_id}, status = 2, time_cancelled = {f.time_cancelled}")
 
         # If this is a withdrawal then we need to put the funds back in the 
         # user's account.
-        if flow_to_cancel.quantity < de.Decimal("0"):
-            account_id = flow_to_cancel.paid_to_id
+        if f.quantity < de.Decimal("0"):
+            account_id = f.paid_to_id
             account = Account.query.filter_by(account_id = account_id).first()
-            if flow_to_cancel.currency == "EUR":
-                account.EUR = account.EUR - flow_to_cancel.quantity
-            elif flow_to_cancel.currency == "STN":
-                account.STN = account.STN - flow_to_cancel.quantity
+            if f.currency == "EUR":
+                account.EUR = account.EUR - f.quantity
+                logger.info(f"AA account_id = {account.account_id}, EUR = {account.EUR}")
+            elif f.currency == "STN":
+                account.STN = account.STN - f.quantity
+                logger.info(f"AA account_id = {account.account_id}, STN = {account.STN}")
 
         # db.session.delete(order_to_cancel)
         db.session.commit()
+        logger.info(f"Database Commit")
         fl.flash("Deposito cancelado")
 
         return fl.redirect(return_path)
+    
+    @app.route("/cancel_flow_from_account/<int:id>")
+    def cancel_flow_from_account(id):
+        """
+        This function only exists as a wrapper to ensure that we are returned to
+        the correct page after cancelling a flow.
+        """
+        return cancel_flow(id, "/my_transfers")
     
     @app.route("/admin/approve_flow/<int:id>")
     def approve_flow(id, return_path = "/admin/review_flows"):
@@ -120,23 +145,27 @@ def create_app():
             -> return_path: str, the path where the user is returned after the 
                their flow is excuted.
         """
-        flow_to_cancel = Flow.query.get_or_404(id)
+        f = Flow.query.get_or_404(id) # flow to approve
 
-        flow_to_cancel.status = 1
-        flow_to_cancel.time_executed = dt.datetime.now()
+        f.status = 1
+        f.time_executed = dt.datetime.now()
+        logger.info(f"FA flow_id = {f.flow_id}, status = 1, time_cancelled = {f.time_executed}")
 
         # If this is a deposit we now need to put the funds in the user's 
         # account.
-        if flow_to_cancel.quantity > de.Decimal("0"):
-            account_id = flow_to_cancel.paid_to_id
+        if f.quantity > de.Decimal("0"):
+            account_id = f.paid_to_id
             account = Account.query.filter_by(account_id = account_id).first()
-            if flow_to_cancel.currency == "EUR":
-                account.EUR = account.EUR + flow_to_cancel.quantity
-            elif flow_to_cancel.currency == "STN":
-                account.STN = account.STN + flow_to_cancel.quantity
+            if f.currency == "EUR":
+                account.EUR = account.EUR + f.quantity
+                logger.info(f"AA account_id = {account.account_id}, EUR = {account.EUR}")
+            elif f.currency == "STN":
+                account.STN = account.STN + f.quantity
+                logger.info(f"AA account_id = {account.account_id}, STN = {account.STN}")
 
         # db.session.delete(order_to_cancel)
         db.session.commit()
+        logger.info(f"Database Commit")
         fl.flash("Deposito aprovado")
 
         return fl.redirect(return_path)

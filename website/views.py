@@ -1,3 +1,5 @@
+# This page has received basic logging.
+
 import flask as fl
 import flask_login as fo
 import decimal as de
@@ -10,7 +12,7 @@ from website.flows import make_flow, get_flow_table
 from website.matching_engine import enter_order
 from website.bots import bot_6000000
 from website.util import format_de, check_IBAN
-from website import db
+from website import db, logger
 
 views = fl.Blueprint("views", __name__)
 
@@ -299,19 +301,19 @@ def my_account():
     """   
     trades = get_my_trades(fo.current_user.account_id, 7)
     transfers = get_transfers(fo.current_user.account_id, 7)
-    return fl.render_template("my_account.html", user = fo.current_user, trades = trades, transfers = transfers)
+    return fl.render_template("my_account/main.html", user = fo.current_user, trades = trades, transfers = transfers)
 
 @fo.login_required
 @views.route("/my_trades")
 def my_trades():
     trades = get_my_trades(fo.current_user.account_id, 0, True)
-    return fl.render_template("my_trades.html", user = fo.current_user, trades = trades)
+    return fl.render_template("my_account/my_trades.html", user = fo.current_user, trades = trades)
 
 @fo.login_required
 @views.route("/my_transfers")
 def my_transfers():
     transfers = get_transfers(fo.current_user.account_id, 0, True)
-    return fl.render_template("my_transfers.html", user = fo.current_user, transfers = transfers)
+    return fl.render_template("my_account/my_transfers.html", user = fo.current_user, transfers = transfers)
 
 @fo.login_required
 @views.route("/deposits")
@@ -332,46 +334,51 @@ def send_funds(data):
     currency = data.get("currency")
     quantity = de.Decimal(data.get("quantity"))
     paid_to_id = int(data.get("paid_to_id"))
+    paid_from_id = fo.current_user.account_id
     password = data.get("password")
 
     paid_to = Account.query.filter_by(account_id = paid_to_id).first()
-    paid_from = Account.query.filter_by(account_id = fo.current_user.account_id).first()
+    paid_from = Account.query.filter_by(account_id = paid_from_id).first()
 
     # Now for a series of checks to confirm that the request is valid.
-    if paid_to_id == fo.current_user.account_id:
+    if paid_to_id == paid_from_id:
         # Can't send money to yourself
         fl.flash("Não pode enviar dinheiro da sua conta para a mesma conta", category = "e")
     elif quantity <= de.Decimal("0"):
         # Can't take money from other people's accounts
         fl.flash("O valor deve ser positivo", category = "e")
-    elif currency == "STN" and quantity > fo.current_user.STN:
+    elif currency == "STN" and quantity > paid_from.STN:
         # The person is trying to send more money than they have
         fl.flash("Saldo de STN insufficent", category = "e")
-    elif currency == "EUR" and quantity > fo.current_user.EUR:
+    elif currency == "EUR" and quantity > paid_from.EUR:
         # The person is trying to send more money than they have
         fl.flash("Saldo de EUR insufficent", category = "e")
     elif not paid_to:
         # The receipiant does not exist
         fl.flash("Não existe uma conta com o número fornecido", category = "e")
-    elif password != fo.current_user.password:
+    elif password != paid_from.password:
         # Incorrect password
         fl.flash("Senha incorreta", category = "e")
     else:
         # The payment is valid so, now we will process it.
         db.session.add(Payment(
             currency = currency, quantity = quantity, 
-            paid_from_id = fo.current_user.account_id, 
-            paid_to_id = paid_to_id
-            ))
+            paid_from_id = paid_from_id, paid_to_id = paid_to_id))
+        logger.info(f"PC currency = {currency}, quantity = {quantity}, paid_from_id = {paid_from_id}, paid_to_id = {paid_to_id}")
         if currency == "EUR":
             paid_to.EUR = paid_to.EUR + quantity
             paid_from.EUR = paid_from.EUR - quantity
+            logger.info(f"AA account_id = {paid_to_id}, EUR = {paid_to.EUR}")
+            logger.info(f"AA account_id = {paid_from_id}, EUR = {paid_to.EUR}")
         elif currency == "STN":
             paid_to.STN = paid_to.STN + quantity
             paid_from.STN = paid_from.STN - quantity
+            logger.info(f"AA account_id = {paid_to_id}, STN = {paid_to.STN}")
+            logger.info(f"AA account_id = {paid_from_id}, STN = {paid_to.STN}")
             
         # This commits the new balances as well logging a the new payment.
         db.session.commit()
+        logger.info(f"Database Commit")
         fl.flash("Dinheiro Enviado", category = "s")
     
     return fl.redirect("/send")
@@ -406,11 +413,16 @@ def submit_flow():
         
         if data.get("name") and currency == "EUR":
             fo.current_user.name_EUR = data.get("name")
+            logger.info(f"AA account_id = {fo.current_user.account_id}, name_EUR = {fo.current_user.name_EUR}")
 
         if data.get("iban") and currency == "EUR":
             IBAN = data.get("iban")
             if check_IBAN(IBAN):
                 fo.current_user.IBAN_EUR = IBAN
+                logger.info(f"AA account_id = {fo.current_user.account_id}, IBAN_EUR = {IBAN}")
+                # If the IBAN is incorrect then the account name isn't saved.
+                db.session.commit()
+                logger.info(f"Database Commit")
             else:
                 fl.flash(f"{IBAN} não é um IBAN válido.", category = "e")
                 return fl.render_template("/admin/submit_flow.html", user = fo.current_user)
@@ -457,6 +469,9 @@ def withdrawals_EUR():
 
         if data.get("name"):
             fo.current_user.name_EUR = data.get("name")
+            logger.info(f"AA account_id = {fo.current_user.account_id}, name_EUR = {fo.current_user.name_EUR}")
+            db.session.commit()
+            logger.info(f"Database Commit")
         elif not fo.current_user.name_EUR: # no account name on file:
             fl.flash(f"Precisamos de um nome de conta para enviar seu dinheiro.", category = "e")
             submit_withdrawal = False
@@ -465,6 +480,9 @@ def withdrawals_EUR():
             IBAN = data.get("iban")
             if check_IBAN(IBAN):
                 fo.current_user.IBAN_EUR = IBAN
+                logger.info(f"AA account_id = {fo.current_user.account_id}, IBAN_EUR = {IBAN}")
+                db.session.commit()
+                logger.info(f"Database Commit")
             else:
                 fl.flash(f"{IBAN} não é um IBAN válido.", category = "e")
                 submit_withdrawal = False

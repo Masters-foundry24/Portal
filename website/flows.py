@@ -1,6 +1,8 @@
 # This file handels all our logic for deposits and withdrawals. The functions
 # that render pages should call these functions as soon as possible.
 
+# This page has received basic logging.
+
 import flask as fl
 import flask_login as fo
 import decimal as de
@@ -8,7 +10,7 @@ import datetime as dt
 
 from website.models import Account, Payment, Flow, Order, Trade
 from website.util import format_de
-from website import db
+from website import db, logger
 
 def admin_checks(account, password):
     """
@@ -68,6 +70,7 @@ def cancel_orders(account, currency, quantity):
             # Cancelling the order because the user no longer has funds for it.
             fl.flash(f"Pedido {o.order_id} cancelado, fundos retirados", category = "s")
             o.active = False
+            logger.info(f"OA order_id = {o.order_id}, active = False")
         else:
             balance_used += o.quantity * o.price
     
@@ -80,6 +83,7 @@ def cancel_orders(account, currency, quantity):
             # Cancelling the order because the user no longer has funds for it.
             fl.flash(f"Pedido {o.order_id} cancelado, fundos retirados", category = "s")
             o.active = False
+            logger.info(f"OA order_id = {o.order_id}, active = False")
         else:
             balance_used += o.quantity
     
@@ -125,8 +129,8 @@ def make_flow(admin: bool, currency: str, quantity: de.Decimal, account_id: int,
 
     # Now that we're satified that the change is valid, let's record it.
     db.session.add(Flow(
-        currency = currency, quantity = quantity, paid_to_id = account_id, 
-        status = 0))
+        currency = currency, quantity = quantity, paid_to_id = account_id))
+    logger.info(f"FC account_id = {account_id}, currency = {currency}, quantity = {quantity}")
     
     # For withdrawals we will take the funds away now, for deposits we will wait
     # until the flow is status: "Approved"
@@ -138,28 +142,36 @@ def make_flow(admin: bool, currency: str, quantity: de.Decimal, account_id: int,
     else: # withdrawals
         if currency == "EUR":
             account.EUR = account.EUR + quantity
+            logger.info(f"AA account_id = {account_id}, EUR = {account.EUR}")
         elif currency == "STN":
             account.STN = account.STN + quantity
+            logger.info(f"AA account_id = {account_id}, STN = {account.STN}")
         if admin:
             fl.flash(f"{currency} {quantity} tirou de conta {account_id}", category = "s")
         else:
             fl.flash(f"{currency} {quantity} retirou da sua conta", category = "s")
     
     db.session.commit()
+    logger.info(f"Database Commit")
     return fl.redirect("/admin/review_flows" if admin else "/my_account")
 
 def get_flow_table():
     flows = Flow.query.filter_by(status = 0)
-    flows2 = Flow.query.filter_by(status = "Pending")
-    flow_table = [[
-        flow.flow_id,
-        flow.time.strftime("%d/%m/%y %H:%M:%S"),
-        flow.paid_to_id,
-        flow.currency,
-        format_de(flow.quantity)] for flow in flows] + [[
-        flow.flow_id,
-        flow.time.strftime("%d/%m/%y %H:%M:%S"),
-        flow.paid_to_id,
-        flow.currency,
-        format_de(flow.quantity)] for flow in flows2]
-    return flow_table
+    table = []
+    for f in flows:
+        if f.currency == "EUR": # Withdrawal
+            a = Account.query.filter_by(account_id = f.paid_to_id).first()
+            IBAN = a.IBAN_EUR
+            name = a.name_EUR
+        else:
+            IBAN, name = "", ""
+        table.append([
+            f.flow_id,
+            f.time.strftime("%d/%m/%y %H:%M:%S"),
+            f.paid_to_id,
+            f.currency,
+            format_de(f.quantity),
+            name,
+            IBAN
+        ])
+    return table
