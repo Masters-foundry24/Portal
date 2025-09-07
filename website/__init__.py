@@ -204,98 +204,99 @@ def create_database(app):
         from website.views import check_order
 
         with app.app_context():
-            db.create_all() # database created
+            print("NO DATABASE!!! SCREAM!!!")
+            # db.create_all() # database created
 
-            db.session.add(Account(account_id = 9885140, 
-                name = "Scott Masters", password = "Austria", 
-                EUR = de.Decimal("0.00"), STN = de.Decimal("0.00"),
-                name_EUR = "Scott Andrew Masters", IBAN_EUR = "BE17 9677 9251 4921"))
-            db.session.add(Account(account_id = 9875512, 
-                name = "Lázaro Martins", password = "Lazkatty22", 
-                EUR = de.Decimal("0.00"), STN = de.Decimal("281.25")))
-            db.session.add(Account(account_id = 1234567, 
-                name = "Administrador", password = "Austria", 
-                EUR = de.Decimal("0.00"), STN = de.Decimal("0.00"),
-                name_EUR = "Scott Andrew Masters", IBAN_EUR = "BE17 9677 9251 4921"))
-            db.session.add(Account(account_id = 6000000, 
-                name = "EURSTNFIMM", password = "Austria", 
-                EUR = de.Decimal("593.00"), STN = de.Decimal("29721.95")))
-            db.session.add(Account(account_id = 9018170, 
-                name = "Lázaro Martins", password = "Lazkatty22@", 
-                EUR = de.Decimal("0.00"), STN = de.Decimal("0.00")))
-            db.session.add(Account(account_id = 9812368, 
-                name = "Katiliana Rodrigues", password = "lazkatty22", 
-                EUR = de.Decimal("44.00"), STN = de.Decimal("0.00")))
-            db.session.add(Account(account_id = 9929925, 
-                name = "Elsa Mariza", password = "Nuna25", 
-                EUR = de.Decimal("0.00"), STN = de.Decimal("79.25")))
-            db.session.add(Account(account_id = 9033424, 
-                name = "Ernaldson Gomes", password = "Gomes25", 
-                EUR = de.Decimal("0.00"), STN = de.Decimal("6.50")))
-            db.session.add(Account(account_id = 9853105, 
-                name = "Maria José", password = "1988", 
-                EUR = de.Decimal("0.00"), STN = de.Decimal("4.25")))
-            db.session.add(Account(account_id = 9906453, 
-                name = "Páscoa Rita", password = "1234", 
-                EUR = de.Decimal("0.00"), STN = de.Decimal("95.50")))
-            db.session.add(Account(account_id = 9879940, 
-                name = "Lourença Felipe", password = "2526", 
-                EUR = de.Decimal("0.00"), STN = de.Decimal("8.75")))
-            db.session.add(Account(account_id = 9844197, 
-                name = "Tete Cruz", password = "tete25", 
-                EUR = de.Decimal("0.00"), STN = de.Decimal("16.90")))
-            db.session.add(Account(account_id = 9000001, 
-                name = "Julieta Martins", password = "130997", 
-                EUR = de.Decimal("0.00"), STN = de.Decimal("0.00")))
-            db.session.add(Account(account_id = 9814372, 
-                name = "Joel Dos Santos", password = "Joel25", 
-                EUR = de.Decimal("0.00"), STN = de.Decimal("5.25")))
-            db.session.add(Account(account_id = 9041487, 
-                name = "Ana Sofia Gomes", password = "#8754*", 
-                EUR = de.Decimal("0.00"), STN = de.Decimal("0.00")))
-            db.session.add(Account(account_id = 90000002, 
-                name = "Stela Bouças", password = "#2054*", 
-                EUR = de.Decimal("0.00"), STN = de.Decimal("0.00")))
-            db.session.add(Account(account_id = 9918108, 
-                name = "Regina Cruz", password = "*1533#", 
-                EUR = de.Decimal("0.00"), STN = de.Decimal("5.40")))
-            db.session.add(Account(account_id = 9849464, 
-                name = "Madger Lombá", password = "palavar_passe", 
-                EUR = de.Decimal("0.00"), STN = de.Decimal("0.00")))
-            db.session.commit()
+            # db.session.add(Account(account_id = 9885140, 
+            #     name = "Scott Masters", password = "Austria", 
+            #     EUR = de.Decimal("0.00"), STN = de.Decimal("0.00"),
+            #     name_EUR = "Scott Andrew Masters", IBAN_EUR = "BE17 9677 9251 4921"))
+            # db.session.add(Account(account_id = 9875512, 
+            #     name = "Lázaro Martins", password = "Lazkatty22", 
+            #     EUR = de.Decimal("0.00"), STN = de.Decimal("281.25")))
+            # db.session.add(Account(account_id = 1234567, 
+            #     name = "Administrador", password = "Austria", 
+            #     EUR = de.Decimal("0.00"), STN = de.Decimal("0.00"),
+            #     name_EUR = "Scott Andrew Masters", IBAN_EUR = "BE17 9677 9251 4921"))
+            # db.session.add(Account(account_id = 6000000, 
+            #     name = "EURSTNFIMM", password = "Austria", 
+            #     EUR = de.Decimal("593.00"), STN = de.Decimal("29721.95")))
+            # db.session.add(Account(account_id = 9018170, 
+            #     name = "Lázaro Martins", password = "Lazkatty22@", 
+            #     EUR = de.Decimal("0.00"), STN = de.Decimal("0.00")))
+            # db.session.add(Account(account_id = 9812368, 
+            #     name = "Katiliana Rodrigues", password = "lazkatty22", 
+            #     EUR = de.Decimal("44.00"), STN = de.Decimal("0.00")))
+            # db.session.add(Account(account_id = 9929925, 
+            #     name = "Elsa Mariza", password = "Nuna25", 
+            #     EUR = de.Decimal("0.00"), STN = de.Decimal("79.25")))
+            # db.session.add(Account(account_id = 9033424, 
+            #     name = "Ernaldson Gomes", password = "Gomes25", 
+            #     EUR = de.Decimal("0.00"), STN = de.Decimal("6.50")))
+            # db.session.add(Account(account_id = 9853105, 
+            #     name = "Maria José", password = "1988", 
+            #     EUR = de.Decimal("0.00"), STN = de.Decimal("4.25")))
+            # db.session.add(Account(account_id = 9906453, 
+            #     name = "Páscoa Rita", password = "1234", 
+            #     EUR = de.Decimal("0.00"), STN = de.Decimal("95.50")))
+            # db.session.add(Account(account_id = 9879940, 
+            #     name = "Lourença Felipe", password = "2526", 
+            #     EUR = de.Decimal("0.00"), STN = de.Decimal("8.75")))
+            # db.session.add(Account(account_id = 9844197, 
+            #     name = "Tete Cruz", password = "tete25", 
+            #     EUR = de.Decimal("0.00"), STN = de.Decimal("16.90")))
+            # db.session.add(Account(account_id = 9000001, 
+            #     name = "Julieta Martins", password = "130997", 
+            #     EUR = de.Decimal("0.00"), STN = de.Decimal("0.00")))
+            # db.session.add(Account(account_id = 9814372, 
+            #     name = "Joel Dos Santos", password = "Joel25", 
+            #     EUR = de.Decimal("0.00"), STN = de.Decimal("5.25")))
+            # db.session.add(Account(account_id = 9041487, 
+            #     name = "Ana Sofia Gomes", password = "#8754*", 
+            #     EUR = de.Decimal("0.00"), STN = de.Decimal("0.00")))
+            # db.session.add(Account(account_id = 90000002, 
+            #     name = "Stela Bouças", password = "#2054*", 
+            #     EUR = de.Decimal("0.00"), STN = de.Decimal("0.00")))
+            # db.session.add(Account(account_id = 9918108, 
+            #     name = "Regina Cruz", password = "*1533#", 
+            #     EUR = de.Decimal("0.00"), STN = de.Decimal("5.40")))
+            # db.session.add(Account(account_id = 9849464, 
+            #     name = "Madger Lombá", password = "palavar_passe", 
+            #     EUR = de.Decimal("0.00"), STN = de.Decimal("0.00")))
+            # db.session.commit()
 
-            bot_6000000()
+            # bot_6000000()
 
-            db.session.add(Flow(currency = "STN", quantity = de.Decimal("815"), 
-                paid_to_id = 9849464, status = 1))
-            account_0 = Account.query.filter_by(account_id = 9849464).first()
-            account_0.STN += de.Decimal("815")
-            db.session.add(Flow(currency = "STN", quantity = de.Decimal("1358"), 
-                paid_to_id = 9033424, status = 1))
-            account_1 = Account.query.filter_by(account_id = 9033424).first()
-            account_1.STN += de.Decimal("1358")
-            db.session.commit()
+            # db.session.add(Flow(currency = "STN", quantity = de.Decimal("815"), 
+            #     paid_to_id = 9849464, status = 1))
+            # account_0 = Account.query.filter_by(account_id = 9849464).first()
+            # account_0.STN += de.Decimal("815")
+            # db.session.add(Flow(currency = "STN", quantity = de.Decimal("1358"), 
+            #     paid_to_id = 9033424, status = 1))
+            # account_1 = Account.query.filter_by(account_id = 9033424).first()
+            # account_1.STN += de.Decimal("1358")
+            # db.session.commit()
 
-            check_order(Account.query.filter_by(account_id = 9849464).first(), 
-                "bid", de.Decimal("30"), de.Decimal("27.15"))
-            check_order(Account.query.filter_by(account_id = 9033424).first(), 
-                "bid", de.Decimal("40"), de.Decimal("27.15"))
-            check_order(Account.query.filter_by(account_id = 9033424).first(), 
-                "bid", de.Decimal("10"), de.Decimal("27.20"))
-            db.session.commit()
+            # check_order(Account.query.filter_by(account_id = 9849464).first(), 
+            #     "bid", de.Decimal("30"), de.Decimal("27.15"))
+            # check_order(Account.query.filter_by(account_id = 9033424).first(), 
+            #     "bid", de.Decimal("40"), de.Decimal("27.15"))
+            # check_order(Account.query.filter_by(account_id = 9033424).first(), 
+            #     "bid", de.Decimal("10"), de.Decimal("27.20"))
+            # db.session.commit()
 
-            db.session.add(Flow(currency = "EUR", quantity = de.Decimal("-30"), 
-                paid_to_id = 9849464, status = 1))
-            account_0 = Account.query.filter_by(account_id = 9849464).first()
-            account_0.EUR -= de.Decimal("30")
-            db.session.add(Flow(currency = "EUR", quantity = de.Decimal("-50"), 
-                paid_to_id = 9033424, status = 1))
-            account_1 = Account.query.filter_by(account_id = 9033424).first()
-            account_1.EUR -= de.Decimal("50")
-            db.session.add(Payment(currency = "EUR", quantity = de.Decimal("30"), 
-                paid_from_id = 9885140, paid_to_id = 9875512))
-            account_2 = Account.query.filter_by(account_id = 9875512).first()
-            account_2.EUR += de.Decimal("30")
-            db.session.commit()
+            # db.session.add(Flow(currency = "EUR", quantity = de.Decimal("-30"), 
+            #     paid_to_id = 9849464, status = 1))
+            # account_0 = Account.query.filter_by(account_id = 9849464).first()
+            # account_0.EUR -= de.Decimal("30")
+            # db.session.add(Flow(currency = "EUR", quantity = de.Decimal("-50"), 
+            #     paid_to_id = 9033424, status = 1))
+            # account_1 = Account.query.filter_by(account_id = 9033424).first()
+            # account_1.EUR -= de.Decimal("50")
+            # db.session.add(Payment(currency = "EUR", quantity = de.Decimal("30"), 
+            #     paid_from_id = 9885140, paid_to_id = 9875512))
+            # account_2 = Account.query.filter_by(account_id = 9875512).first()
+            # account_2.EUR += de.Decimal("30")
+            # db.session.commit()
 
-            bot_6000000()
+            # bot_6000000()
