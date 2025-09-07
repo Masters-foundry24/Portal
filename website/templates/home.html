@@ -29,10 +29,20 @@
 
 {% block content %} 
   <article class = "post featured">
+    <p id = "offline_warning"> 
+      Atenção, você está offline no momento. Enquanto estiver offline, você não 
+      poderá enviar ou cancelar pedidos e algumas informações podem não estar 
+      disponíveis para visualização. 
+    </p>
     <header class = "major">
       {% if user.is_authenticated %}
   	  <!-- If the user is logged in show a welcome message and a photo -->
         <h2> Bem Vindo {{ user.name }} </h2>
+        <ul class = "actions special"></ul>
+          <a id = "install_button" class = "button" style = "display: none;">
+            Baixe o Aplicativo
+          </a>
+        </ul>
         <a class = "image main"> 
           <img src = {{ url_for('static', filename='images/Sao_Tome.avif') }} alt = "" /> 
         </a>
@@ -60,6 +70,11 @@
             </div>
           </div>
         </form>
+        <ul class = "actions special"></ul>
+          <a id = "install_button" class = "button" style = "display: none;">
+            Baixe o Aplicativo
+          </a>
+        </ul>
         {% if retry %}
           <p>
             Em caso de perder a sua conta, entre em contacto com Lázaro 
@@ -69,4 +84,75 @@
       {% endif %}
     </header>
   </article>
+{% endblock %}
+
+{% block scripts %} 
+  <script>
+    let deferredPrompt;
+    console.log('test');
+  
+    // Listen for the install prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      console.log('beforeinstallprompt event fired');
+      // Prevent Chrome from showing the default install banner
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      deferredPrompt = e;
+  
+      // Show the custom install button
+      const install_button = document.getElementById('install_button');
+      if (install_button) {
+        install_button.style.display = 'inline-block';
+  
+        install_button.addEventListener('click', () => {
+          // Show the install prompt
+          deferredPrompt.prompt();
+          // Wait for the user to respond to the prompt
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+              console.log('User accepted the A2HS prompt');
+            } else {
+              console.log('User dismissed the A2HS prompt');
+            }
+            deferredPrompt = null;
+          });
+        });
+      }
+    });
+  
+    // Detect if already running in standalone mode (i.e., installed as a PWA)
+    window.addEventListener('DOMContentLoaded', () => {
+      const isInStandaloneMode = () =>
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true;
+  
+      if (isInStandaloneMode()) {
+        // Hide the install button if already installed
+        const install_button = document.getElementById('install_button');
+        if (install_button) {
+          install_button.style.display = 'none';
+        }
+      }
+    });
+  </script>
+  <script>
+    async function checkOnline() {
+      try {
+        const response = await fetch("/ping");
+        return response.ok;
+      } catch {
+        return false;
+      }
+    }
+
+    checkOnline().then(is_online => {
+      if (is_online) {
+        const offline_warning = document.getElementById('offline_warning');
+        offline_warning.style.display = 'none';
+        console.log("Online confirmed");
+      } else {
+        console.log("Offline confirmed");
+      }
+    });
+  </script>
 {% endblock %}

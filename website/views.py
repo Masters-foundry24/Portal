@@ -8,7 +8,7 @@ from sqlalchemy.sql import func, or_
 from sqlalchemy import or_, text
 
 from website.models import Account, Payment, Flow, Order, Trade
-from website.flows import make_flow, get_flow_table
+from website.flows import make_flow, get_flow_table, cancel_orders
 from website.matching_engine import enter_order
 from website.bots import bot_6000000
 from website.util import format_de, check_IBAN
@@ -338,7 +338,7 @@ def send_funds(data):
     password = data.get("password")
 
     paid_to = Account.query.filter_by(account_id = paid_to_id).first()
-    paid_from = Account.query.filter_by(account_id = paid_from_id).first()
+    paid_from = fo.current_user
 
     # Now for a series of checks to confirm that the request is valid.
     if paid_to_id == paid_from_id:
@@ -360,7 +360,9 @@ def send_funds(data):
         # Incorrect password
         fl.flash("Senha incorreta", category = "e")
     else:
-        # The payment is valid so, now we will process it.
+        # The payment is valid so, now we will process it. To begin with we will
+        # cancel any orders that use the same money that we will be paying out.
+        cancel_orders(paid_from, currency, - quantity)
         db.session.add(Payment(
             currency = currency, quantity = quantity, 
             paid_from_id = paid_from_id, paid_to_id = paid_to_id))
@@ -506,3 +508,11 @@ def flows():
 def admin():
     flow_table = get_flow_table()
     return fl.render_template("admin/main.html", user = fo.current_user, flows = flow_table)
+
+@views.route("/offline")
+def offline():
+    return fl.render_template("offline.html", user = fo.current_user)
+
+@views.route("/ping")
+def ping():
+    return fl.Response("ping", status = 200, mimetype = "text/plain")

@@ -22,6 +22,7 @@
 -->
 <html>
   <head>
+    <meta charset="UTF-8">
     <title> {% block title %} The Portal {% endblock %} </title>
     <meta charset = "utf-8" />
     <meta name = "viewport" content = "width=device-width, initial-scale=1, user-scalable=no" />
@@ -29,6 +30,8 @@
     <link rel = "stylesheet" href = "{{ url_for('static', filename='css/alerts.css') }}" />
     <link rel = "stylesheet" href = "{{ url_for('static', filename='css/balance.css') }}" />
     <noscript><link rel = "stylesheet" href = "{{ url_for('static', filename='css/noscript.css') }}" /></noscript>
+    <link rel = "manifest" href = "{{ url_for('static', filename='manifest.json') }}">
+    <meta name = "theme-color" content = "#317EFB"/>
     <!-- 
       This next line puts the icon on top of all of our tabs. What I have now is
       just a placeholder. There are plenty of icons available at 
@@ -124,6 +127,21 @@
     <script src = "{{ url_for('static', filename='js/breakpoints.min.js') }}"></script>
     <script src = "{{ url_for('static', filename='js/util.js') }}"></script>
     <script src = "{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
+          .then(function(reg) {
+            console.log('Service worker registered.', reg);
+          });
+      }
+    </script>
+    <script>
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        console.log('PWA is already installed (standalone mode)');
+      } else {
+        console.log('PWA is not installed');
+      }
+    </script>
     {% block scripts %} {% endblock %}
 
   </body>

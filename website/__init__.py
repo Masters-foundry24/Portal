@@ -17,6 +17,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__) # __name__
 logging.getLogger('werkzeug').setLevel(logging.CRITICAL + 1)
+# logging.getLogger('werkzeug').setLevel(logging.DEBUG)
 logging.getLogger('website').setLevel(logging.DEBUG)
 
 logger.info("Initial message to test our logger")
@@ -184,8 +185,14 @@ def create_app():
             name_EUR = account.name_EUR
         else:
             account_name = "Não existe conta com esse número"
+            IBAN_EUR = "N/A"
+            name_EUR = "N/A"
         return fl.jsonify({"account_name": account_name, "IBAN_EUR": IBAN_EUR, "name_EUR": name_EUR})
 
+    @app.route('/service-worker.js')
+    def service_worker():
+        return fl.send_from_directory('static', 'service-worker.js')
+    
     return app
 
 def create_database(app):
