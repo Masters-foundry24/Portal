@@ -24,16 +24,20 @@
                 </div>
               </div>
             
-              <div class = "col-3 col-6-small">
+              <div class = "col-2 col-4-small">
                 <input 
-                  type = "radio" id = "EUR" name = "currency" value = "EUR" 
-                  required = true>
+                  type = "radio" id = "EUR" name = "currency" value = "EUR" required = true>
                 <label for = "EUR"> EUR </label>
               </div>
-              <div class = "col-3 col-6-small">
+              <div class = "col-2 col-4-small">
                 <input 
                   type = "radio" id = "STN" name = "currency" value = "STN" required = true>
                 <label for = "STN"> STN </label>
+              </div>
+              <div class = "col-2 col-4-small">
+                <input 
+                  type = "radio" id = "USD" name = "currency" value = "USD" required = true>
+                <label for = "USD"> USD </label>
               </div>
               <div class = "col-6 col-12-small">
                 <label> VALOR: </label>
@@ -45,14 +49,14 @@
               <div id = "name_space" class = "col-6 col-12-small">
                 <label id = "name_lable"> Nome da Conta <a href = "#" onclick = "change_name();">(mudar)</a>: </label>
                 <div id = "name_box" class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
-                  <p id = "EUR_name"> Digite o número da conta acima </p>
+                  <p id = "bank_name"> Digite o número da conta acima </p>
                 </div>
               </div>
     
               <div id = "iban_space" class = "col-6 col-12-small">
                 <label id = "iban_lable"> IBAN da Conta <a href = "#" onclick = "change_iban();">(mudar)</a>: </label>
                 <div id = "iban_box" class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
-                  <p id = "EUR_iban"> Digite o número da conta acima </p>
+                  <p id = "bank_iban"> Digite o número da conta acima </p>
                 </div>
               </div>
   
@@ -88,19 +92,68 @@
 
 {% block scripts %} 
   <script>
-    let account_id = document.getElementById("paid_to_id");
-    let account_name = document.getElementById("paid_to_name");
-    let EUR_name = document.getElementById("EUR_name");
-    let EUR_iban = document.getElementById("EUR_iban");
+    const account_id = document.getElementById("paid_to_id");
+    const account_name = document.getElementById("paid_to_name");
+    const bank_name = document.getElementById("bank_name");
+    const bank_iban = document.getElementById("bank_iban");
+    const radios = document.querySelectorAll('input[name="currency"]');
 
-    account_id.addEventListener("blur", function(event) {
-      fetch(`/get_account_name?account_id=${encodeURIComponent(account_id.value)}`).then(res => res.json()).then(data => {
-        account_name.textContent = data.account_name;
-        EUR_name.textContent = data.name_EUR;
-        EUR_iban.textContent = data.IBAN_EUR;
-      });
-    })
+    let lastAccountData = null; // store the latest fetch result
+
+    function getSelectedCurrency() {
+      const checked = document.querySelector('input[name="currency"]:checked');
+      return checked ? checked.value : null;
+    }
+
+    function updateBank() {
+      console.log("arrived at the bank function")
+      if (!lastAccountData) return;
+      const currency = getSelectedCurrency();
+      if (!currency) {
+        bank_name.textContent = "Escolhe uma moeda";
+        bank_iban.textContent = "Escolhe uma moeda";
+        return;
+      }
+    
+      if (currency === "EUR") {
+        bank_name.textContent = lastAccountData.name_EUR;
+        bank_iban.textContent = lastAccountData.IBAN_EUR;
+      } else if (currency === "STN") {
+        bank_name.textContent = lastAccountData.name_STN;
+        bank_iban.textContent = lastAccountData.IBAN_STN;
+      } else if (currency === "USD") {
+        console.log("arrived at the currency asignment")
+        console.log(lastAccountData.IBAN_USD)
+        bank_name.textContent = lastAccountData.name_USD;
+        bank_iban.textContent = lastAccountData.IBAN_USD;
+      }
+    }
+    
+    account_id.addEventListener("blur", () => {
+      fetch(`/get_account_name?account_id=${encodeURIComponent(account_id.value)}`)
+        .then(res => res.json())
+        .then(data => {
+          account_name.textContent = data.account_name;
+          console.log("Saving data")
+          console.log(data.IBAN_USD)
+          lastAccountData = data;
+          updateBank();
+        })
+        .catch(err => {
+          console.error(err);
+          account_name.textContent = "Errado";
+          bank_name.textContent = "Errado";
+          bank_iban.textContent = "Errado";
+        });
+    });
+
+    // Fetch the account data again if the user selects a new currency
+    radios.forEach(radio => {
+      radio.addEventListener("change", updateBank);
+    });
   </script>
+
+  <!-- This next script is for if the user decides to change the IBAN or account name that we have on file.-->
   <script>
     let name_space = document.getElementById("name_space");
     let name_lable = document.getElementById("name_lable");

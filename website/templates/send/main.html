@@ -2,7 +2,13 @@
 
 {% block navbar %}
   <li><a href = "/"> Casa </a></li>
-  <li><a href = "/market"> EUR/STN </a></li>
+  <li class = "dropdown">
+    <span class = "opener"> Mercados </span>
+    <ul class = "submenu" style = "padding-left: 0px">
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/EURSTN"> EUR/STN </a></li>
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/USDEUR"> USD/EUR </a></li>
+    </ul>
+  </li>
   <li><a href = "/how_it_works"> Como Funciona </a></li>
   {% if user.is_authenticated %}
     <li><a href = "/my_account"> Minha Conta </a></li>
@@ -38,37 +44,29 @@
               </div>
             </div>
             
-            <div class = "col-3 col-6-small">
+            <div class = "col-2 col-4-small">
               <input 
                 type = "radio" id = "EUR" name = "currency" value = "EUR" 
                 required = true>
               <label for = "EUR"> EUR </label>
             </div>
-            <div class = "col-3 col-6-small">
+            <div class = "col-2 col-4-small">
               <input 
                 type = "radio" id = "STN" name = "currency" value = "STN" 
                 required = true>
               <label for = "STN"> STN </label>
+            </div>
+            <div class = "col-2 col-4-small">
+              <input 
+                type = "radio" id = "USD" name = "currency" value = "USD" 
+                required = true>
+              <label for = "USD"> USD </label>
             </div>
             <div class = "col-6 col-12-small">
               <label> VALOR: </label>
               <input 
                 type = "number" name = "quantity" id = "quantity" value = "" 
                 placeholder = "100" step = "0.01" required = true/>
-            </div>
-  
-            <div class = "col-6 col-12-small">
-              <label> MENSAGEM: </label>
-              <input 
-                type = "text" name = "message" id = "message" value = "" 
-                placeholder = "Mensagem para o destinatário"/>
-            </div>
-  
-            <div class = "col-6 col-12-small">
-              <label> SUA SENHA: </label>
-              <input 
-                type = "password" name = "password" id = "password" value = "" 
-                placeholder = "*******" required = true/>
             </div>
   
             <div class = "col-12">

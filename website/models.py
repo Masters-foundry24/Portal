@@ -47,12 +47,15 @@ class Account(db.Model, fo.UserMixin):
     password = db.Column(db.String(100))
     STN = db.Column(db.Numeric(9, 2), default = de.Decimal("0"))
     EUR = db.Column(db.Numeric(9, 2), default = de.Decimal("0"))
+    USD = db.Column(db.Numeric(9, 2), default = de.Decimal("0"))
     orders = db.relationship("Order")
     # orders = db.relationship("Deposit")
     name_EUR = db.Column(db.String(50))
     IBAN_EUR = db.Column(db.String(100))
     name_STN = db.Column(db.String(50))
     IBAN_STN = db.Column(db.String(100))
+    name_USD = db.Column(db.String(50))
+    IBAN_USD = db.Column(db.String(100))
 
 class Trade(db.Model):
     trade_id = db.Column(db.Integer, primary_key = True)

@@ -1,18 +1,24 @@
 {% extends "base.html" %}
 
 {% block navbar %}
-  <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/"> Casa </a></li>
-  <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/market"> EUR/STN </a></li>
-  <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/how_it_works"> Como Funciona </a></li>
+  <li><a href = "/"> Casa </a></li>
+  <li class = "dropdown">
+    <span class = "opener"> Mercados </span>
+    <ul class = "submenu" style = "padding-left: 0px">
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/EURSTN"> EUR/STN </a></li>
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/USDEUR"> USD/EUR </a></li>
+    </ul>
+  </li>
+  <li><a href = "/how_it_works"> Como Funciona </a></li>
   {% if user.is_authenticated %}
-    <li class = "active"><a style = "padding-left: 20px; padding-right: 20px;" href = "/my_account"> Minha Conta </a></li>
-    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/deposits"> Depósitos </a></li>
-    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/withdrawals"> Retiradas </a></li>
-    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/send"> Enviar Dinheiro </a></li>
+    <li class = "active"><a href = "/my_account"> Minha Conta </a></li>
+    <li><a href = "/deposits"> Depósitos </a></li>
+    <li><a href = "/withdrawals"> Retiradas </a></li>
+    <li><a href = "/send"> Enviar Dinheiro </a></li>
     {% if user.account_id in [1234567, 9875512] %}
-      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/admin"> Admin </a></li>
+      <li><a href = "/admin"> Admin </a></li>
     {% endif %}
-    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/logout"> Logout </a></li>
+    <li><a href = "/logout"> Logout </a></li>
   {% endif%}
 {% endblock %}
 
@@ -62,12 +68,12 @@
           <p class = "balance_value"> {{ user.STN }} </p>
         </div>
 
-        <!--div class = "balance_grid_cell">
-          <p class = "balance_lable"> IBAN (EUR): </p>
+        <div class = "balance_grid_cell">
+          <p class = "balance_lable"> USD: </p>
         </div>
         <div class = "balance_grid_cell">
-          <p class = "balance_value"> {{ user.IBAN_EUR }} </p>
-        </div-->
+          <p class = "balance_value"> {{ user.USD }} </p>
+        </div>
 
 	  </div>
     </article>

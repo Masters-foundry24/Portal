@@ -1,44 +1,53 @@
 {% extends "base.html" %}
 
 {% block navbar %}
-  <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/"> Casa </a></li>
-  <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/market"> EUR/STN </a></li>
-  <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/how_it_works"> Como Funciona </a></li>
+  <li><a href = "/"> Casa </a></li>
+  <li class = "dropdown">
+    <span class = "opener"> Mercados </span>
+    <ul class = "submenu" style = "padding-left: 0px">
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/EURSTN"> EUR/STN </a></li>
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/USDEUR"> USD/EUR </a></li>
+    </ul>
+  </li>
+  <li><a href = "/how_it_works"> Como Funciona </a></li>
   {% if user.is_authenticated %}
-    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/my_account"> Minha Conta </a></li>
-    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/deposits"> Depósitos </a></li>
-    <li class = "active"><a style = "padding-left: 20px; padding-right: 20px;" href = "/withdrawals"> Retiradas </a></li>
-    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/send"> Enviar Dinheiro </a></li>
+    <li><a href = "/my_account"> Minha Conta </a></li>
+    <li><a href = "/deposits"> Depósitos </a></li>
+    <li class = "active"><a href = "/withdrawals"> Retiradas </a></li>
+    <li><a href = "/send"> Enviar Dinheiro </a></li>
     {% if user.account_id in [1234567, 9875512] %}
-      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/admin"> Admin </a></li>
+      <li><a href = "/admin"> Admin </a></li>
     {% endif %}
-    <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/logout"> Logout </a></li>
+    <li><a href = "/logout"> Logout </a></li>
   {% endif%}
 {% endblock %}
 
 {% block content %} 
-
-<article class = "post featured">
-  <header class = "major">
-    <section class = "post">
-      <header class = "major">
-        <h1> Retiradas </h1>
-      </header>
-      <p> Qual moeada você gostaria retirar? </p>
-      <div class = "row gtr-uniform">
-        <div class = "col-6">
-          <ul class = "actions special">
-            <li> <a href = "/withdrawals/EUR" class = "button"> EUR </a> </li>
-          </ul>
+  <article class = "post featured">
+    <header class = "major">
+      <section class = "post">
+        <header class = "major">
+          <h1> Retiradas </h1>
+        </header>
+        <p> Qual moeada você gostaria retirar? </p>
+        <div class = "row gtr-uniform">
+          <div class = "col-3 col-6-small">
+            <ul class = "actions special">
+              <li> <a href = "/withdrawals/EUR" class = "button"> EUR </a> </li>
+            </ul>
+          </div>
+          <div class = "col-3 col-6-small">
+            <ul class = "actions special">
+              <li> <a href = "/withdrawals/STN" class = "button"> STN </a> </li>
+            </ul>
+          </div>
+          <div class = "col-3 col-6-small">
+            <ul class = "actions special">
+              <li> <a href = "/withdrawals/USD" class = "button"> USD </a> </li>
+            </ul>
+          </div>
         </div>
-        <div class = "col-6">
-          <ul class = "actions special">
-            <li> <a href = "/withdrawals/STN" class = "button"> STN </a> </li>
-          </ul>
-        </div>
-      </div>
-    </section>
-  </header>
-</article>
-
+      </section>
+    </header>
+  </article>
 {% endblock %}

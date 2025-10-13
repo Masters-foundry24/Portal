@@ -7,7 +7,7 @@ import datetime as dt
 from website.models import Account, Payment, Flow, Order, Trade
 from website import db, logger
 
-def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, messages: bool = False):
+def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, asset_0: str, asset_1: str, messages: bool = False):
     """
     An order comes here once it has already passed all its validation checks.
     This function inserts it into the matching engine to check if it matches
@@ -28,7 +28,7 @@ def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, messag
     # if it matches with any current orders, or will be entered as a quote.
     if side == "bid": # Bid order
         opp_orders = Order.query.filter_by(
-            asset_0 = "STN", asset_1 = "EUR", side = "ask", active = True
+            asset_0 = asset_0, asset_1 = asset_1, side = "ask", active = True
             ).order_by(Order.price)
         for o in opp_orders:
             if o.price > price:
@@ -43,22 +43,47 @@ def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, messag
             if messages:
                 fl.flash("Pedido negociado", category = "s")
             db.session.add(Trade(
-                asset_0 = "STN", asset_1 = "EUR", 
+                asset_0 = asset_0, asset_1 = asset_1, 
                 quantity = quantity_traded, price = o.price, 
                 buyer = user.account_id, seller = o.account_id
                 ))
-            logger.info(f"TC asset_0 = STN, asset_1 = EUR, quantity = {quantity_traded}, price = {o.price}, buyer = {user.account_id}, seller = {o.account_id}")
+            logger.info(f"TC asset_0 = {asset_0}, asset_1 = {asset_1}, quantity = {quantity_traded}, price = {o.price}, buyer = {user.account_id}, seller = {o.account_id}")
 
             # Now we update the balances of both traders.
             buyer = Account.query.filter_by(account_id = user.account_id).first()
             seller = Account.query.filter_by(account_id = o.account_id).first()
 
-            buyer.EUR += quantity_traded
-            buyer.STN -= quantity_traded * o.price
-            seller.EUR -= quantity_traded
-            seller.STN += quantity_traded * o.price
-            logger.info(f"AA account_id = {buyer.account_id}, EUR = {buyer.EUR}, STN = {buyer.STN}")
-            logger.info(f"AA account_id = {seller.account_id}, EUR = {seller.EUR}, STN = {seller.STN}")
+            if asset_0 == "STN":
+                buyer.STN -= quantity_traded * o.price
+                seller.STN += quantity_traded * o.price
+                logger.info(f"AA account_id = {buyer.account_id}, STN = {buyer.STN}")
+                logger.info(f"AA account_id = {seller.account_id}, STN = {seller.STN}")
+            elif asset_0 == "EUR":
+                buyer.EUR -= quantity_traded * o.price
+                seller.EUR += quantity_traded * o.price
+                logger.info(f"AA account_id = {buyer.account_id}, EUR = {buyer.EUR}")
+                logger.info(f"AA account_id = {seller.account_id}, EUR = {seller.EUR}")
+            if asset_0 == "USD":
+                buyer.USD -= quantity_traded * o.price
+                seller.USD += quantity_traded * o.price
+                logger.info(f"AA account_id = {buyer.account_id}, USD = {buyer.USD}")
+                logger.info(f"AA account_id = {seller.account_id}, USD = {seller.USD}")
+            
+            if asset_1 == "STN":
+                buyer.STN += quantity_traded
+                seller.STN -= quantity_traded
+                logger.info(f"AA account_id = {buyer.account_id}, STN = {buyer.STN}")
+                logger.info(f"AA account_id = {seller.account_id}, STN = {seller.STN}")
+            elif asset_1 == "EUR":
+                buyer.EUR += quantity_traded
+                seller.EUR -= quantity_traded
+                logger.info(f"AA account_id = {buyer.account_id}, EUR = {buyer.EUR}")
+                logger.info(f"AA account_id = {seller.account_id}, EUR = {seller.EUR}")
+            if asset_1 == "USD":
+                buyer.USD += quantity_traded
+                seller.USD -= quantity_traded
+                logger.info(f"AA account_id = {buyer.account_id}, USD = {buyer.USD}")
+                logger.info(f"AA account_id = {seller.account_id}, USD = {seller.USD}")
 
             if o.quantity == de.Decimal("0"):
                 o.active = False
@@ -72,7 +97,7 @@ def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, messag
 
     else: # Ask order
         opp_orders = Order.query.filter_by(
-            asset_0 = "STN", asset_1 = "EUR", side = "bid", active = True
+            asset_0 = asset_0, asset_1 = asset_1, side = "bid", active = True
             ).order_by(Order.price.desc())
         for o in opp_orders:
             if o.price < price:
@@ -87,22 +112,47 @@ def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, messag
             if messages:
                 fl.flash("Pedido negociado", category = "s")
             db.session.add(Trade(
-                asset_0 = "STN", asset_1 = "EUR", 
+                asset_0 = asset_0, asset_1 = asset_1, 
                 quantity = quantity_traded, price = o.price, 
                 buyer = o.account_id, seller = user.account_id
                 ))
-            logger.info(f"TC asset_0 = STN, asset_1 = EUR, quantity = {quantity_traded}, price = {o.price}, buyer = {user.account_id}, seller = {o.account_id}")
+            logger.info(f"TC asset_0 = {asset_0}, asset_1 = {asset_1}, quantity = {quantity_traded}, price = {o.price}, buyer = {user.account_id}, seller = {o.account_id}")
 
             # Now we update the balances of both traders.
             seller = Account.query.filter_by(account_id = user.account_id).first()
             buyer = Account.query.filter_by(account_id = o.account_id).first()
 
-            buyer.EUR += quantity_traded
-            buyer.STN -= quantity_traded * o.price
-            seller.EUR -= quantity_traded
-            seller.STN += quantity_traded * o.price
-            logger.info(f"AA account_id = {buyer.account_id}, EUR = {buyer.EUR}, STN = {buyer.STN}")
-            logger.info(f"AA account_id = {seller.account_id}, EUR = {seller.EUR}, STN = {seller.STN}")
+            if asset_0 == "STN":
+                buyer.STN -= quantity_traded * o.price
+                seller.STN += quantity_traded * o.price
+                logger.info(f"AA account_id = {buyer.account_id}, STN = {buyer.STN}")
+                logger.info(f"AA account_id = {seller.account_id}, STN = {seller.STN}")
+            elif asset_0 == "EUR":
+                buyer.EUR -= quantity_traded * o.price
+                seller.EUR += quantity_traded * o.price
+                logger.info(f"AA account_id = {buyer.account_id}, EUR = {buyer.EUR}")
+                logger.info(f"AA account_id = {seller.account_id}, EUR = {seller.EUR}")
+            if asset_0 == "USD":
+                buyer.USD -= quantity_traded * o.price
+                seller.USD += quantity_traded * o.price
+                logger.info(f"AA account_id = {buyer.account_id}, USD = {buyer.USD}")
+                logger.info(f"AA account_id = {seller.account_id}, USD = {seller.USD}")
+            
+            if asset_1 == "STN":
+                buyer.STN += quantity_traded
+                seller.STN -= quantity_traded
+                logger.info(f"AA account_id = {buyer.account_id}, STN = {buyer.STN}")
+                logger.info(f"AA account_id = {seller.account_id}, STN = {seller.STN}")
+            elif asset_1 == "EUR":
+                buyer.EUR += quantity_traded
+                seller.EUR -= quantity_traded
+                logger.info(f"AA account_id = {buyer.account_id}, EUR = {buyer.EUR}")
+                logger.info(f"AA account_id = {seller.account_id}, EUR = {seller.EUR}")
+            if asset_1 == "USD":
+                buyer.USD += quantity_traded
+                seller.USD -= quantity_traded
+                logger.info(f"AA account_id = {buyer.account_id}, USD = {buyer.USD}")
+                logger.info(f"AA account_id = {seller.account_id}, USD = {seller.USD}")
 
             if o.quantity == de.Decimal("0"):
                 o.active = False
@@ -116,10 +166,10 @@ def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, messag
 
     active = (quantity > de.Decimal("0"))        
     db.session.add(Order(
-        asset_0 = "STN", asset_1 = "EUR", side = side, price = price, 
+        asset_0 = asset_0, asset_1 = asset_1, side = side, price = price, 
         quantity = quantity, quantity_og = quantity_og, 
         account_id = user.account_id, active = active))
-    logger.info(f"TC asset_0 = STN, asset_1 = EUR, side = {side}, price = {o.price}, quantity = {quantity}, quantity_og = {quantity_og}, account_id = {user.account_id}, active = {active}")
+    logger.info(f"TC asset_0 = {asset_0}, asset_1 = {asset_1}, side = {side}, price = {price}, quantity = {quantity}, quantity_og = {quantity_og}, account_id = {user.account_id}, active = {active}")
     db.session.commit()
     logger.info(f"Database Commit")
     if messages:

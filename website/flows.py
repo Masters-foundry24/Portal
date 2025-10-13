@@ -40,6 +40,10 @@ def user_checks(currency, quantity, password, account):
         # The person is trying to withdraw more money than they have
         fl.flash("Saldo de STN insufficent", category = "e")
         return False
+    elif currency == "USD" and account.USD + quantity < de.Decimal("0"):
+        # The person is trying to withdraw more money than they have
+        fl.flash("Saldo de USD insufficent", category = "e")
+        return False
     elif False:
         # Verify that the IBAN passes a checksum
         return False
@@ -58,12 +62,14 @@ def cancel_orders(account, currency, quantity):
     balance_used = de.Decimal("0")
     if currency == "STN":
         balance_available = account.STN + quantity
-    else:
+    elif currency == "EUR":
         balance_available = account.EUR + quantity
+    elif currency == "USD":
+        balance_available = account.USD + quantity
     
     # Bid, orders that are using the currency to purchase something else.
     my_orders = Order.query.filter_by(
-        account_id = account.account_id, asset_0 = "STN", side = "bid", 
+        account_id = account.account_id, asset_0 = currency, side = "bid", 
         active = True)
     for o in my_orders:
         if o.quantity * o.price + balance_used > balance_available:
@@ -76,7 +82,7 @@ def cancel_orders(account, currency, quantity):
     
     # Ask orders that are selling the currency as an asset.
     my_orders = Order.query.filter_by(
-        account_id = account.account_id, asset_1 = "EUR", side = "ask", 
+        account_id = account.account_id, asset_1 = currency, side = "ask", 
         active = True)
     for o in my_orders:
         if o.quantity + balance_used > balance_available:
@@ -146,10 +152,13 @@ def make_flow(admin: bool, currency: str, quantity: de.Decimal, account_id: int,
         elif currency == "STN":
             account.STN = account.STN + quantity
             logger.info(f"AA account_id = {account_id}, STN = {account.STN}")
+        elif currency == "USD":
+            account.USD = account.USD + quantity
+            logger.info(f"AA account_id = {account_id}, USD = {account.USD}")
         if admin:
-            fl.flash(f"{currency} {quantity} tirou de conta {account_id}", category = "s")
+            fl.flash(f"{currency} {abs(quantity)} tirou de conta {account_id}", category = "s")
         else:
-            fl.flash(f"{currency} {quantity} retirou da sua conta", category = "s")
+            fl.flash(f"{currency} {abs(quantity)} retirou da sua conta", category = "s")
     
     db.session.commit()
     logger.info(f"Database Commit")
@@ -163,6 +172,10 @@ def get_flow_table():
             a = Account.query.filter_by(account_id = f.paid_to_id).first()
             IBAN = a.IBAN_EUR
             name = a.name_EUR
+        elif f.currency == "USD": # Withdrawal
+            a = Account.query.filter_by(account_id = f.paid_to_id).first()
+            IBAN = a.IBAN_USD
+            name = a.name_USD
         else:
             IBAN, name = "", ""
         table.append([

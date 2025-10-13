@@ -1,0 +1,42 @@
+{% extends "send/main.html" %}
+
+{% block content %} 
+  <article class = "post featured">
+    <header class = "major">
+      <section class = "post">
+        <header class = "major">
+          <h1> Confirmação </h1>
+        </header>
+        <p> Vamos enviar {{ currency }} {{ quantity }} para {{ name }}. </p>
+        <form method = "post">
+          <div class = "row gtr-uniform">
+            <input type = "hidden" name = "paid_to_id" id = "paid_to_id" value = {{ paid_to_id }}/>
+            <input type = "hidden" id = "EUR" name = "currency" value = {{ currency }}/>
+            <input type = "hidden" name = "quantity" id = "quantity" value = {{ quantity }}/>
+
+            <div class = "col-6 col-12-small">
+              <label> MENSAGEM: </label>
+              <input 
+                type = "text" name = "message" id = "message" value = "" 
+                placeholder = "Mensagem para o destinatário"/>
+            </div>
+  
+            <div class = "col-6 col-12-small">
+              <label> SUA SENHA: </label>
+              <input 
+                type = "password" name = "password" id = "password" value = "" 
+                placeholder = "*******" required = true/>
+            </div>
+  
+            <div class = "col-12">
+              <ul class = "actions">
+                <li><input type = "submit" value = "Confirmar" class = "primary"/></li>
+                <li><input type = "reset" value = "Cancelar"/></li>
+              </ul>
+            </div>
+          </div>
+        </form>
+      </section>
+    </header>
+  </article>
+{% endblock %}
