@@ -7,4 +7,9 @@ from website import create_app
 app = create_app()
 
 if __name__ == '__main__':
-    app.run(debug = True) # Use debug when building, not in production
+    app.run(host = "0.0.0.0", port = 5000, debug = True)
+    # To access this page on my phone I can enter "ipconfig" into a bash
+    # terminal and get my local IP address which is listed as "IPv4 Address".
+    # Then I can get on my phone and enter "http://[my_IP_address]:5000". Make
+    # sure that your VPN, in both the computer and phone is turned off for this.
+    # app.run(debug = True) # Use debug when building, not in production
