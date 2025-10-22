@@ -20,7 +20,7 @@
      own (for updating account names in forms) which I add on to two of the 
      pages.
 -->
-<html>
+<html lang = "pt">
   <head>
     <meta charset="UTF-8">
     <title> {% block title %} The Portal {% endblock %} </title>
@@ -57,6 +57,8 @@
 
     <!-- Wrapper -->
     <div id = "wrapper" class = "fade-in">
+
+      <img class = "bg" src = "../../static/images/bg.jpg" alt = "">
 
       {% block intro %} {% endblock %}
 
@@ -120,7 +122,7 @@
 
       <!-- Copyright -->
       <div id = "copyright">
-        <ul><li> The Portal is a division of the Black Dragon Society </li></ul>
+        <ul><li> </li></ul>
       </div>
 
     </div>
@@ -159,6 +161,15 @@
           });
         });
       });
+    </script>
+    <script>
+      function setBgHeight() {
+        const wrapperBg = document.querySelector('#wrapper .bg');
+        if (!wrapperBg) return;
+        wrapperBg.style.height = window.screen.height + 'px';
+      }
+      setBgHeight();
+      window.addEventListener('orientationchange', setBgHeight);
     </script>
     {% block scripts %} {% endblock %}
 

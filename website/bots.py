@@ -90,7 +90,7 @@ class Deriviative_Market_Maker():
 
     def query_source(self):
         data = yf.Ticker("EUR=X")
-        price = 2 / (data.info["bid"] + data.info["ask"])
+        price = (data.info["bid"] + data.info["ask"]) / 2
         return de.Decimal(price)
 
     def main(self, source_price = None):
@@ -133,10 +133,7 @@ class Deriviative_Market_Maker():
                 db.session.commit()
                 logger.info(f"Database Commit")
                 self.bot.v2 = bot_order(self.user, "bid", bid_size, bid_price, asset_0 = "EUR", asset_1 = "USD")
-                db.session.commit()
-        
-        print("stop")
-            
+                db.session.commit()            
         
 class Fixed_Interval_Market_Maker():
     """

@@ -1,5 +1,6 @@
 # This page has received basic logging.
 
+import os
 import flask as fl
 import flask_login as fo
 import decimal as de
@@ -383,7 +384,21 @@ def my_account():
     """   
     trades = get_my_trades(fo.current_user.account_id, 7)
     transfers = get_transfers(fo.current_user.account_id, 7)
-    return fl.render_template("my_account/main.html", user = fo.current_user, trades = trades, transfers = transfers)
+    image_path = fl.current_app.root_path + f"/static/images/{fo.current_user.account_id}.png"
+    if os.path.exists(image_path):
+        image_path = fl.url_for("static", filename =  f"images/{fo.current_user.account_id}.png")
+    else:
+        image_path = fl.url_for("static", filename = f"images/default.png")
+    return fl.render_template("my_account/main.html", user = fo.current_user, trades = trades, transfers = transfers, image_path = image_path)
+
+@fo.login_required
+@views.route("/my_account/bank_details")
+def bank_details():
+    """
+    This function prepares a backend for the 'bank details' page where the users
+    can see the bank accounts which we have on file for them.
+    """
+    return fl.render_template("my_account/bank_details.html", user = fo.current_user)
 
 @fo.login_required
 @views.route("/my_trades")

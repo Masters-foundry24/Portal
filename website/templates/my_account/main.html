@@ -23,11 +23,102 @@
 {% endblock %}
 
 {% block content %} 
+
+  <article class="post featured">
+    <a class = "image"> 
+      <!--img class = "profile_pic" src ="{{ url_for('static', filename='images/' ~ user.account_id ~ '.jpg') }}" alt = "" /--> 
+      <img class = "profile_pic" src = "{{ image_path }}" alt = "" />
+    </a>
+    <div>
+      <span> Bem vindo {{ user.name }} </span>
+      <h2> {{ user.account_id}} </h2>
+    </div>
+  </article>
+
   <section class="posts">
     <!-- This dashboard is divided into four windows. -->
 
     <article>
-	  <!-- The first section shows the user's account details and balances -->
+      <!-- The list section shows the uses' current funds. -->
+      <header>
+        <h2> Saldo Disponível </h2>
+      </header>
+      <div class = "row gtr-uniform">
+        <div class = "col-6 col-12-medium col-6-small">
+          <a style = "background-image: url('{{ url_for('static', filename='images/EUR.png') }}');" href = "#" class = "button fit flag">
+            <span style = "display: block; text-align: left;"> EUR </span>
+            <span style = "display: block; text-align: right; font-size: large;"> € {{ user.EUR }} </span>
+          </a>
+        </div>
+        <div class = "col-6 col-12-medium col-6-small">
+          <a style = "background-image: url('{{ url_for('static', filename='images/STN.png') }}');" href = "#" class = "button fit flag">
+            <span style = "display: block; text-align: left;"> STN </span>
+            <span style = "display: block; text-align: right; font-size: large;"> Db {{ user.STN }} </span>
+          </a>
+        </div>
+        <div class = "col-6 col-12-medium col-6-small">
+          <a style = "background-image: url('{{ url_for('static', filename='images/USD.png') }}');" href = "#" class = "button fit flag">
+            <span style = "display: block; text-align: left;"> USD </span>
+            <span style = "display: block; text-align: right; font-size: large;"> $ {{ user.USD }} </span>
+          </a>
+        </div>
+      </div>
+    </article>
+
+    <article>
+      <!-- The second section shows the user's account details -->
+      <header>
+        <h2> Detalhes da Conta </h2>
+      </header>
+      <div class = "balance_grid">
+
+        <div class = "balance">
+          <p class = "balance_lable"> ID: </p>
+        </div>
+        <div class = "balance_grid_cell">
+          <p class = "balance_value"> {{ user.account_id }} </p>
+          <!--img class = "edit_icon" style = "opacity: 0.0;" src = {{ url_for('static', filename='images/edit.png') }} alt = ""/-->
+        </div>
+
+        <div class = "balance">
+          <p class = "balance_lable"> Nome: </p>
+        </div>
+        <div class = "balance_grid_cell">
+          <p class = "balance_value"> {{ user.name }} </p>
+          <!--a href = "#">
+            <img class = "edit_icon" src = {{ url_for('static', filename='images/edit.png') }} alt = ""/>
+          </a-->
+        </div>
+
+        <div class = "balance">
+          <p class = "balance_lable"> Email: </p>
+        </div>
+        <div class = "balance_grid_cell">
+          <p class = "balance_value"> {{ user.email }} </p>
+          <!--img class = "edit_icon" src = {{ url_for('static', filename='images/edit.png') }} alt = "" href = "#"/-->
+        </div>
+
+        <div class = "balance_grid_cell">
+          <p class = "balance_lable"> Telefone: </p>
+        </div>
+        <div class = "balance_grid_cell">
+          <p class = "balance_value"> {{ user.phone }} </p>
+          <!--img class = "edit_icon" src = {{ url_for('static', filename='images/edit.png') }} alt = "" href = "#"/-->
+        </div>
+
+        <div class = "balance_grid_cell">
+          <p class = "balance_lable"> Senha: </p>
+        </div>
+        <div class = "balance_grid_cell">
+          <p class = "balance_value"> ********** </p>
+          <!--img class = "edit_icon" src = {{ url_for('static', filename='images/edit.png') }} alt = "" href = "#"/-->
+        </div>
+
+      </div>
+    </article>
+
+    <!--article>
+	  < The first section shows the user's account details and balances >
       <header>
         <h2> Minha Conta </h2>
       </header>
@@ -75,8 +166,8 @@
           <p class = "balance_value"> {{ user.USD }} </p>
         </div>
 
-	  </div>
-    </article>
+      </div>
+    </article -->
 
     <article>
       <!-- The second section shows a record of the user's recent transfers -->
