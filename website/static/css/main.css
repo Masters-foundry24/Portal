@@ -2140,6 +2140,16 @@ input, select, textarea {
 		.button.fit {
 			width: 100%;
 		}
+		.button.fit.flag {
+			background-size: cover;
+    		background-position: center;
+    		background-repeat: no-repeat;
+			text-transform: none !important;
+			height: auto; 
+			line-height: 2; 
+			padding-left: 10px; 
+			padding-right: 10px;
+		}
 
 		input[type="submit"].small,
 		input[type="reset"].small,
@@ -2680,6 +2690,22 @@ input, select, textarea {
 			-ms-transform: scale(1.05);
 			transform: scale(1.05);
 		}
+
+		a.image img.profile_pic {
+			display: block;
+			width: 150px;
+			height: 150px;
+			object-fit: cover;
+			border-radius: 50%;
+			overflow: hidden; 
+		}
+
+img.edit_icon {
+	height: 20px; 
+	width: 20px; 
+	opacity: 0.5; 
+	margin: 7px 6px 7px 6px;
+}
 
 /* Actions */
 
@@ -3233,24 +3259,19 @@ input, select, textarea {
 	}
 
 		#wrapper > .bg {
-			position: absolute;
+			position: fixed;
 			top: 0;
 			left: 0;
-			width: 100%;
-			height: 100%;
-			background-color: #212931;
-			background-image: url("../../images/overlay.png"), linear-gradient(0deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)), url("../../images/bg.jpg");
-			background-size: auto,								auto,														100% auto;
-			background-position: center,								center,														top center;
-			background-repeat: repeat,								no-repeat,													no-repeat;
-			background-attachment: scroll,								scroll,														scroll;
+			width: 100vw;
+			height: 100dvh; 
+			object-fit: cover;
 			z-index: -1;
 		}
 
 			#wrapper > .bg.fixed {
 				position: fixed;
 				width: 100vw;
-				height: 100vh;
+				height: 100dvh;
 			}
 
 		#wrapper.fade-in:before {
