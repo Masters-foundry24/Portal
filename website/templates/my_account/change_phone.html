@@ -1,0 +1,38 @@
+{% extends "my_account/main.html" %}
+
+{% block content %} 
+  <article class = "post featured">
+    <header class = "major">
+      <section class = "post">
+        <header class = "major">
+          <h1> Mude seu Telefone </h1>
+        </header>
+        <form method = "post">
+          <div class = "row gtr-uniform">
+            <div class = "col-6 col-12-small">
+              <label> Número de Telefone: </label>
+              <input 
+                type = "text" name = "phone" id = "phone" value = "" 
+                placeholder = "+239 123 4567"/>
+            </div>
+    
+            <div class = "col-6 col-12-small">
+              <label> SUA SENHA: </label>
+              <input 
+                type = "password" name = "password" id = "password" value = "" 
+                placeholder = "*******" required = true/>
+            </div>
+    
+            <div class = "col-12">
+              <ul class = "actions">
+                <li><input type = "submit" value = "Enviar" class = "primary" /></li>
+                <li><input type = "reset" value = "Reiniciar" /></li>
+              </ul>
+            </div>
+          </div>
+        </form>
+      </section>
+    </header>
+  </article>
+
+{% endblock %}

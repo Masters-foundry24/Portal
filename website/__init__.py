@@ -141,6 +141,21 @@ def create_app():
             elif f.currency == "USD":
                 account.USD = account.USD - f.quantity
                 logger.info(f"AA account_id = {account.account_id}, USD = {account.USD}")
+            elif f.currency == "GBP":
+                account.GBP = account.GBP - f.quantity
+                logger.info(f"AA account_id = {account.account_id}, GBP = {account.GBP}")
+            elif f.currency == "JPY":
+                account.JPY = account.JPY - f.quantity
+                logger.info(f"AA account_id = {account.account_id}, JPY = {account.JPY}")
+            elif f.currency == "CAD":
+                account.CAD = account.CAD - f.quantity
+                logger.info(f"AA account_id = {account.account_id}, CAD = {account.CAD}")
+            elif f.currency == "AUD":
+                account.AUD = account.AUD - f.quantity
+                logger.info(f"AA account_id = {account.account_id}, AUD = {account.AUD}")
+            elif f.currency == "CHF":
+                account.CHF = account.CHF - f.quantity
+                logger.info(f"AA account_id = {account.account_id}, CHF = {account.CHF}")
 
         # db.session.delete(order_to_cancel)
         db.session.commit()
@@ -188,6 +203,21 @@ def create_app():
             elif f.currency == "USD":
                 account.USD = account.USD + f.quantity
                 logger.info(f"AA account_id = {account.account_id}, USD = {account.USD}")
+            elif f.currency == "GBP":
+                account.GBP = account.GBP + f.quantity
+                logger.info(f"AA account_id = {account.account_id}, GBP = {account.GBP}")
+            elif f.currency == "JPY":
+                account.JPY = account.JPY + f.quantity
+                logger.info(f"AA account_id = {account.account_id}, JPY = {account.JPY}")
+            elif f.currency == "CAD":
+                account.CAD = account.CAD + f.quantity
+                logger.info(f"AA account_id = {account.account_id}, CAD = {account.CAD}")
+            elif f.currency == "AUD":
+                account.AUD = account.AUD + f.quantity
+                logger.info(f"AA account_id = {account.account_id}, AUD = {account.AUD}")
+            elif f.currency == "CHF":
+                account.CHF = account.CHF + f.quantity
+                logger.info(f"AA account_id = {account.account_id}, CHF = {account.CHF}")
 
         # db.session.delete(order_to_cancel)
         db.session.commit()
@@ -206,25 +236,34 @@ def create_app():
         account = Account.query.filter_by(account_id = account_id).first()
         if account:
             account_name = account.name
-            IBAN_EUR = account.IBAN_EUR
-            name_EUR = account.name_EUR
-            IBAN_STN = account.IBAN_STN
-            name_STN = account.name_STN
-            IBAN_USD = account.IBAN_USD
-            name_USD = account.name_USD
+            name_EUR, IBAN_EUR = account.name_EUR, account.IBAN_EUR
+            name_STN, IBAN_STN = account.name_STN, account.IBAN_STN
+            name_USD, IBAN_USD = account.name_USD, account.IBAN_USD
+            name_GBP, IBAN_GBP = account.name_GBP, account.IBAN_GBP
+            name_JPY, IBAN_JPY = account.name_JPY, account.IBAN_JPY
+            name_CAD, IBAN_CAD = account.name_CAD, account.IBAN_CAD
+            name_AUD, IBAN_AUD = account.name_AUD, account.IBAN_AUD
+            name_CHF, IBAN_CHF = account.name_CHF, account.IBAN_CHF
         else:
             account_name = "Não existe conta com esse número"
-            IBAN_EUR = "N/A"
-            name_EUR = "N/A"
-            IBAN_STN = "N/A"
-            name_STN = "N/A"
-            IBAN_USD = "N/A"
-            name_USD = "N/A"
+            name_EUR, IBAN_EUR = "N/A", "N/A"
+            name_STN, IBAN_STN = "N/A", "N/A"
+            name_USD, IBAN_USD = "N/A", "N/A"
+            name_GBP, IBAN_GBP = "N/A", "N/A"
+            name_JPY, IBAN_JPY = "N/A", "N/A"
+            name_CAD, IBAN_CAD = "N/A", "N/A"
+            name_AUD, IBAN_AUD = "N/A", "N/A"
+            name_CHF, IBAN_CHF = "N/A", "N/A"
         return fl.jsonify({
             "account_name": account_name, 
-            "IBAN_EUR": IBAN_EUR, "name_EUR": name_EUR,
-            "IBAN_STN": IBAN_STN, "name_STN": name_STN,
-            "IBAN_USD": IBAN_USD, "name_USD": name_USD,
+            "name_EUR": name_EUR, "IBAN_EUR": IBAN_EUR,
+            "name_STN": name_STN, "IBAN_STN": IBAN_STN,
+            "name_USD": name_USD, "IBAN_USD": IBAN_USD,
+            "name_GBP": name_GBP, "IBAN_GBP": IBAN_GBP,
+            "name_JPY": name_JPY, "IBAN_JPY": IBAN_JPY,
+            "name_CAD": name_CAD, "IBAN_CAD": IBAN_CAD,
+            "name_AUD": name_AUD, "IBAN_AUD": IBAN_AUD,
+            "name_CHF": name_CHF, "IBAN_CHF": IBAN_CHF
             })
 
     @app.route('/service-worker.js')

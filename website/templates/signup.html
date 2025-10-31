@@ -5,21 +5,37 @@
     <header class = "major">
       <section class = "post">
         <header class = "major">
-          <h1> Sign Up </h1>
+          <h1> Inscrever-se </h1>
         </header>
         <form method = "post">
+          <p>
+            Se você precisa de ajuda enviar uma mensagem para um agente 
+            (+239 994 9365).
+          </p>
           <div class = "row gtr-uniform">
             <div class = "col-6 col-12-small">
               <label> NÚMERO DA NOVA CONTA: </label>
               <input 
                 type = "number" name = "account_id" id = "account_id" value = "" 
-                placeholder = "1234567" step = "1" required = true/>
+                placeholder = "1234567" step = "1" pattern = "\d{7}" 
+                maxlength = "7" required = true
+                oninput = "this.value = this.value.replace(/[^0-9]/g, '').slice(0, 7);" />
+              <p> 
+                Isso é o número que outras no Portal vai usar para enviar 
+                dinheiro para você. Para fazer isso mais facil os sete dígitos 
+                do seu número de celular Santomense.
+              </p>
             </div>
             <div class = "col-6 col-12-small">
               <label> NOME DA NOVA CONTA: </label>
               <input 
                 type = "text" name = "name" id = "name" value = "" 
                 placeholder = "André Rufino" required = true/>
+              <p>
+                Seu nome vair aparecer quando você enviar dinheiro para outras 
+                pessoas na plataforma ou quando outras pessoas enviarem dinheiro 
+                para você.
+              </p>
             </div>
 
             <div class = "col-6 col-12-small">
@@ -36,16 +52,18 @@
             </div>
   
             <div class = "col-6 col-12-small">
-              <label> SENHA DO NOVO CLIENTE: </label>
+              <label> SENHA: </label>
                 <input 
-                  type = "text" name = "password" id = "password" value = "" 
+                  type = "text" name = "password_1" id = "password_1" value = "" 
                   placeholder = "*******" required = true/>
             </div>
             <div class = "col-6 col-12-small">
-              <label> SENHA DO ADMINISTRADOR: </label>
+              <label> CONFIRME SENHA: </label>
               <input 
-                type = "password" name = "password_admin" id = "password_admin" 
-                value = "" placeholder = "*******" required = true/>
+                type = "text" name = "password_2" id = "password_2" 
+                value = "" placeholder = "*******" required = true
+                oninput = "this.setCustomValidity(this.value !== document.getElementById('password_1').value ? 'Senhas não são iguais' : '')"
+                />
             </div>
   
             <div class="col-12">

@@ -7,6 +7,11 @@
     <ul class = "submenu" style = "padding-left: 0px">
       <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/EURSTN"> EUR/STN </a></li>
       <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/USDEUR"> USD/EUR </a></li>
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/GBPEUR"> GBP/EUR </a></li>
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/JPYEUR"> JPY/EUR </a></li>
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/CADEUR"> CAD/EUR </a></li>
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/AUDEUR"> AUD/EUR </a></li>
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/CHFEUR"> CHF/EUR </a></li>
     </ul>
   </li>
   <li><a href = "/how_it_works"> Como Funciona </a></li>
@@ -19,6 +24,8 @@
       <li><a href = "/admin"> Admin </a></li>
     {% endif %}
     <li><a href = "/logout"> Logout </a></li>
+  {% else %}
+    <li><a href = "/signup"> Inscrever </a></li>
   {% endif%}
 {% endblock %}
 

@@ -1,0 +1,110 @@
+{% extends "markets/main.html" %}
+
+{% block box_1_order_book %}
+  <header>
+    <h2> Mercado: JPY/EUR </h2>
+  </header>
+  <div class = "table-wrapper">
+    <table class = "alt">
+      <thead>
+        <tr>
+          <th style = "color: darkgreen"> Quant. </th>
+          <th style = "color: darkgreen"> Preço </th>
+          <th style = "color: darkred"> Preço </th>
+          <th style = "color: darkred"> Quant. </th>
+        </tr>
+      </thead>
+      {% set ns = namespace(shade=true) %}
+      <tbody>
+        {% for row in book %}
+          {% if ns.shade == True %}
+            <tr>
+              <td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> {{ row[0] }} </td>
+              <td style = "color: darkgreen; background-color: rgb(207, 238, 207);"> {{ row[1] }} </td>
+              <td style = "color: darkred; background-color: rgb(238, 207, 207);"> {{ row[2] }} </td>
+              <td style = "color: darkred; background-color: rgb(238, 207, 207);"> {{ row[3] }} </td>
+            </tr>
+            {% set ns.shade = False %}
+          {% else %}
+            <tr>
+              <td style = "color: darkgreen;"> {{ row[0] }} </td>
+              <td style = "color: darkgreen"> {{ row[1] }} </td>
+              <td style = "color: darkred"> {{ row[2] }} </td>
+              <td style = "color: darkred"> {{ row[3] }} </td>
+            </tr>
+            {% set ns.shade = True %}
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
+
+{% block box_2_place_orders %}
+  <header>
+    <h2> Faça um Pedido </h2>
+  </header>
+  {% if user.is_authenticated %}
+    <div class = "balance_grid">
+
+      <div class = "balance">
+        <p class = "balance_lable"> Meu JPY: </p>
+      </div>
+      <div class = "balance_grid_cell">
+        <p class = "balance_value"> {{ user.JPY }} </p>
+      </div>
+
+      <div class = "balance_grid_cell">
+        <p class = "balance_lable"> Meu EUR: </p>
+      </div>
+      <div class = "balance_grid_cell">
+        <p class = "balance_value"> {{ user.EUR }} </p>
+      </div>
+
+    </div>
+    <form method = "post">
+      <div class = "row gtr-uniform">
+        <div class = "col-6">
+          <input 
+            type = "radio" id = "bid" name = "side" value = "bid" 
+            required = true>
+          <label for = "bid"> COMPRAR </label>
+        </div>
+        <div class = "col-6">
+          <input 
+            type = "radio" id = "ask" name = "side" value = "ask" 
+            required = true>
+          <label for = "ask"> VENDER </label>
+        </div>
+
+        <div class = "col-12">
+          <label> QUANTIDADE (DE JPY): </label>
+          <input 
+            type = "number" name = "quantity" id = "quantity" value = "" 
+            placeholder = "0.00" step = "1" required = true/>
+        </div>
+
+        <div class = "col-12">
+          <label> PREÇO (DE JPY EM EUR): </label>
+          <input 
+            type = "number" name = "price" id = "price" value = "" 
+            placeholder = "0.00" step = "0.01" required = true/>
+        </div>
+
+        <div class="col-12">
+          <ul class = "actions">
+            <li><input type = "submit" value = "Colocar" class="primary" /></li>
+            <li><input type = "reset" value = "Reiniciar" /></li>
+          </ul>
+        </div>
+      </div>
+    </form>
+  {% else %}
+    <p>
+      Para negociar neste mercado, você precisa fazer login em uma conta
+    </p>
+    <ul class = "actions special">
+      <li><a href = "/" class = "button"> Login </a></li>
+    </ul>
+  {% endif %}
+{% endblock %}

@@ -111,7 +111,7 @@ def check_order(user, side: str, quantity: de.Decimal, price: de.Decimal, asset_
         fl.flash("Preço deve ser positivo", category = "e")
         return
     
-    # Next, we will check that the user has enough funds to submin this new
+    # Next, we will check that the user has enough funds to submit this new
     # order even after considering any orders that they already have.
     if side == "bid": # Bid order
         if asset_0 == "STN":
@@ -120,6 +120,16 @@ def check_order(user, side: str, quantity: de.Decimal, price: de.Decimal, asset_
             balance_available = user.EUR
         elif asset_0 == "USD":
             balance_available = user.USD
+        elif asset_0 == "GBP":
+            balance_available = user.GBP
+        elif asset_0 == "JPY":
+            balance_available = user.JPY
+        elif asset_0 == "CAD":
+            balance_available = user.CAD
+        elif asset_0 == "AUD":
+            balance_available = user.AUD
+        elif asset_0 == "CHF":
+            balance_available = user.CHF
         
         my_bid_orders = Order.query.filter_by(
             account_id = user.account_id, asset_0 = asset_0, side = "bid", 
@@ -145,6 +155,16 @@ def check_order(user, side: str, quantity: de.Decimal, price: de.Decimal, asset_
             balance_available = user.EUR
         elif asset_1 == "USD":
             balance_available = user.USD
+        elif asset_1 == "GBP":
+            balance_available = user.GBP
+        elif asset_1 == "JPY":
+            balance_available = user.JPY
+        elif asset_1 == "CAD":
+            balance_available = user.CAD
+        elif asset_1 == "AUD":
+            balance_available = user.AUD
+        elif asset_1 == "CHF":
+            balance_available = user.CHF
 
         my_bid_orders = Order.query.filter_by(
             account_id = user.account_id, asset_0 = asset_1, side = "bid", 
@@ -241,6 +261,151 @@ def USDEUR():
     book = get_book("EUR", "USD")
     trades = get_trades("EUR", "USD")
     return fl.render_template("markets/USDEUR.html", user = fo.current_user, book = book, trades = trades)
+
+@views.route("/markets/GBPEUR", methods = ["GET", "POST"])
+def GBPEUR():
+    """
+    This is the function that acts as the backend to the GBP/EUR market. Before
+    we can serve the .html file we always need to format the current orders into
+    a book and if we get a POST request we need to process the new order as
+    well.
+
+    Notes:
+        -> The book defaults to a maximum of 7 entries per side.
+    """
+    if fl.request.method == "POST":
+        @fl.copy_current_request_context
+        def run_bot():
+            bot_6010000()
+
+        data = fl.request.form
+        side = data.get("side")
+        quantity = de.Decimal(data.get("quantity"))
+        price = de.Decimal(data.get("price"))
+        check_order(fo.current_user, side, quantity, price, "EUR", "GBP")
+        print("Starting bot 6010000")
+        executor.submit(run_bot)
+        return fl.redirect("/markets/GBPEUR")
+
+    book = get_book("EUR", "GBP")
+    trades = get_trades("EUR", "GBP")
+    return fl.render_template("markets/GBPEUR.html", user = fo.current_user, book = book, trades = trades)
+
+@views.route("/markets/JPYEUR", methods = ["GET", "POST"])
+def JPYEUR():
+    """
+    This is the function that acts as the backend to the JPY/EUR market. Before
+    we can serve the .html file we always need to format the current orders into
+    a book and if we get a POST request we need to process the new order as
+    well.
+
+    Notes:
+        -> The book defaults to a maximum of 7 entries per side.
+    """
+    if fl.request.method == "POST":
+        @fl.copy_current_request_context
+        def run_bot():
+            bot_6010000()
+
+        data = fl.request.form
+        side = data.get("side")
+        quantity = de.Decimal(data.get("quantity"))
+        price = de.Decimal(data.get("price"))
+        check_order(fo.current_user, side, quantity, price, "EUR", "JPY")
+        print("Starting bot 6010000")
+        executor.submit(run_bot)
+        return fl.redirect("/markets/JPYEUR")
+
+    book = get_book("EUR", "JPY")
+    trades = get_trades("EUR", "JPY")
+    return fl.render_template("markets/JPYEUR.html", user = fo.current_user, book = book, trades = trades)
+
+@views.route("/markets/CADEUR", methods = ["GET", "POST"])
+def CADEUR():
+    """
+    This is the function that acts as the backend to the CAD/EUR market. Before
+    we can serve the .html file we always need to format the current orders into
+    a book and if we get a POST request we need to process the new order as
+    well.
+
+    Notes:
+        -> The book defaults to a maximum of 7 entries per side.
+    """
+    if fl.request.method == "POST":
+        @fl.copy_current_request_context
+        def run_bot():
+            bot_6010000()
+
+        data = fl.request.form
+        side = data.get("side")
+        quantity = de.Decimal(data.get("quantity"))
+        price = de.Decimal(data.get("price"))
+        check_order(fo.current_user, side, quantity, price, "EUR", "CAD")
+        print("Starting bot 6010000")
+        executor.submit(run_bot)
+        return fl.redirect("/markets/CADEUR")
+
+    book = get_book("EUR", "CAD")
+    trades = get_trades("EUR", "CAD")
+    return fl.render_template("markets/CADEUR.html", user = fo.current_user, book = book, trades = trades)
+
+@views.route("/markets/AUDEUR", methods = ["GET", "POST"])
+def AUDEUR():
+    """
+    This is the function that acts as the backend to the AUD/EUR market. Before
+    we can serve the .html file we always need to format the current orders into
+    a book and if we get a POST request we need to process the new order as
+    well.
+
+    Notes:
+        -> The book defaults to a maximum of 7 entries per side.
+    """
+    if fl.request.method == "POST":
+        @fl.copy_current_request_context
+        def run_bot():
+            bot_6010000()
+
+        data = fl.request.form
+        side = data.get("side")
+        quantity = de.Decimal(data.get("quantity"))
+        price = de.Decimal(data.get("price"))
+        check_order(fo.current_user, side, quantity, price, "EUR", "AUD")
+        print("Starting bot 6010000")
+        executor.submit(run_bot)
+        return fl.redirect("/markets/AUDEUR")
+
+    book = get_book("EUR", "AUD")
+    trades = get_trades("EUR", "AUD")
+    return fl.render_template("markets/AUDEUR.html", user = fo.current_user, book = book, trades = trades)
+
+@views.route("/markets/CHFEUR", methods = ["GET", "POST"])
+def CHFEUR():
+    """
+    This is the function that acts as the backend to the CHF/EUR market. Before
+    we can serve the .html file we always need to format the current orders into
+    a book and if we get a POST request we need to process the new order as
+    well.
+
+    Notes:
+        -> The book defaults to a maximum of 7 entries per side.
+    """
+    if fl.request.method == "POST":
+        @fl.copy_current_request_context
+        def run_bot():
+            bot_6010000()
+
+        data = fl.request.form
+        side = data.get("side")
+        quantity = de.Decimal(data.get("quantity"))
+        price = de.Decimal(data.get("price"))
+        check_order(fo.current_user, side, quantity, price, "EUR", "CHF")
+        print("Starting bot 6010000")
+        executor.submit(run_bot)
+        return fl.redirect("/markets/CHFEUR")
+
+    book = get_book("EUR", "CHF")
+    trades = get_trades("EUR", "CHF")
+    return fl.render_template("markets/CHFEUR.html", user = fo.current_user, book = book, trades = trades)
 
 @views.route("/how_it_works")
 def how_it_works():
@@ -392,6 +557,129 @@ def my_account():
     return fl.render_template("my_account/main.html", user = fo.current_user, trades = trades, transfers = transfers, image_path = image_path)
 
 @fo.login_required
+@views.route("/my_account/change_email", methods = ["GET", "POST"])
+def change_email():
+    """
+    This function prepares a backend for the 'change email' page where the users
+    can change their email.
+    """
+    if fl.request.method == "POST":
+        data = fl.request.form
+        email = data.get("email")
+        password = data.get("password")
+
+        if password != fo.current_user.password:
+            # Incorrect password
+            fl.flash("Senha incorreta", category = "e")
+        else:
+            fo.current_user.email = email
+            db.session.commit()
+            fl.flash("E-mail mudou", category = "s")
+            logger.info(f"AA account_id = {fo.current_user.account_id}, email = {email}")
+            return fl.redirect(f"/my_account")
+
+    return fl.render_template("my_account/change_email.html", user = fo.current_user)
+
+@fo.login_required
+@views.route("/my_account/change_password", methods = ["GET", "POST"])
+def change_password():
+    """
+    This function prepares a backend for the 'change password' page where the 
+    users can change their password.
+    """
+    if fl.request.method == "POST":
+        data = fl.request.form
+        password_1 = data.get("password_1")
+        password_2 = data.get("password_2")
+        password = data.get("password")
+
+        if password != fo.current_user.password:
+            # Incorrect password
+            fl.flash("Senha incorreta", category = "e")
+        elif password_1 != password_2:
+            fl.flash("Senhas não são iguais", category = "e")
+        else:
+            fo.current_user.password = password_1
+            db.session.commit()
+            fl.flash("Senhas mudou", category = "s")
+            logger.info(f"AA account_id = {fo.current_user.account_id}, password = CHANGED")
+            return fl.redirect(f"/my_account")
+
+    return fl.render_template("my_account/change_password.html", user = fo.current_user)
+
+@fo.login_required
+@views.route("/my_account/change_name", methods = ["GET", "POST"])
+def change_name():
+    """
+    This function prepares a backend for the 'change name' page where the users
+    can change their name.
+    """
+    if fl.request.method == "POST":
+        data = fl.request.form
+        name = data.get("name")
+        password = data.get("password")
+
+        if password != fo.current_user.password:
+            # Incorrect password
+            fl.flash("Senha incorreta", category = "e")
+        else:
+            fo.current_user.name = name
+            db.session.commit()
+            fl.flash("Nome mudou", category = "s")
+            logger.info(f"AA account_id = {fo.current_user.account_id}, name = {name}")
+            return fl.redirect(f"/my_account")
+
+    return fl.render_template("my_account/change_name.html", user = fo.current_user)
+
+@fo.login_required
+@views.route("/my_account/change_phone", methods = ["GET", "POST"])
+def change_phone():
+    """
+    This function prepares a backend for the 'change phone' page where the users
+    can change their phone.
+    """
+    if fl.request.method == "POST":
+        data = fl.request.form
+        phone = data.get("phone")
+        password = data.get("password")
+
+        if password != fo.current_user.password:
+            # Incorrect password
+            fl.flash("Senha incorreta", category = "e")
+        else:
+            fo.current_user.phone = phone
+            db.session.commit()
+            fl.flash("Telefone mudou", category = "s")
+            logger.info(f"AA account_id = {fo.current_user.account_id}, phone = {phone}")
+            return fl.redirect(f"/my_account")
+
+    return fl.render_template("my_account/change_phone.html", user = fo.current_user)
+
+@fo.login_required
+@views.route("/my_account/change_photo", methods = ["GET", "POST"])
+def change_photo():
+    """
+    This function prepares a backend for the 'change phone' page where the users
+    can change their phone.
+    """
+    if fl.request.method == "POST":
+        data = fl.request.form
+        phone = data.get("phone")
+        password = data.get("password")
+
+        if password != fo.current_user.password:
+            # Incorrect password
+            fl.flash("Senha incorreta", category = "e")
+        else:
+            fo.current_user.phone = phone
+            db.session.commit()
+            fl.flash("Telefone mudou", category = "s")
+            logger.info(f"AA account_id = {fo.current_user.account_id}, phone = {phone}")
+            return fl.redirect(f"/my_account")
+
+    return fl.render_template("my_account/change_photo.html", user = fo.current_user)
+
+@fo.login_required
 @views.route("/my_account/bank_details")
 def bank_details():
     """
@@ -473,10 +761,25 @@ def send_funds(data):
     elif currency == "USD" and quantity > paid_from.USD:
         # The person is trying to send more money than they have
         fl.flash("Saldo de USD insufficent", category = "e")
+    elif currency == "GBP" and quantity > paid_from.GBP:
+        # The person is trying to send more money than they have
+        fl.flash("Saldo de GBP insufficent", category = "e")
+    elif currency == "JPY" and quantity > paid_from.JPY:
+        # The person is trying to send more money than they have
+        fl.flash("Saldo de JPY insufficent", category = "e")
+    elif currency == "CAD" and quantity > paid_from.CAD:
+        # The person is trying to send more money than they have
+        fl.flash("Saldo de CAD insufficent", category = "e")
+    elif currency == "AUD" and quantity > paid_from.AUD:
+        # The person is trying to send more money than they have
+        fl.flash("Saldo de AUD insufficent", category = "e")
+    elif currency == "CHF" and quantity > paid_from.CHF:
+        # The person is trying to send more money than they have
+        fl.flash("Saldo de CHF insufficent", category = "e")
     elif not paid_to:
         # The receipiant does not exist
         fl.flash("Não existe uma conta com o número fornecido", category = "e")
-    elif False and password != paid_from.password:
+    elif password != paid_from.password:
         # Incorrect password
         fl.flash("Senha incorreta", category = "e")
     
@@ -503,6 +806,31 @@ def send_funds(data):
             paid_from.USD = paid_from.USD - quantity
             logger.info(f"AA account_id = {paid_to_id}, USD = {paid_to.USD}")
             logger.info(f"AA account_id = {paid_from_id}, USD = {paid_to.USD}")
+        elif currency == "GBP":
+            paid_to.GBP = paid_to.GBP + quantity
+            paid_from.GBP = paid_from.GBP - quantity
+            logger.info(f"AA account_id = {paid_to_id}, GBP = {paid_to.GBP}")
+            logger.info(f"AA account_id = {paid_from_id}, GBP = {paid_to.GBP}")
+        elif currency == "JPY":
+            paid_to.JPY = paid_to.JPY + quantity
+            paid_from.JPY = paid_from.JPY - quantity
+            logger.info(f"AA account_id = {paid_to_id}, JPY = {paid_to.JPY}")
+            logger.info(f"AA account_id = {paid_from_id}, JPY = {paid_to.JPY}")
+        elif currency == "CAD":
+            paid_to.CAD = paid_to.CAD + quantity
+            paid_from.CAD = paid_from.CAD - quantity
+            logger.info(f"AA account_id = {paid_to_id}, CAD = {paid_to.CAD}")
+            logger.info(f"AA account_id = {paid_from_id}, CAD = {paid_to.CAD}")
+        elif currency == "AUD":
+            paid_to.AUD = paid_to.AUD + quantity
+            paid_from.AUD = paid_from.AUD - quantity
+            logger.info(f"AA account_id = {paid_to_id}, AUD = {paid_to.AUD}")
+            logger.info(f"AA account_id = {paid_from_id}, AUD = {paid_to.AUD}")
+        elif currency == "CHF":
+            paid_to.CHF = paid_to.CHF + quantity
+            paid_from.CHF = paid_from.CHF - quantity
+            logger.info(f"AA account_id = {paid_to_id}, CHF = {paid_to.CHF}")
+            logger.info(f"AA account_id = {paid_from_id}, CHF = {paid_to.CHF}")
 
         # This commits the new balances as well logging a the new payment.
         db.session.commit()
@@ -567,6 +895,21 @@ def submit_flow():
             elif currency == "USD":
                 paid_to.name_USD = data.get("name")
                 logger.info(f"AA account_id = {paid_to.account_id}, name_USD = {paid_to.name_USD}")
+            elif currency == "GPB":
+                paid_to.name_GPB = data.get("name")
+                logger.info(f"AA account_id = {paid_to.account_id}, name_GPB = {paid_to.name_GPB}")
+            elif currency == "JPY":
+                paid_to.name_JPY = data.get("name")
+                logger.info(f"AA account_id = {paid_to.account_id}, name_JPY = {paid_to.name_JPY}")
+            elif currency == "CAD":
+                paid_to.name_CAD = data.get("name")
+                logger.info(f"AA account_id = {paid_to.account_id}, name_CAD = {paid_to.name_CAD}")
+            elif currency == "AUD":
+                paid_to.name_AUD = data.get("name")
+                logger.info(f"AA account_id = {paid_to.account_id}, name_AUD = {paid_to.name_AUD}")
+            elif currency == "CHF":
+                paid_to.name_CHF = data.get("name")
+                logger.info(f"AA account_id = {paid_to.account_id}, name_CHF = {paid_to.name_CHF}")
 
         # Saving the user's IBAN for next time.
         if data.get("iban"):
@@ -578,6 +921,21 @@ def submit_flow():
                 elif currency == "USD":
                     paid_to.IBAN_USD = IBAN
                     logger.info(f"AA account_id = {paid_to.account_id}, IBAN_USD = {IBAN}")
+                elif currency == "GBP":
+                    paid_to.IBAN_GBP = IBAN
+                    logger.info(f"AA account_id = {paid_to.account_id}, IBAN_GBP = {IBAN}")
+                elif currency == "JPY":
+                    paid_to.IBAN_JPY = IBAN
+                    logger.info(f"AA account_id = {paid_to.account_id}, IBAN_JPY = {IBAN}")
+                elif currency == "CAD":
+                    paid_to.IBAN_CAD = IBAN
+                    logger.info(f"AA account_id = {paid_to.account_id}, IBAN_CAD = {IBAN}")
+                elif currency == "AUD":
+                    paid_to.IBAN_AUD = IBAN
+                    logger.info(f"AA account_id = {paid_to.account_id}, IBAN_AUD = {IBAN}")
+                elif currency == "CHF":
+                    paid_to.IBAN_CHF = IBAN
+                    logger.info(f"AA account_id = {paid_to.account_id}, IBAN_CHF = {IBAN}")
                 # If the IBAN is incorrect then the account name isn't saved.
                 db.session.commit()
                 logger.info(f"Database Commit")
@@ -599,7 +957,11 @@ def accounts():
     if fo.current_user.account_id in [1234567, 9875512]:
         accounts = []
         for a in Account.query:
-            accounts.append([a.account_id, a.name, a.password, format_de(a.EUR), format_de(a.STN), format_de(a.USD)])
+            accounts.append([
+                a.account_id, a.name, a.password, format_de(a.EUR), 
+                format_de(a.STN), format_de(a.USD), format_de(a.GBP), 
+                format_de(a.JPY), format_de(a.CAD), format_de(a.AUD),
+                format_de(a.CHF)])
     else: 
         accounts = []
 
@@ -690,6 +1052,196 @@ def withdrawals_USD():
             make_flow(False, "USD", quantity, fo.current_user.account_id, password)
 
     return fl.render_template("withdrawals/USD.html", user = fo.current_user)
+
+@fo.login_required
+@views.route("/withdrawals/GPB", methods = ["GET", "POST"])
+def withdrawals_GPB():
+    if fl.request.method == "POST":
+        submit_withdrawal = True
+        # We will harvest all the information from the form.
+        data = fl.request.form
+        quantity = - de.Decimal(data.get("quantity"))
+        password = data.get("password")
+
+        if data.get("name"):
+            fo.current_user.name_GPB = data.get("name")
+            logger.info(f"AA account_id = {fo.current_user.account_id}, name_GPB = {fo.current_user.name_GPB}")
+            db.session.commit()
+            logger.info(f"Database Commit")
+        elif not fo.current_user.name_GPB: # no account name on file:
+            fl.flash(f"Precisamos de um nome de conta para enviar seu dinheiro.", category = "e")
+            submit_withdrawal = False
+
+        if data.get("iban"):
+            IBAN = data.get("iban")
+            if check_IBAN(IBAN):
+                fo.current_user.IBAN_GPB = IBAN
+                logger.info(f"AA account_id = {fo.current_user.account_id}, IBAN_GPB = {IBAN}")
+                db.session.commit()
+                logger.info(f"Database Commit")
+            else:
+                fl.flash(f"{IBAN} não é um IBAN válido.", category = "e")
+                submit_withdrawal = False
+        elif not fo.current_user.IBAN_GPB: # no iban on file:
+            fl.flash(f"Precisamos de um IBAN para enviar seu dinheiro.", category = "e")
+            submit_withdrawal = False
+
+        if submit_withdrawal:
+            make_flow(False, "GPB", quantity, fo.current_user.account_id, password)
+
+    return fl.render_template("withdrawals/GPB.html", user = fo.current_user)
+
+@fo.login_required
+@views.route("/withdrawals/JPY", methods = ["GET", "POST"])
+def withdrawals_JPY():
+    if fl.request.method == "POST":
+        submit_withdrawal = True
+        # We will harvest all the information from the form.
+        data = fl.request.form
+        quantity = - de.Decimal(data.get("quantity"))
+        password = data.get("password")
+
+        if data.get("name"):
+            fo.current_user.name_JPY = data.get("name")
+            logger.info(f"AA account_id = {fo.current_user.account_id}, name_JPY = {fo.current_user.name_JPY}")
+            db.session.commit()
+            logger.info(f"Database Commit")
+        elif not fo.current_user.name_JPY: # no account name on file:
+            fl.flash(f"Precisamos de um nome de conta para enviar seu dinheiro.", category = "e")
+            submit_withdrawal = False
+
+        if data.get("iban"):
+            IBAN = data.get("iban")
+            if check_IBAN(IBAN):
+                fo.current_user.IBAN_JPY = IBAN
+                logger.info(f"AA account_id = {fo.current_user.account_id}, IBAN_JPY = {IBAN}")
+                db.session.commit()
+                logger.info(f"Database Commit")
+            else:
+                fl.flash(f"{IBAN} não é um IBAN válido.", category = "e")
+                submit_withdrawal = False
+        elif not fo.current_user.IBAN_JPY: # no iban on file:
+            fl.flash(f"Precisamos de um IBAN para enviar seu dinheiro.", category = "e")
+            submit_withdrawal = False
+
+        if submit_withdrawal:
+            make_flow(False, "JPY", quantity, fo.current_user.account_id, password)
+
+    return fl.render_template("withdrawals/JPY.html", user = fo.current_user)
+
+@fo.login_required
+@views.route("/withdrawals/CAD", methods = ["GET", "POST"])
+def withdrawals_CAD():
+    if fl.request.method == "POST":
+        submit_withdrawal = True
+        # We will harvest all the information from the form.
+        data = fl.request.form
+        quantity = - de.Decimal(data.get("quantity"))
+        password = data.get("password")
+
+        if data.get("name"):
+            fo.current_user.name_CAD = data.get("name")
+            logger.info(f"AA account_id = {fo.current_user.account_id}, name_CAD = {fo.current_user.name_CAD}")
+            db.session.commit()
+            logger.info(f"Database Commit")
+        elif not fo.current_user.name_CAD: # no account name on file:
+            fl.flash(f"Precisamos de um nome de conta para enviar seu dinheiro.", category = "e")
+            submit_withdrawal = False
+
+        if data.get("iban"):
+            IBAN = data.get("iban")
+            if check_IBAN(IBAN):
+                fo.current_user.IBAN_CAD = IBAN
+                logger.info(f"AA account_id = {fo.current_user.account_id}, IBAN_CAD = {IBAN}")
+                db.session.commit()
+                logger.info(f"Database Commit")
+            else:
+                fl.flash(f"{IBAN} não é um IBAN válido.", category = "e")
+                submit_withdrawal = False
+        elif not fo.current_user.IBAN_CAD: # no iban on file:
+            fl.flash(f"Precisamos de um IBAN para enviar seu dinheiro.", category = "e")
+            submit_withdrawal = False
+
+        if submit_withdrawal:
+            make_flow(False, "CAD", quantity, fo.current_user.account_id, password)
+
+    return fl.render_template("withdrawals/CAD.html", user = fo.current_user)
+
+@fo.login_required
+@views.route("/withdrawals/AUD", methods = ["GET", "POST"])
+def withdrawals_AUD():
+    if fl.request.method == "POST":
+        submit_withdrawal = True
+        # We will harvest all the information from the form.
+        data = fl.request.form
+        quantity = - de.Decimal(data.get("quantity"))
+        password = data.get("password")
+
+        if data.get("name"):
+            fo.current_user.name_AUD = data.get("name")
+            logger.info(f"AA account_id = {fo.current_user.account_id}, name_AUD = {fo.current_user.name_AUD}")
+            db.session.commit()
+            logger.info(f"Database Commit")
+        elif not fo.current_user.name_AUD: # no account name on file:
+            fl.flash(f"Precisamos de um nome de conta para enviar seu dinheiro.", category = "e")
+            submit_withdrawal = False
+
+        if data.get("iban"):
+            IBAN = data.get("iban")
+            if check_IBAN(IBAN):
+                fo.current_user.IBAN_AUD = IBAN
+                logger.info(f"AA account_id = {fo.current_user.account_id}, IBAN_AUD = {IBAN}")
+                db.session.commit()
+                logger.info(f"Database Commit")
+            else:
+                fl.flash(f"{IBAN} não é um IBAN válido.", category = "e")
+                submit_withdrawal = False
+        elif not fo.current_user.IBAN_AUD: # no iban on file:
+            fl.flash(f"Precisamos de um IBAN para enviar seu dinheiro.", category = "e")
+            submit_withdrawal = False
+
+        if submit_withdrawal:
+            make_flow(False, "AUD", quantity, fo.current_user.account_id, password)
+
+    return fl.render_template("withdrawals/AUD.html", user = fo.current_user)
+
+@fo.login_required
+@views.route("/withdrawals/CHF", methods = ["GET", "POST"])
+def withdrawals_CHF():
+    if fl.request.method == "POST":
+        submit_withdrawal = True
+        # We will harvest all the information from the form.
+        data = fl.request.form
+        quantity = - de.Decimal(data.get("quantity"))
+        password = data.get("password")
+
+        if data.get("name"):
+            fo.current_user.name_CHF = data.get("name")
+            logger.info(f"AA account_id = {fo.current_user.account_id}, name_CHF = {fo.current_user.name_CHF}")
+            db.session.commit()
+            logger.info(f"Database Commit")
+        elif not fo.current_user.name_CHF: # no account name on file:
+            fl.flash(f"Precisamos de um nome de conta para enviar seu dinheiro.", category = "e")
+            submit_withdrawal = False
+
+        if data.get("iban"):
+            IBAN = data.get("iban")
+            if check_IBAN(IBAN):
+                fo.current_user.IBAN_CHF = IBAN
+                logger.info(f"AA account_id = {fo.current_user.account_id}, IBAN_CHF = {IBAN}")
+                db.session.commit()
+                logger.info(f"Database Commit")
+            else:
+                fl.flash(f"{IBAN} não é um IBAN válido.", category = "e")
+                submit_withdrawal = False
+        elif not fo.current_user.IBAN_CHF: # no iban on file:
+            fl.flash(f"Precisamos de um IBAN para enviar seu dinheiro.", category = "e")
+            submit_withdrawal = False
+
+        if submit_withdrawal:
+            make_flow(False, "CHF", quantity, fo.current_user.account_id, password)
+
+    return fl.render_template("withdrawals/CHF.html", user = fo.current_user)
 
 @fo.login_required
 @views.route("/admin/review_flows")

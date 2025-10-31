@@ -1,0 +1,38 @@
+{% extends "my_account/main.html" %}
+
+{% block content %} 
+  <article class = "post featured">
+    <header class = "major">
+      <section class = "post">
+        <header class = "major">
+          <h1> Mude seu E-mail </h1>
+        </header>
+        <form method = "post">
+          <div class = "row gtr-uniform">
+            <div class = "col-6 col-12-small">
+              <label> EMAIL: </label>
+              <input 
+                type = "email" name = "email" id = "email" value = "" 
+                placeholder = "exemplo@protonmail.com"/>
+            </div>
+    
+            <div class = "col-6 col-12-small">
+              <label> SUA SENHA: </label>
+              <input 
+                type = "password" name = "password" id = "password" value = "" 
+                placeholder = "*******" required = true/>
+            </div>
+    
+            <div class = "col-12">
+              <ul class = "actions">
+                <li><input type = "submit" value = "Enviar" class = "primary" /></li>
+                <li><input type = "reset" value = "Reiniciar" /></li>
+              </ul>
+            </div>
+          </div>
+        </form>
+      </section>
+    </header>
+  </article>
+
+{% endblock %}

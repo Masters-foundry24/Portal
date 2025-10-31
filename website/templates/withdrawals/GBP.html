@@ -5,12 +5,12 @@
     <header class = "major">
       <section class = "post">
         <header class = "major">
-          <h1> Retiradas de USD </h1>
+          <h1> Retiradas de GBP </h1>
         </header>
         <p> 
-          O Portal vai enviar uma transferência bancária eletrônica em dolares 
-          para uma conta nos Estados Unidos. Não será taxas adicionais por um 
-          banco nos EU, contas de dolares fora da América pode haver taxas 
+          O Portal vai enviar uma transferência bancária eletrônica em libres 
+          para uma conta no Reino Unido. Não será taxas adicionais por um banco 
+          no Reino Unido, contas de libres fora do Reino Unido pode haver taxas 
           adicionais dos bancos lá. Se você precisa de ajuda enviar uma mensagem 
           para um agente (<a href = "https://wa.me/2399949365">+239 994 9365</a>).
         </p>
@@ -25,7 +25,7 @@
             <div class="col-6 col-12-small">
               <label> VALOR DISPONÍVEL: </label>
               <div class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
-                <p> {{ user.USD }} </p>
+                <p> {{ user.GBP }} </p>
               </div>
             </div>
             
@@ -41,10 +41,10 @@
             </div-->
   
             <div id = "name_space" class = "col-6 col-12-small">
-              {% if user.name_USD %}
+              {% if user.name_GBP %}
                 <label id = "name_lable"> Nome da Conta <a href = "#" onclick = "change_name();">(mudar)</a>: </label>
                 <div id = "name_box" class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
-                  <p> {{ user.name_USD }} </p>
+                  <p> {{ user.name_GBP }} </p>
                 </div>
               {% else %}
                 <label> Nome da Conta: </label>
@@ -55,10 +55,10 @@
             </div>
   
             <div id = "iban_space" class = "col-6 col-12-small">
-              {% if user.IBAN_USD %}
+              {% if user.IBAN_GBP %}
                 <label id = "iban_lable"> IBAN da Conta <a href = "#" onclick = "change_iban();">(mudar)</a>: </label>
                 <div id = "iban_box" class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
-                  <p> {{ user.IBAN_USD }} </p>
+                  <p> {{ user.IBAN_GBP }} </p>
                 </div>
               {% else %}
                 <label> IBAN da Conta: </label>

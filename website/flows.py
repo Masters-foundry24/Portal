@@ -44,6 +44,26 @@ def user_checks(currency, quantity, password, account):
         # The person is trying to withdraw more money than they have
         fl.flash("Saldo de USD insufficent", category = "e")
         return False
+    elif currency == "GBP" and account.GBP + quantity < de.Decimal("0"):
+        # The person is trying to withdraw more money than they have
+        fl.flash("Saldo de GBP insufficent", category = "e")
+        return False
+    elif currency == "JPY" and account.JPY + quantity < de.Decimal("0"):
+        # The person is trying to withdraw more money than they have
+        fl.flash("Saldo de JPY insufficent", category = "e")
+        return False
+    elif currency == "CAD" and account.CAD + quantity < de.Decimal("0"):
+        # The person is trying to withdraw more money than they have
+        fl.flash("Saldo de CAD insufficent", category = "e")
+        return False
+    elif currency == "AUD" and account.AUD + quantity < de.Decimal("0"):
+        # The person is trying to withdraw more money than they have
+        fl.flash("Saldo de AUD insufficent", category = "e")
+        return False
+    elif currency == "CHF" and account.CHF + quantity < de.Decimal("0"):
+        # The person is trying to withdraw more money than they have
+        fl.flash("Saldo de CHF insufficent", category = "e")
+        return False
     elif False:
         # Verify that the IBAN passes a checksum
         return False
@@ -66,6 +86,16 @@ def cancel_orders(account, currency, quantity):
         balance_available = account.EUR + quantity
     elif currency == "USD":
         balance_available = account.USD + quantity
+    elif currency == "GBP":
+        balance_available = account.GBP + quantity
+    elif currency == "JPY":
+        balance_available = account.JPY + quantity
+    elif currency == "CAD":
+        balance_available = account.CAD + quantity
+    elif currency == "AUD":
+        balance_available = account.AUD + quantity
+    elif currency == "CHF":
+        balance_available = account.CHF + quantity
     
     # Bid, orders that are using the currency to purchase something else.
     my_orders = Order.query.filter_by(
@@ -155,6 +185,21 @@ def make_flow(admin: bool, currency: str, quantity: de.Decimal, account_id: int,
         elif currency == "USD":
             account.USD = account.USD + quantity
             logger.info(f"AA account_id = {account_id}, USD = {account.USD}")
+        elif currency == "GBP":
+            account.GBP = account.GBP + quantity
+            logger.info(f"AA account_id = {account_id}, GBP = {account.GBP}")
+        elif currency == "JPY":
+            account.JPY = account.JPY + quantity
+            logger.info(f"AA account_id = {account_id}, JPY = {account.JPY}")
+        elif currency == "CAD":
+            account.CAD = account.CAD + quantity
+            logger.info(f"AA account_id = {account_id}, CAD = {account.CAD}")
+        elif currency == "AUD":
+            account.AUD = account.AUD + quantity
+            logger.info(f"AA account_id = {account_id}, AUD = {account.AUD}")
+        elif currency == "CHF":
+            account.CHF = account.CHF + quantity
+            logger.info(f"AA account_id = {account_id}, CHF = {account.CHF}")
         if admin:
             fl.flash(f"{currency} {abs(quantity)} tirou de conta {account_id}", category = "s")
         else:
@@ -176,6 +221,26 @@ def get_flow_table():
             a = Account.query.filter_by(account_id = f.paid_to_id).first()
             IBAN = a.IBAN_USD
             name = a.name_USD
+        elif f.currency == "GBP": # Withdrawal
+            a = Account.query.filter_by(account_id = f.paid_to_id).first()
+            IBAN = a.IBAN_GBP
+            name = a.name_GBP
+        elif f.currency == "JPY": # Withdrawal
+            a = Account.query.filter_by(account_id = f.paid_to_id).first()
+            IBAN = a.IBAN_JPY
+            name = a.name_JPY
+        elif f.currency == "CAD": # Withdrawal
+            a = Account.query.filter_by(account_id = f.paid_to_id).first()
+            IBAN = a.IBAN_CAD
+            name = a.name_CAD
+        elif f.currency == "AUD": # Withdrawal
+            a = Account.query.filter_by(account_id = f.paid_to_id).first()
+            IBAN = a.IBAN_AUD
+            name = a.name_AUD
+        elif f.currency == "CHF": # Withdrawal
+            a = Account.query.filter_by(account_id = f.paid_to_id).first()
+            IBAN = a.IBAN_CHF
+            name = a.name_CHF
         else:
             IBAN, name = "", ""
         table.append([

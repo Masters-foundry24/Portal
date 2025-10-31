@@ -28,15 +28,45 @@ def bot_order(user, side: str, quantity: de.Decimal, price: de.Decimal, asset_0:
     # market. Note, once we expand to having more than one market this 
     # function will need to be changed to consider all the user's orders.
     my_orders = Order.query.filter_by(
-        account_id = user.account_id, asset_0 = "STN", asset_1 = "EUR", 
+        account_id = user.account_id, asset_0 = asset_0, asset_1 = asset_1, 
         side = side, active = True)
 
     if side == "bid":
         balance_used = sum([o.quantity * o.price for o in my_orders])
-        quantity = math.floor(min(quantity, (user.STN - balance_used) / price))
+        if asset_0 == "STN":
+            quantity = math.floor(min(quantity, (user.STN - balance_used) / price))
+        elif asset_0 == "EUR":
+            quantity = math.floor(min(quantity, (user.EUR - balance_used) / price))
+        elif asset_0 == "USD":
+            quantity = math.floor(min(quantity, (user.USD - balance_used) / price))
+        elif asset_0 == "GBP":
+            quantity = math.floor(min(quantity, (user.GBP - balance_used) / price))
+        elif asset_0 == "JPY":
+            quantity = math.floor(min(quantity, (user.JPY - balance_used) / price))
+        elif asset_0 == "CAD":
+            quantity = math.floor(min(quantity, (user.CAD - balance_used) / price))
+        elif asset_0 == "AUD":
+            quantity = math.floor(min(quantity, (user.AUD - balance_used) / price))
+        elif asset_0 == "CHF":
+            quantity = math.floor(min(quantity, (user.CHF - balance_used) / price))
     else: # side == "ask"
         balance_used = sum([o.quantity for o in my_orders])
-        quantity = math.floor(min(quantity, user.EUR - balance_used))
+        if asset_0 == "STN":
+            quantity = math.floor(min(quantity, user.STN - balance_used))
+        elif asset_1 == "EUR":
+            quantity = math.floor(min(quantity, user.EUR - balance_used))
+        elif asset_1 == "USD":
+            quantity = math.floor(min(quantity, user.USD - balance_used))
+        elif asset_1 == "GBP":
+            quantity = math.floor(min(quantity, user.GBP - balance_used))
+        elif asset_1 == "JPY":
+            quantity = math.floor(min(quantity, user.JPY - balance_used))
+        elif asset_1 == "CAD":
+            quantity = math.floor(min(quantity, user.CAD - balance_used))
+        elif asset_1 == "AUD":
+            quantity = math.floor(min(quantity, user.AUD - balance_used))
+        elif asset_1 == "CHF":
+            quantity = math.floor(min(quantity, user.CHF - balance_used))
 
     if quantity == de.Decimal("0"): # We have no funds available for this order.
         return False
@@ -109,7 +139,7 @@ class Deriviative_Market_Maker():
         ask_size = de.Decimal(math.floor(min(self.size, self.user.USD)))
         bid_size = de.Decimal(math.floor(min(self.size, self.user.EUR / bid_price)))
         
-        if self.bot.v1 == -1:
+        if self.bot.v1 in [-1, 0]:
             self.bot.v1 = bot_order(self.user, "ask", ask_size, ask_price, asset_0 = "EUR", asset_1 = "USD")
             db.session.commit()
         else:
@@ -122,7 +152,7 @@ class Deriviative_Market_Maker():
                 self.bot.v1 = bot_order(self.user, "ask", ask_size, ask_price, asset_0 = "EUR", asset_1 = "USD")
                 db.session.commit()
         
-        if self.bot.v2 == -1:
+        if self.bot.v2 in [-1, 0]:
             self.bot.v2 = bot_order(self.user, "bid", bid_size, bid_price, asset_0 = "EUR", asset_1 = "USD")
             db.session.commit()
         else:
@@ -133,7 +163,7 @@ class Deriviative_Market_Maker():
                 db.session.commit()
                 logger.info(f"Database Commit")
                 self.bot.v2 = bot_order(self.user, "bid", bid_size, bid_price, asset_0 = "EUR", asset_1 = "USD")
-                db.session.commit()            
+                db.session.commit()
         
 class Fixed_Interval_Market_Maker():
     """

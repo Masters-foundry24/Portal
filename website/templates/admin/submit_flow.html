@@ -23,8 +23,23 @@
                   <p id = "paid_to_name"> Digite o número da conta acima </p>
                 </div>
               </div>
-            
-              <div class = "col-2 col-4-small">
+
+              <div class="col-6 col-12-small">
+                <label> MOEDA: </label>
+                <select id = "currency" name = "currency">
+                  <option value = "" disabled selected > Escolhe uma moeda </option>
+                  <option value = "EUR"> EUR </option>
+                  <option value = "STN"> STN </option>
+                  <option value = "USD"> USD </option>
+                  <option value = "GBP"> GBP </option>
+                  <option value = "JPY"> JPY </option>
+                  <option value = "CAD"> CAD </option>
+                  <option value = "AUD"> AUD </option>
+                  <option value = "CHF"> CHF </option>
+                </select>
+              </div>
+              
+              <!--div class = "col-2 col-4-small">
                 <input 
                   type = "radio" id = "EUR" name = "currency" value = "EUR" required = true>
                 <label for = "EUR"> EUR </label>
@@ -39,6 +54,32 @@
                   type = "radio" id = "USD" name = "currency" value = "USD" required = true>
                 <label for = "USD"> USD </label>
               </div>
+              <div class = "col-2 col-4-small">
+                <input 
+                  type = "radio" id = "GBP" name = "currency" value = "GBP" required = true>
+                <label for = "GBP"> GBP </label>
+              </div>
+              <div class = "col-2 col-4-small">
+                <input 
+                  type = "radio" id = "JPY" name = "currency" value = "JPY" required = true>
+                <label for = "JPY"> JPY </label>
+              </div>
+              <div class = "col-2 col-4-small">
+                <input 
+                  type = "radio" id = "CAD" name = "currency" value = "CAD" required = true>
+                <label for = "CAD"> CAD </label>
+              </div>
+              <div class = "col-2 col-4-small">
+                <input 
+                  type = "radio" id = "AUD" name = "currency" value = "AUD" required = true>
+                <label for = "AUD"> AUD </label>
+              </div>
+              <div class = "col-2 col-4-small">
+                <input 
+                  type = "radio" id = "CHF" name = "currency" value = "CHF" required = true>
+                <label for = "CHF"> CHF </label>
+              </div-->
+
               <div class = "col-6 col-12-small">
                 <label> VALOR: </label>
                 <input 
@@ -96,13 +137,13 @@
     const account_name = document.getElementById("paid_to_name");
     const bank_name = document.getElementById("bank_name");
     const bank_iban = document.getElementById("bank_iban");
-    const radios = document.querySelectorAll('input[name="currency"]');
+    const dropdown = document.getElementById("currency");
 
     let lastAccountData = null; // store the latest fetch result
 
     function getSelectedCurrency() {
-      const checked = document.querySelector('input[name="currency"]:checked');
-      return checked ? checked.value : null;
+      const dropdown = document.getElementById("currency");
+      return dropdown ? dropdown.value : null;
     }
 
     function updateBank() {
@@ -122,10 +163,23 @@
         bank_name.textContent = lastAccountData.name_STN;
         bank_iban.textContent = lastAccountData.IBAN_STN;
       } else if (currency === "USD") {
-        console.log("arrived at the currency asignment")
-        console.log(lastAccountData.IBAN_USD)
         bank_name.textContent = lastAccountData.name_USD;
         bank_iban.textContent = lastAccountData.IBAN_USD;
+      } else if (currency === "GBP") {
+        bank_name.textContent = lastAccountData.name_GBP;
+        bank_iban.textContent = lastAccountData.IBAN_GBP;
+      } else if (currency === "JPY") {
+        bank_name.textContent = lastAccountData.name_JPY;
+        bank_iban.textContent = lastAccountData.IBAN_JPY;
+      } else if (currency === "CAD") {
+        bank_name.textContent = lastAccountData.name_CAD;
+        bank_iban.textContent = lastAccountData.IBAN_CAD;
+      } else if (currency === "AUD") {
+        bank_name.textContent = lastAccountData.name_AUD;
+        bank_iban.textContent = lastAccountData.IBAN_AUD;
+      } else if (currency === "CHF") {
+        bank_name.textContent = lastAccountData.name_CHF;
+        bank_iban.textContent = lastAccountData.IBAN_CHF;
       }
     }
     
@@ -148,9 +202,7 @@
     });
 
     // Fetch the account data again if the user selects a new currency
-    radios.forEach(radio => {
-      radio.addEventListener("change", updateBank);
-    });
+    dropdown.addEventListener("change", updateBank);
   </script>
 
   <!-- This next script is for if the user decides to change the IBAN or account name that we have on file.-->
