@@ -53,55 +53,55 @@
     <article>
       <!-- The list section shows the uses' current funds. -->
       <header>
-        <h2> Bens </h2>
+        <h2> Saldo Disponível </h2>
       </header>
       <div class = "row gtr-uniform">
         <div class = "col-6 col-12-medium col-6-small">
-          <a class = "button fit flag">
-            <span style = "display: block; text-align: left;"> Arroz 1kg </span>
-            <span style = "display: block; text-align: center; font-size: large;"> Db 20.00 </span>
+          <a style = "background-image: url('{{ url_for('static', filename='images/EUR.png') }}');" href = "#" class = "button fit flag">
+            <span style = "display: block; text-align: left;"> EUR </span>
+            <span style = "display: block; text-align: right; font-size: large;"> € {{ user.EUR }} </span>
           </a>
         </div>
         <div class = "col-6 col-12-medium col-6-small">
-          <a class = "button fit flag">
-            <span style = "display: block; text-align: left;"> Arroz 1kg </span>
-            <span style = "display: block; text-align: center; font-size: large;"> Db 20.00 </span>
+          <a style = "background-image: url('{{ url_for('static', filename='images/STN.png') }}');" href = "#" class = "button fit flag">
+            <span style = "display: block; text-align: left;"> STN </span>
+            <span style = "display: block; text-align: right; font-size: large;"> {{ user.STN }} Db </span>
           </a>
         </div>
         <div class = "col-6 col-12-medium col-6-small">
-          <a class = "button fit flag">
-            <span style = "display: block; text-align: left;"> Arroz 1kg </span>
-            <span style = "display: block; text-align: center; font-size: large;"> Db 20.00 </span>
+          <a style = "background-image: url('{{ url_for('static', filename='images/USD.png') }}');" href = "#" class = "button fit flag">
+            <span style = "display: block; text-align: left;"> USD </span>
+            <span style = "display: block; text-align: right; font-size: large;"> $ {{ user.USD }} </span>
           </a>
         </div>
         <div class = "col-6 col-12-medium col-6-small">
-          <a class = "button fit flag">
-            <span style = "display: block; text-align: left;"> Arroz 1kg </span>
-            <span style = "display: block; text-align: center; font-size: large;"> Db 20.00 </span>
+          <a style = "background-image: url('{{ url_for('static', filename='images/GBP.png') }}');" href = "#" class = "button fit flag">
+            <span style = "display: block; text-align: left;"> GBP </span>
+            <span style = "display: block; text-align: right; font-size: large;"> £ {{ user.GBP }} </span>
           </a>
         </div>
         <div class = "col-6 col-12-medium col-6-small">
-          <a class = "button fit flag">
-            <span style = "display: block; text-align: left;"> Arroz 1kg </span>
-            <span style = "display: block; text-align: center; font-size: large;"> Db 20.00 </span>
+          <a style = "background-image: url('{{ url_for('static', filename='images/JPY.png') }}');" href = "#" class = "button fit flag">
+            <span style = "display: block; text-align: left;"> JPY </span>
+            <span style = "display: block; text-align: right; font-size: large;"> ¥ {{ user.JPY }} </span>
           </a>
         </div>
         <div class = "col-6 col-12-medium col-6-small">
-          <a class = "button fit flag">
-            <span style = "display: block; text-align: left;"> Arroz 1kg </span>
-            <span style = "display: block; text-align: center; font-size: large;"> Db 20.00 </span>
+          <a style = "background-image: url('{{ url_for('static', filename='images/CAD.png') }}');" href = "#" class = "button fit flag">
+            <span style = "display: block; text-align: left;"> CAD </span>
+            <span style = "display: block; text-align: right; font-size: large;"> $ {{ user.CAD }} </span>
           </a>
         </div>
         <div class = "col-6 col-12-medium col-6-small">
-          <a class = "button fit flag">
-            <span style = "display: block; text-align: left;"> Arroz 1kg </span>
-            <span style = "display: block; text-align: center; font-size: large;"> Db 20.00 </span>
+          <a style = "background-image: url('{{ url_for('static', filename='images/AUD.png') }}');" href = "#" class = "button fit flag">
+            <span style = "display: block; text-align: left;"> AUD </span>
+            <span style = "display: block; text-align: right; font-size: large;"> $ {{ user.AUD }} </span>
           </a>
         </div>
         <div class = "col-6 col-12-medium col-6-small">
-          <a class = "button fit flag">
-            <span style = "display: block; text-align: left;"> Arroz 1kg </span>
-            <span style = "display: block; text-align: center; font-size: large;"> Db 20.00 </span>
+          <a style = "background-image: url('{{ url_for('static', filename='images/CHF.png') }}');" href = "#" class = "button fit flag">
+            <span style = "display: block; text-align: left;"> CHF </span>
+            <span style = "display: block; text-align: right; font-size: large;"> Fr. {{ user.CHF }} </span>
           </a>
         </div>
       </div>
