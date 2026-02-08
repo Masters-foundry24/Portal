@@ -546,12 +546,13 @@ def my_account():
     """
     This function prepares a backend for the 'my account' page where the users
     can see a dashboard summary of their assets.
-    """   
+    """
     trades = get_my_trades(fo.current_user.account_id, 7)
     transfers = get_transfers(fo.current_user.account_id, 7)
-    image_path = fl.current_app.root_path + f"/static/images/{fo.current_user.account_id}.png"
+    image_path = fl.current_app.root_path + \
+        f"/static/images/{fo.current_user.account_id}.{fo.current_user.photo}"
     if os.path.exists(image_path):
-        image_path = fl.url_for("static", filename =  f"images/{fo.current_user.account_id}.png")
+        image_path = fl.url_for("static", filename =  f"images/{fo.current_user.account_id}.{fo.current_user.photo}")
     else:
         image_path = fl.url_for("static", filename = f"images/default.png")
     return fl.render_template("my_account/main.html", user = fo.current_user, trades = trades, transfers = transfers, image_path = image_path)
@@ -659,23 +660,26 @@ def change_phone():
 @views.route("/my_account/change_photo", methods = ["GET", "POST"])
 def change_photo():
     """
-    This function prepares a backend for the 'change phone' page where the users
-    can change their phone.
+    This function prepares a backend for the 'change photo' page where the users
+    can change their profile photo.
     """
     if fl.request.method == "POST":
-        data = fl.request.form
-        phone = data.get("phone")
-        password = data.get("password")
-
-        if password != fo.current_user.password:
-            # Incorrect password
-            fl.flash("Senha incorreta", category = "e")
+        # data = fl.request.form
+        file = fl.request.files["photo"]
+        if file:
+            filetype = file.filename.split(".")[-1].lower()
+            if filetype in ["png", "jpeg", "jpg"]:
+                image_path = fl.current_app.root_path + f"/static/images/{fo.current_user.account_id}.{filetype}"
+                file.save(image_path)
+                fo.current_user.photo = filetype
+                db.session.commit()
+                fl.flash("Foto mudou", category = "s")
+                logger.info(f"AA account_id = {fo.current_user.account_id}, photo = {filetype}")
+                return fl.redirect(f"/my_account")
+            else:
+                fl.flash("A foto deve ser '.png', '.jpeg' ou '.jpg'", category = "e")
         else:
-            fo.current_user.phone = phone
-            db.session.commit()
-            fl.flash("Telefone mudou", category = "s")
-            logger.info(f"AA account_id = {fo.current_user.account_id}, phone = {phone}")
-            return fl.redirect(f"/my_account")
+            fl.flash("Escolhe uma foto", category = "e")
 
     return fl.render_template("my_account/change_photo.html", user = fo.current_user)
 
@@ -879,7 +883,12 @@ def submit_flow():
     if fl.request.method == "POST":
         data = fl.request.form
         currency = data.get("currency")
-        quantity = de.Decimal(data.get("quantity"))
+        if data.get("direction") == "deposit":
+            quantity = de.Decimal(data.get("quantity"))
+        elif data.get("direction") == "withdrawal":
+            quantity = - de.Decimal(data.get("quantity"))
+        else:
+            fl.flash(f"Escolhe se o fluxo é um deposito ou retirada.", category = "e")
         paid_to_id = int(data.get("paid_to_id"))
         password = data.get("password")
 
