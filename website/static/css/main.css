@@ -2700,13 +2700,6 @@ input, select, textarea {
 			overflow: hidden; 
 		}
 
-img.edit_icon {
-	height: 20px; 
-	width: 20px; 
-	opacity: 0.5; 
-	margin: 7px 6px 7px 6px;
-}
-
 /* Actions */
 
 	ul.actions {
@@ -3112,6 +3105,18 @@ img.edit_icon {
 
 		table tbody tr:nth-child(2n + 1) {
 			background-color: rgba(220, 220, 220, 0.25);
+		}
+
+		/* Stripe transaction rows only */
+		table tbody tr.data-row:nth-child(4n + 1),
+		table tbody tr.data-row:nth-child(4n + 1) + tr.comment-row {
+			background-color: rgba(220, 220, 220, 0.25);
+		}
+
+		/* Ensure the alternating pair stays white */
+		table tbody tr.data-row:nth-child(4n + 3),
+		table tbody tr.data-row:nth-child(4n + 3) + tr.comment-row {
+			background-color: transparent;
 		}
 
 	table th {
