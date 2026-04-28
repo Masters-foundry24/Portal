@@ -13,3 +13,6 @@ if __name__ == '__main__':
     # Then I can get on my phone and enter "http://[my_IP_address]:5000". Make
     # sure that your VPN, in both the computer and phone is turned off for this.
     # app.run(debug = True) # Use debug when building, not in production
+
+# The live version of this lives at portalSTP portalstp.com (ventures.masters@gmail.com)
+# The static version of this lives at testeSTP portalstp.pythonanywhere.com (scott_arh@protonmail.com)
