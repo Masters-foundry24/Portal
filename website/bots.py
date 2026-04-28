@@ -101,11 +101,15 @@ class Deriviative_Market_Maker():
     def __init__(
         self,
         source: str,
+        asset_0: str,
+        asset_1: str,
         offset: de.Decimal,
         size: de.Decimal,
         user: int
     ):
         self.source = source
+        self.asset_0 = asset_0
+        self.asset_1 = asset_1
         self.offset = offset
         self.size = size
         self.user = Account.query.filter_by(account_id = user).first()
@@ -119,8 +123,11 @@ class Deriviative_Market_Maker():
         self.main()
 
     def query_source(self):
-        data = yf.Ticker("EUR=X")
+        data = yf.Ticker(self.source)
         price = (data.info["bid"] + data.info["ask"]) / 2
+        # A patch because our API normalises Yen in a weird way.
+        if self.source[:3] == "JPY" and price > 0.05:
+            price = price / 100
         return de.Decimal(price)
 
     def main(self, source_price = None):
@@ -134,13 +141,24 @@ class Deriviative_Market_Maker():
             check_size = False
             source_price = self.query_source()
 
-        ask_price = (source_price + self.offset).quantize(de.Decimal("0.01"), rounding = de.ROUND_UP)
-        bid_price = (source_price - self.offset).quantize(de.Decimal("0.01"), rounding = de.ROUND_DOWN)
-        ask_size = de.Decimal(math.floor(min(self.size, self.user.USD)))
+        ask_price = (source_price * (1 + self.offset)).quantize(de.Decimal("0.01"), rounding = de.ROUND_UP)
+        bid_price = (source_price * (1 - self.offset)).quantize(de.Decimal("0.01"), rounding = de.ROUND_DOWN)
+        if self.asset_1 == "USD":
+            ask_size = de.Decimal(math.floor(min(self.size, self.user.USD)))
+        elif self.asset_1 == "GBP":
+            ask_size = de.Decimal(math.floor(min(self.size, self.user.GBP)))
+        elif self.asset_1 == "JPY":
+            ask_size = de.Decimal(math.floor(min(self.size, self.user.JPY)))
+        elif self.asset_1 == "CAD":
+            ask_size = de.Decimal(math.floor(min(self.size, self.user.CAD)))
+        elif self.asset_1 == "AUD":
+            ask_size = de.Decimal(math.floor(min(self.size, self.user.AUD)))
+        elif self.asset_1 == "CHF":
+            ask_size = de.Decimal(math.floor(min(self.size, self.user.CHF)))
         bid_size = de.Decimal(math.floor(min(self.size, self.user.EUR / bid_price)))
         
         if self.bot.v1 in [-1, 0]:
-            self.bot.v1 = bot_order(self.user, "ask", ask_size, ask_price, asset_0 = "EUR", asset_1 = "USD")
+            self.bot.v1 = bot_order(self.user, "ask", ask_size, ask_price, asset_0 = self.asset_0, asset_1 = self.asset_1)
             db.session.commit()
         else:
             o = Order.query.get(int(self.bot.v1))
@@ -149,11 +167,11 @@ class Deriviative_Market_Maker():
                 logger.info(f"OA order_id = {o.order_id}, active = False")
                 db.session.commit()
                 logger.info(f"Database Commit")
-                self.bot.v1 = bot_order(self.user, "ask", ask_size, ask_price, asset_0 = "EUR", asset_1 = "USD")
+                self.bot.v1 = bot_order(self.user, "ask", ask_size, ask_price, asset_0 = self.asset_0, asset_1 = self.asset_1)
                 db.session.commit()
         
         if self.bot.v2 in [-1, 0]:
-            self.bot.v2 = bot_order(self.user, "bid", bid_size, bid_price, asset_0 = "EUR", asset_1 = "USD")
+            self.bot.v2 = bot_order(self.user, "bid", bid_size, bid_price, asset_0 = self.asset_0, asset_1 = self.asset_1)
             db.session.commit()
         else:
             o = Order.query.get(int(self.bot.v2))
@@ -162,7 +180,7 @@ class Deriviative_Market_Maker():
                 logger.info(f"OA order_id = {o.order_id}, active = False")
                 db.session.commit()
                 logger.info(f"Database Commit")
-                self.bot.v2 = bot_order(self.user, "bid", bid_size, bid_price, asset_0 = "EUR", asset_1 = "USD")
+                self.bot.v2 = bot_order(self.user, "bid", bid_size, bid_price, asset_0 = self.asset_0, asset_1 = self.asset_1)
                 db.session.commit()
         
 class Fixed_Interval_Market_Maker():
@@ -526,8 +544,75 @@ def bot_6010000():
     Runs the derivative market making bot in the USD/EUR market.
     """
     return Deriviative_Market_Maker(
-        source = "AAPL",
+        source = "EUR=X",
+        asset_0 = "EUR",
+        asset_1 = "USD",
         offset = de.Decimal("0.001"),
         size = de.Decimal("300"),
         user = 6010000
+    )
+
+def bot_6010001():
+    """
+    Runs the derivative market making bot in the GBP/EUR market.
+    """
+    return Deriviative_Market_Maker(
+        source = "GBPEUR=X",
+        asset_0 = "EUR",
+        asset_1 = "GBP",
+        offset = de.Decimal("0.001"),
+        size = de.Decimal("300"),
+        user = 6010001
+    )
+
+def bot_6010002():
+    """
+    Runs the derivative market making bot in the JPY/EUR market.
+    """
+    return Deriviative_Market_Maker(
+        source = "JPYEUR=X",
+        asset_0 = "EUR",
+        asset_1 = "JPY",
+        offset = de.Decimal("0.001"),
+        size = de.Decimal("300"),
+        user = 6010002
+    )
+
+def bot_6010003():
+    """
+    Runs the derivative market making bot in the CAD/EUR market.
+    """
+    return Deriviative_Market_Maker(
+        source = "CADEUR=X",
+        asset_0 = "EUR",
+        asset_1 = "CAD",
+        offset = de.Decimal("0.001"),
+        size = de.Decimal("300"),
+        user = 6010003
+    )
+
+def bot_6010004():
+    """
+    Runs the derivative market making bot in the AUD/EUR market.
+    """
+    return Deriviative_Market_Maker(
+        source = "AUDEUR=X",
+        asset_0 = "EUR",
+        asset_1 = "AUD",
+        offset = de.Decimal("0.001"),
+        size = de.Decimal("300"),
+        user = 6010004
+    )
+
+def bot_6010005():
+    """
+    Runs the derivative market making bot in the CHF/EUR market.
+    """
+    return Deriviative_Market_Maker(
+        source = "CHFEUR=X",
+        asset_0 = "EUR",
+        asset_1 = "CHF",
+        offset = de.Decimal("0.001"),
+        size = de.Decimal("300"),
+        user = 6010005
     )

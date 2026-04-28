@@ -127,7 +127,7 @@ def cancel_orders(account, currency, quantity):
     # withdrawal that requires cancelling these orders
 
 
-def make_flow(admin: bool, currency: str, quantity: de.Decimal, account_id: int, password: str = None):
+def make_flow(admin: bool, currency: str, quantity: de.Decimal, account_id: int, password: str = None, message: str = ""):
     """
     This function adds a new pending flow to the database.
 
@@ -165,7 +165,8 @@ def make_flow(admin: bool, currency: str, quantity: de.Decimal, account_id: int,
 
     # Now that we're satified that the change is valid, let's record it.
     db.session.add(Flow(
-        currency = currency, quantity = quantity, paid_to_id = account_id))
+        currency = currency, quantity = quantity, paid_to_id = account_id,
+        message = message))
     logger.info(f"FC account_id = {account_id}, currency = {currency}, quantity = {quantity}")
     
     # For withdrawals we will take the funds away now, for deposits we will wait

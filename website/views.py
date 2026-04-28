@@ -477,38 +477,68 @@ def get_transfers(account_id: int, row_limit: int = 0, long: bool = False):
     different tables. After this, the result is converted into a list of lists.
 
     Inputs:
-        -> account_id: int, tells us which user's transfers to collect.
+        -> account_id: int, tells us which user's transfers to collect. -1 
+           indicates that admin is making the request asking for all accounts.
         -> row_limit: int, sets a the maximum number of rows to display, 
            defaults to zero which will result in displaying all available data.
         -> long: bool, controls if we add the extra information found on the
            dedicated 'my transfers' page (True) or just the summary information
            displayed at 'my account' (False).
     """
-    transfer_data = db.session.execute(text(f"""
-        SELECT 
-            flow_id as id,
-            time,
-            CASE WHEN quantity < 0 THEN 1 ELSE 2 END AS type,
-            currency,
-            ABS(quantity) AS quantity,
-            CASE WHEN quantity < 0 THEN {account_id} ELSE NULL END AS paid_from,
-            CASE WHEN quantity > 0 THEN {account_id} ELSE NULL END AS paid_to,
-            status
-        FROM Flow 
-        WHERE paid_to_id={account_id}
-        UNION
-        SELECT 
-            payment_id as id,
-            time, 
-            0 AS type, 
-            currency, 
-            quantity, 
-            paid_from_id AS paid_from, 
-            paid_to_id AS paid_to,
-            status
-        FROM Payment
-        WHERE paid_from_id={account_id} OR paid_to_id={account_id}
-        ORDER BY time DESC"""))
+    if account_id == -1:
+        transfer_data = db.session.execute(text(f"""
+            SELECT 
+                flow_id as id,
+                time,
+                CASE WHEN quantity < 0 THEN 1 ELSE 2 END AS type,
+                currency,
+                ABS(quantity) AS quantity,
+                CASE WHEN quantity < 0 THEN paid_to_id ELSE NULL END AS paid_from,
+                CASE WHEN quantity > 0 THEN paid_to_id ELSE NULL END AS paid_to,
+                status,
+                message
+            FROM Flow 
+            UNION
+            SELECT 
+                payment_id as id,
+                time, 
+                0 AS type, 
+                currency, 
+                quantity, 
+                paid_from_id AS paid_from, 
+                paid_to_id AS paid_to,
+                status,
+                message
+            FROM Payment
+            ORDER BY time DESC"""))
+    else:
+        transfer_data = db.session.execute(text(f"""
+            SELECT 
+                flow_id as id,
+                time,
+                CASE WHEN quantity < 0 THEN 1 ELSE 2 END AS type,
+                currency,
+                ABS(quantity) AS quantity,
+                CASE WHEN quantity < 0 THEN {account_id} ELSE NULL END AS paid_from,
+                CASE WHEN quantity > 0 THEN {account_id} ELSE NULL END AS paid_to,
+                status,
+                message
+            FROM Flow 
+            WHERE paid_to_id={account_id}
+            UNION
+            SELECT 
+                payment_id as id,
+                time, 
+                0 AS type, 
+                currency, 
+                quantity, 
+                paid_from_id AS paid_from, 
+                paid_to_id AS paid_to,
+                status,
+                message
+            FROM Payment
+            WHERE paid_from_id={account_id} OR paid_to_id={account_id}
+            ORDER BY time DESC"""))
     
     lables_long = ["Pagamento", "Retirada", "Depósito"]
     lables_short = ["P", "R", "D"]
@@ -524,7 +554,8 @@ def get_transfers(account_id: int, row_limit: int = 0, long: bool = False):
                 f"{o.currency} {format_de(o.quantity)}", 
                 "-" if o.paid_from is None else o.paid_from,
                 "-" if o.paid_to is None else o.paid_to,
-                lables_status[o.status]
+                lables_status[o.status],
+                o.message
             ])
         else:
             transfers.append([
@@ -891,6 +922,7 @@ def submit_flow():
             fl.flash(f"Escolhe se o fluxo é um deposito ou retirada.", category = "e")
         paid_to_id = int(data.get("paid_to_id"))
         password = data.get("password")
+        message = data.get("message")
 
         # This will be equal to the current user unless and administrator 
         # submitted the flow.
@@ -952,7 +984,7 @@ def submit_flow():
                 fl.flash(f"{IBAN} não é um IBAN válido.", category = "e")
                 return fl.render_template("/admin/submit_flow.html", user = fo.current_user)
         
-        make_flow(True, currency, quantity, paid_to_id, password)
+        make_flow(True, currency, quantity, paid_to_id, password, message)
 
     return fl.render_template("/admin/submit_flow.html", user = fo.current_user)
 
@@ -964,13 +996,28 @@ def accounts():
         Administrator.
     """
     if fo.current_user.account_id in [1234567, 9875512]:
-        accounts = []
+        totals = [
+            de.Decimal(0), de.Decimal(0), de.Decimal(0), de.Decimal(0), 
+            de.Decimal(0), de.Decimal(0), de.Decimal(0), de.Decimal(0)]
+        accounts = [[]] # the second brakets will be filled by the totals.
         for a in Account.query:
             accounts.append([
                 a.account_id, a.name, a.password, format_de(a.EUR), 
                 format_de(a.STN), format_de(a.USD), format_de(a.GBP), 
                 format_de(a.JPY), format_de(a.CAD), format_de(a.AUD),
                 format_de(a.CHF)])
+            totals[0] += a.EUR
+            totals[1] += a.STN
+            totals[2] += a.USD
+            totals[3] += a.GBP
+            totals[4] += a.JPY
+            totals[5] += a.CAD
+            totals[6] += a.AUD
+            totals[7] += a.CHF
+        accounts[0] = ["", "Total", "", format_de(totals[0]), 
+            format_de(totals[1]), format_de(totals[2]), format_de(totals[3]), 
+            format_de(totals[4]), format_de(totals[5]), format_de(totals[6]), 
+            format_de(totals[7])]
     else: 
         accounts = []
 
@@ -995,6 +1042,7 @@ def withdrawals_EUR():
         data = fl.request.form
         quantity = - de.Decimal(data.get("quantity"))
         password = data.get("password")
+        message = data.get("message")
 
         if data.get("name"):
             fo.current_user.name_EUR = data.get("name")
@@ -1020,7 +1068,7 @@ def withdrawals_EUR():
             submit_withdrawal = False
 
         if submit_withdrawal:
-            make_flow(False, "EUR", quantity, fo.current_user.account_id, password)
+            make_flow(False, "EUR", quantity, fo.current_user.account_id, password, message)
 
     return fl.render_template("withdrawals/EUR.html", user = fo.current_user)
 
@@ -1033,6 +1081,7 @@ def withdrawals_USD():
         data = fl.request.form
         quantity = - de.Decimal(data.get("quantity"))
         password = data.get("password")
+        message = data.get("message")
 
         if data.get("name"):
             fo.current_user.name_USD = data.get("name")
@@ -1058,7 +1107,7 @@ def withdrawals_USD():
             submit_withdrawal = False
 
         if submit_withdrawal:
-            make_flow(False, "USD", quantity, fo.current_user.account_id, password)
+            make_flow(False, "USD", quantity, fo.current_user.account_id, password, message)
 
     return fl.render_template("withdrawals/USD.html", user = fo.current_user)
 
@@ -1071,6 +1120,7 @@ def withdrawals_GPB():
         data = fl.request.form
         quantity = - de.Decimal(data.get("quantity"))
         password = data.get("password")
+        message = data.get("message")
 
         if data.get("name"):
             fo.current_user.name_GPB = data.get("name")
@@ -1096,7 +1146,7 @@ def withdrawals_GPB():
             submit_withdrawal = False
 
         if submit_withdrawal:
-            make_flow(False, "GPB", quantity, fo.current_user.account_id, password)
+            make_flow(False, "GPB", quantity, fo.current_user.account_id, password, message)
 
     return fl.render_template("withdrawals/GPB.html", user = fo.current_user)
 
@@ -1109,6 +1159,7 @@ def withdrawals_JPY():
         data = fl.request.form
         quantity = - de.Decimal(data.get("quantity"))
         password = data.get("password")
+        message = data.get("message")
 
         if data.get("name"):
             fo.current_user.name_JPY = data.get("name")
@@ -1134,7 +1185,7 @@ def withdrawals_JPY():
             submit_withdrawal = False
 
         if submit_withdrawal:
-            make_flow(False, "JPY", quantity, fo.current_user.account_id, password)
+            make_flow(False, "JPY", quantity, fo.current_user.account_id, password, message)
 
     return fl.render_template("withdrawals/JPY.html", user = fo.current_user)
 
@@ -1147,6 +1198,7 @@ def withdrawals_CAD():
         data = fl.request.form
         quantity = - de.Decimal(data.get("quantity"))
         password = data.get("password")
+        message = data.get("message")
 
         if data.get("name"):
             fo.current_user.name_CAD = data.get("name")
@@ -1172,7 +1224,7 @@ def withdrawals_CAD():
             submit_withdrawal = False
 
         if submit_withdrawal:
-            make_flow(False, "CAD", quantity, fo.current_user.account_id, password)
+            make_flow(False, "CAD", quantity, fo.current_user.account_id, password, message)
 
     return fl.render_template("withdrawals/CAD.html", user = fo.current_user)
 
@@ -1185,6 +1237,7 @@ def withdrawals_AUD():
         data = fl.request.form
         quantity = - de.Decimal(data.get("quantity"))
         password = data.get("password")
+        message = data.get("message")
 
         if data.get("name"):
             fo.current_user.name_AUD = data.get("name")
@@ -1210,7 +1263,7 @@ def withdrawals_AUD():
             submit_withdrawal = False
 
         if submit_withdrawal:
-            make_flow(False, "AUD", quantity, fo.current_user.account_id, password)
+            make_flow(False, "AUD", quantity, fo.current_user.account_id, password, message)
 
     return fl.render_template("withdrawals/AUD.html", user = fo.current_user)
 
@@ -1223,6 +1276,7 @@ def withdrawals_CHF():
         data = fl.request.form
         quantity = - de.Decimal(data.get("quantity"))
         password = data.get("password")
+        message = data.get("message")
 
         if data.get("name"):
             fo.current_user.name_CHF = data.get("name")
@@ -1248,14 +1302,31 @@ def withdrawals_CHF():
             submit_withdrawal = False
 
         if submit_withdrawal:
-            make_flow(False, "CHF", quantity, fo.current_user.account_id, password)
+            make_flow(False, "CHF", quantity, fo.current_user.account_id, password, message)
 
     return fl.render_template("withdrawals/CHF.html", user = fo.current_user)
 
 @fo.login_required
+@views.route("/admin/view_flows")
+def view_flows():
+    """
+        Lists all the flows on the Portal database if the user is logged in as 
+        an Administrator.
+    """
+    if fo.current_user.account_id in [1234567, 9875512]:
+        transfers = get_transfers(-1, 0, True)
+    else: 
+        transfers = []
+
+    return fl.render_template("admin/view_flows.html", user = fo.current_user, transfers = transfers)
+
+@fo.login_required
 @views.route("/admin/review_flows")
 def flows():
-    flow_table = get_flow_table()
+    if fo.current_user.account_id in [1234567, 9875512]:
+        flow_table = get_flow_table()
+    else: 
+        flows = []
     return fl.render_template("admin/review_flows.html", user = fo.current_user, flows = flow_table)
 
 @fo.login_required

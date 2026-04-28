@@ -18,11 +18,12 @@
                 <th> para </th>
                 <th> Status </th>
                 <th> </th>
+                <th> </th>
               </tr>
             </thead>
             <tbody>
               {% for row in transfers %}
-                <tr>
+                <tr class = "data-row">
                   <td> {{ row[1] }} </td>
                   <td> {{ row[2] }} </td>
                   <td> {{ row[3] }} </td>
@@ -34,6 +35,13 @@
                       <a href = "cancel_flow_from_account/{{ row[0] }}"> &times; </a> 
                     {% endif %}
                   </td>
+                  <td> 
+                    <!--button class = "toggle-comment"> &plus; </button-->
+                    <span class = "toggle-comment" role = "button" tabindex = "0"> &plus; </span> 
+                  </td>
+                </tr>
+                <tr class = "comment-row" style = "display: none;">
+                  <td colspan = "8"> {{ row[7] }} </td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -43,4 +51,23 @@
     </header>
   </article>
 
+{% endblock %}
+
+{% block scripts %} 
+  <script>
+    document.querySelectorAll(".toggle-comment").forEach(button => {
+      button.addEventListener("click", function () {
+        const transactionRow = this.closest("tr");
+        const commentRow = transactionRow.nextElementSibling;
+      
+        if (commentRow.style.display === "none") {
+          commentRow.style.display = "table-row";
+          this.textContent = "−";
+        } else {
+          commentRow.style.display = "none";
+          this.textContent = "+";
+        }
+      });
+    });
+  </script>
 {% endblock %}
