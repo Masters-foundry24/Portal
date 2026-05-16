@@ -16,6 +16,8 @@
 # TC: Trade Created
 # TA: Trade Amended
 
+# SI: Savings Interest
+
 # Where possible we want to log something right AFTER we did the thing.
 
 # create_db_from_log()

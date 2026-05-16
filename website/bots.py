@@ -6,7 +6,7 @@ import flask as fl
 import math
 import time
 
-from website.models import Account, Payment, Flow, Order, Trade, Bot
+from website.models import Account, Payment, Flow, Order, Trade, Bot, Instrument
 from website.matching_engine import enter_order
 from website import db, logger, executor
 

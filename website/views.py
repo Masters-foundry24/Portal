@@ -8,7 +8,7 @@ import datetime as dt
 from sqlalchemy.sql import func, or_
 from sqlalchemy import or_, text
 
-from website.models import Account, Payment, Flow, Order, Trade
+from website.models import Account, Payment, Flow, Order, Trade, Instrument
 from website.flows import make_flow, get_flow_table, cancel_orders
 from website.matching_engine import enter_order
 from website.bots import bot_6000000, bot_6010000
@@ -61,7 +61,7 @@ def get_book(asset_0: str, asset_1: str, row_count: int = 7):
 
     return book
 
-def get_trades(asset_0: str, asset_1: str, row_limit: int = 7):
+def get_trades(asset_0: str, asset_1: str, row_limit: int = 7, filterwashing: bool = True, status: int = 1):
     """
     Formats the recent trades in a market so that they can be displayed on the
     market page.
@@ -75,7 +75,7 @@ def get_trades(asset_0: str, asset_1: str, row_limit: int = 7):
     trade_data = db.session.execute(text(f"""
         SELECT *
         FROM Trade
-        WHERE asset_0="{asset_0}" AND asset_1="{asset_1}" AND buyer!=seller
+        WHERE asset_0="{asset_0}" AND asset_1="{asset_1}" {"AND buyer!=seller" if filterwashing else ""} AND status={status}
         ORDER BY time DESC"""))
     
     trades, i = [], 0
@@ -1307,6 +1307,57 @@ def withdrawals_CHF():
     return fl.render_template("withdrawals/CHF.html", user = fo.current_user)
 
 @fo.login_required
+@views.route("/saving", methods = ["GET", "POST"])
+def saving():
+    if fl.request.method == "POST":
+        data = fl.request.form
+        quantity = de.Decimal(data.get("quantity"))
+        side = data.get("side")
+        currency = "EUR"
+
+        if currency == "EUR":
+            if quantity < 0:
+                fl.flash(f"Não pode ser negativo.", category = "e")
+            if side == "add" and quantity > fo.current_user.EUR:
+                fl.flash(f"Não tem saldo bastante.", category = "e")
+            elif side == "subtract" and quantity > fo.current_user.SAVE_EUR - fo.current_user.RAVE_EUR:
+                fl.flash(f"Não podes tirar mais dinheiro que está na propança.", category = "e")
+            else:
+                if side == "add":
+                    fo.current_user.SAVE_EUR += quantity
+                    fo.current_user.EUR -= quantity
+                    db.session.add(Trade(
+                        asset_0 = "EUR", asset_1 = "SAVE_EUR", 
+                        quantity = quantity, price = de.Decimal("1"), 
+                        buyer = fo.current_user.account_id, 
+                        seller = 1234567, status = 1
+                    ))
+                    logger.info(f"TC asset_0 = EUR, asset_1 = SAVE_EUR, quantity = {quantity}, price = 1.0, buyer = {fo.current_user.account_id}, seller = 1234567")
+                    db.session.commit()
+                    logger.info(f"Database Commit")
+                    fl.flash(f"Dinheiro colocado na caixa.", category = "s")
+                else:
+                    fo.current_user.RAVE_EUR += quantity
+                    db.session.add(Trade(
+                        asset_0 = "EUR", asset_1 = "SAVE_EUR", 
+                        quantity = quantity, price = de.Decimal("1"), 
+                        buyer = 1234567, 
+                        seller = fo.current_user.account_id, status = 0
+                    ))
+                    logger.info(f"TC asset_0 = EUR, asset_1 = SAVE_EUR, quantity = {- quantity}, price = 1.0, buyer = 1234567, seller = {fo.current_user.account_id}")
+                    db.session.commit()
+                    logger.info(f"Database Commit")
+                    fl.flash(f"Dinheiro tirado na caixa.", category = "s")
+
+    EUR_saving = Instrument.query.filter_by(name = "EUR_saving").first()
+    EUR_i = format_de(100 * EUR_saving.interest) + "%"
+    if EUR_saving.interest_next == None:
+        EUR_i_next = "Ainda não foi anunciado"
+    else:
+        EUR_i_next = format_de(100 * EUR_saving.interest_next) + "%"
+    return fl.render_template("saving.html", user = fo.current_user, EUR_i = EUR_i, EUR_i_next = EUR_i_next)
+
+@fo.login_required
 @views.route("/admin/view_flows")
 def view_flows():
     """
@@ -1328,6 +1379,64 @@ def flows():
     else: 
         flows = []
     return fl.render_template("admin/review_flows.html", user = fo.current_user, flows = flow_table)
+
+@fo.login_required
+@views.route("/admin/edit_interest", methods = ["GET", "POST"])
+def edit_interest():
+    if fl.request.method == "POST":
+        data = fl.request.form
+        password = data.get("password")
+        if data.get("EUR_interest") == "":
+            EUR_interest = None
+        else:
+            EUR_interest = de.Decimal(data.get("EUR_interest"))
+
+        if password != "Austria":
+            # Incorrect password
+            fl.flash("Senha incorreta", category = "e")
+            return fl.render_template("admin/edit_interest.html", user = fo.current_user, EUR_i = EUR_i, EUR_i_next = EUR_i_next)
+
+        if EUR_interest is None or EUR_interest == de.Decimal("0"):
+            Instrument.query.filter_by(name = "EUR_saving").first().interest_next = None
+            pass
+        else:
+            Instrument.query.filter_by(name = "EUR_saving").first().interest_next = EUR_interest
+        db.session.commit()
+
+    EUR_saving = Instrument.query.filter_by(name = "EUR_saving").first()
+    EUR_i = EUR_saving.interest
+    if EUR_saving.interest_next == None:
+        EUR_i_next = "Não foi anunciado"
+    else:
+        EUR_i_next = EUR_saving.interest_next
+    return fl.render_template("admin/edit_interest.html", user = fo.current_user, EUR_i = EUR_i, EUR_i_next = EUR_i_next)
+
+@fo.login_required
+@views.route("/admin/review_interest")
+def review_interest():
+    if fo.current_user.account_id in [1234567, 9875512]:
+        trade_data = db.session.execute(text(f"""
+            SELECT *
+            FROM Trade
+            WHERE status=0
+            ORDER BY time DESC"""))
+    
+        table = []
+        for o in trade_data:
+            time = dt.datetime.strptime(o.time, "%Y-%m-%d %H:%M:%S")
+            # side = "side"
+            table.append([
+                o.trade_id,
+                time.strftime("%d/%m/%y %H:%M:%S"),
+                o.buyer,
+                o.asset_0,
+                o.asset_1,
+                format_de(o.quantity),
+                # format_de(o.price),
+            ])
+    else: 
+        table = []
+    return fl.render_template("admin/review_interest.html", user = fo.current_user, table = table)
 
 @fo.login_required
 @views.route("/admin")

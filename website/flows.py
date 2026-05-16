@@ -8,7 +8,7 @@ import flask_login as fo
 import decimal as de
 import datetime as dt
 
-from website.models import Account, Payment, Flow, Order, Trade
+from website.models import Account, Payment, Flow, Order, Trade, Instrument
 from website.util import format_de
 from website import db, logger
 

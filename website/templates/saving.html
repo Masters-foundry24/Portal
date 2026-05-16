@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+  <li><a href = "/"> Casa </a></li>
+  <li class = "dropdown">
+    <span class = "opener"> Mercados </span>
+    <ul class = "submenu" style = "padding-left: 0px">
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/EURSTN"> EUR/STN </a></li>
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/USDEUR"> USD/EUR </a></li>
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/GBPEUR"> GBP/EUR </a></li>
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/JPYEUR"> JPY/EUR </a></li>
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/CADEUR"> CAD/EUR </a></li>
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/AUDEUR"> AUD/EUR </a></li>
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/CHFEUR"> CHF/EUR </a></li>
+    </ul>
+  </li>
+  <li><a href = "/how_it_works"> Como Funciona </a></li>
+  {% if user.is_authenticated %}
+    <li><a href = "/my_account"> Minha Conta </a></li>
+    <li><a href = "/deposits"> Depósitos </a></li>
+    <li><a href = "/withdrawals"> Retiradas </a></li>
+    <li><a href = "/send"> Enviar Dinheiro </a></li>
+    <li class = "active"><a href = "/saving"> Poupança </a></li>
+    {% if user.account_id in [1234567, 9875512] %}
+      <li><a href = "/admin"> Admin </a></li>
+    {% endif %}
+    <li><a href = "/logout"> Logout </a></li>
+  {% else %}
+    <li><a href = "/signup"> Inscrever </a></li>
+  {% endif%}
+{% endblock %}
+
+{% block content %} 
+
+  <article class = "post">
+    <header class = "major">
+      <h1> Poupança </h1>
+    </header>
+  </article>
+
+  <section class = "posts">
+    <!-- This dashboard is divided into four windows. -->
+
+    <article>
+      <!-- The list section shows the uses' current funds. -->
+      <header>
+        <h2> Como Funciona </h2>
+      </header>
+      <form method = "post">
+        <div class = "row gtr-uniform">
+          <div class = "col-6">
+            <input 
+              type = "radio" id = "add" name = "side" value = "add" 
+              required = true>
+            <label for = "add"> DEPOSITAR </label>
+          </div>
+          <div class = "col-6">
+            <input 
+              type = "radio" id = "subtract" name = "side" value = "subtract" 
+              required = true>
+            <label for = "subtract"> RETIRAR </label>
+          </div>
+
+          <!--div class="col-12">
+            <label> MOEDA: </label>
+            <select id = "currency" name = "currency">
+              <option value = "" disabled selected > Escolhe uma moeda </option>
+              <option value = "EUR"> EUR </option>
+            </select>
+          </div-->
+          <div class = "col-12">
+            <label> VALOR (em EUR): </label>
+            <input 
+              type = "number" name = "quantity" id = "quantity" value = "" 
+              placeholder = "0.00" step = "1" required = true/>
+          </div>
+
+          <div class="col-12">
+            <ul class = "actions">
+              <li><input type = "submit" value = "Colocar" class="primary" /></li>
+              <li><input type = "reset" value = "Reiniciar" /></li>
+            </ul>
+          </div>
+        </div>
+      </form>
+    </article>
+
+    <article>
+      <!-- The second section shows the user's account details -->
+      <header>
+        <h2> Poupança de EUR </h2>
+      </header>
+      <div class = "balance_grid">
+
+        <div class = "balance_grid_cell">
+          <p class = "balance_lable"> Valor: </p>
+        </div>
+        <div class = "balance_grid_cell">
+          <p class = "balance_value"> {{ user.SAVE_EUR }} </p>
+        </div>
+
+        <div class = "balance_grid_cell">
+          <p class = "balance_lable"> Valor em retira: </p>
+        </div>
+        <div class = "balance_grid_cell">
+          <p class = "balance_value"> {{ user.RAVE_EUR }} </p>
+        </div>
+
+        <div class = "balance_grid_cell">
+          <p class = "balance_lable"> Juros esse mês: </p>
+        </div>
+        <div class = "balance_grid_cell">
+          <p class = "balance_value"> {{ EUR_i }} </p>
+        </div>
+
+        <div class = "balance_grid_cell">
+          <p class = "balance_lable"> Juros na proximá mês: </p>
+        </div>
+        <div class = "balance_grid_cell">
+          <p class = "balance_value"> {{ EUR_i_next }} </p>
+        </div>
+      </div>
+    </article>
+
+    <article>
+      <!-- The list section shows the uses' current funds. -->
+      <header>
+        <h2> Como Funciona </h2>
+      </header>
+      <p> 
+        Se você não precisa do dinheiro agora, pode depositá-lo em uma conta poupança, onde renderá juros mensalmente. O valor dos juros deste mês e do próximo pode ser consultado no site.
+      </p>
+      <p> 
+        Para ter direito ao pagamento de juros, você precisa deixar o dinheiro na conta poupança durante todo o mês.
+      </p>
+      <p> 
+        Você pode sacar o dinheiro a qualquer momento, mas precisa avisar com uma semana de antecedência.
+      </p>
+      <p> 
+        Atualmente, propanças só disponível por euros.
+      </p>
+    </article>
+
+  </section>
+
+{% endblock %}

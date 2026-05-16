@@ -4,7 +4,7 @@ import flask as fl
 import decimal as de
 import datetime as dt
 
-from website.models import Account, Payment, Flow, Order, Trade
+from website.models import Account, Payment, Flow, Order, Trade, Instrument
 from website import db, logger
 
 def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, asset_0: str, asset_1: str, messages: bool = False):
@@ -45,7 +45,7 @@ def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, asset_
             db.session.add(Trade(
                 asset_0 = asset_0, asset_1 = asset_1, 
                 quantity = quantity_traded, price = o.price, 
-                buyer = user.account_id, seller = o.account_id
+                buyer = user.account_id, seller = o.account_id, status = 1
                 ))
             logger.info(f"TC asset_0 = {asset_0}, asset_1 = {asset_1}, quantity = {quantity_traded}, price = {o.price}, buyer = {user.account_id}, seller = {o.account_id}")
 
@@ -114,7 +114,7 @@ def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, asset_
             db.session.add(Trade(
                 asset_0 = asset_0, asset_1 = asset_1, 
                 quantity = quantity_traded, price = o.price, 
-                buyer = o.account_id, seller = user.account_id
+                buyer = o.account_id, seller = user.account_id, status = 1
                 ))
             logger.info(f"TC asset_0 = {asset_0}, asset_1 = {asset_1}, quantity = {quantity_traded}, price = {o.price}, buyer = {user.account_id}, seller = {o.account_id}")
 

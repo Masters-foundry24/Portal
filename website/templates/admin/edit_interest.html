@@ -1,0 +1,47 @@
+{% extends "admin/main.html" %}
+
+{% block content %} 
+  <article class = "post featured">
+    <header class = "major">
+      <section class = "post">
+        <header class = "major">
+          <h1> Editar Juros </h1>
+        </header>
+        <!-- form to add or subtract money from an account -->
+        {% if user.account_id in [1234567, 9875512] %}
+          <form method = "post">
+            <div class = "row gtr-uniform">
+              <div class = "col-6 col-12-small">
+                <label> EUR juro neste mês: </label>
+                <p> {{ EUR_i }} </p>
+              </div>
+
+              <div class = "col-6 col-12-small">
+                <label> EUR juro no próximo mês: </label>
+                <input 
+                  type = "number" name = "EUR_interest" id = "quantity" value = "" 
+                  placeholder = "{{ EUR_i_next }}" step = "0.0001" min = "0" requried = true/>
+              </div>
+  
+              <div class = "col-6 col-12-small">
+                <label> SENHA DO ADMINISTRADOR: </label>
+                <input 
+                  type = "password" name = "password" id = "password" value = "" 
+                  placeholder = "*******" required = true/>
+              </div>
+    
+              <div class = "col-12">
+                <ul class = "actions">
+                  <li><input type = "submit" value = "Colocar" class = "primary" /></li>
+                  <li><input type = "reset" value = "Reiniciar" /></li>
+                </ul>
+              </div>
+            </div>
+          </form>
+        {% else %}
+          <p> Somente o administrador pode usar esta página. </p>
+        {% endif %}
+      </section>
+    </header>
+  </article>
+{% endblock %}

@@ -20,6 +20,7 @@
     <li><a href = "/deposits"> Depósitos </a></li>
     <li><a href = "/withdrawals"> Retiradas </a></li>
     <li><a href = "/send"> Enviar Dinheiro </a></li>
+    <li><a href = "/saving"> Poupança </a></li>
     {% if user.account_id in [1234567, 9875512] %}
       <li class = "active"><a href = "/admin"> Admin </a></li>
     {% endif %}
@@ -66,6 +67,20 @@
             <div class = "col-6">
               <ul class = "actions special">
                 <li> <a href = "/admin/view_flows" class = "button"> Ver Fluxos </a> </li>
+              </ul>
+            </div>
+          </div>
+
+          <p> Juros </p>
+          <div class = "row gtr-uniform">
+            <div class = "col-6">
+              <ul class = "actions special">
+                <li> <a href = "/admin/edit_interest" class = "button"> Editiar Juros </a> </li>
+              </ul>
+            </div>
+            <div class = "col-6">
+              <ul class = "actions special">
+                <li> <a href = "/admin/review_interest" class = "button"> Aprovar Juros </a> </li>
               </ul>
             </div>
           </div>

@@ -74,6 +74,8 @@ class Account(db.Model, fo.UserMixin):
     IBAN_CAD = db.Column(db.String(100))
     IBAN_AUD = db.Column(db.String(100))
     IBAN_CHF = db.Column(db.String(100))
+    SAVE_EUR = db.Column(db.Numeric(9, 2), default = de.Decimal("0"))
+    RAVE_EUR = db.Column(db.Numeric(9, 2), default = de.Decimal("0"))
 
 class Trade(db.Model):
     trade_id = db.Column(db.Integer, primary_key = True)
@@ -85,6 +87,7 @@ class Trade(db.Model):
     buyer = db.Column(db.Integer, db.ForeignKey("account.account_id"))
     seller = db.Column(db.Integer, db.ForeignKey("account.account_id"))
     side = db.Column(db.String(6)) # Indicates if the order that took the quote was a bid or an ask order.
+    status = db.Column(db.Integer, default = 0) # Options are 0 (Pending), 1 (Approved) and 2 (Cancelled)
 
 class Bot(db.Model):
     bot_id = db.Column(db.Integer, primary_key = True)
@@ -94,3 +97,10 @@ class Bot(db.Model):
     v1 = db.Column(db.Numeric(9, 2))
     v2 = db.Column(db.Numeric(9, 2))
     v3 = db.Column(db.Numeric(9, 2))
+
+class Instrument(db.Model):
+    instrument_id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String(100))
+    interest = db.Column(db.Numeric(9, 4))
+    interest_next = db.Column(db.Numeric(9, 4))
+    currency = db.Column(db.String(6))
