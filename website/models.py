@@ -48,6 +48,7 @@ class Account(db.Model, fo.UserMixin):
     phone = db.Column(db.String(15))
     photo = db.Column(db.String(15))
     password = db.Column(db.String(100))
+    hash = db.Column(db.String(200))
     STN = db.Column(db.Numeric(9, 2), default = de.Decimal("0"))
     EUR = db.Column(db.Numeric(9, 2), default = de.Decimal("0"))
     USD = db.Column(db.Numeric(9, 2), default = de.Decimal("0"))

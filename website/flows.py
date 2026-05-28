@@ -6,6 +6,7 @@
 import flask as fl
 import flask_login as fo
 import decimal as de
+import hashlib as hl
 import datetime as dt
 
 from website.models import Account, Payment, Flow, Order, Trade, Instrument
@@ -20,7 +21,7 @@ def admin_checks(account, password):
         # The receipiant does not exist
         fl.flash("Não existe uma conta com o número fornecido", category = "e")
         return False
-    elif password != "Austria":
+    elif hl.sha256(password.encode()).hexdigest() != "c9cab0238debc6e55498e2c0963a1d8e25bd29c95ddd53a3fff841ee636b6bc5":
         # Incorrect password
         fl.flash("Senha incorreta", category = "e")
         return False
@@ -32,42 +33,11 @@ def user_checks(currency, quantity, password, account):
     """
     Preforms some sanity checks on flows entered by the account holder.
     """
-    if currency == "EUR" and account.EUR + quantity < de.Decimal("0"):
+    if getattr(account, currency) + quantity < de.Decimal("0"):
         # The person is trying to withdraw more money than they have
-        fl.flash("Saldo de EUR insufficent", category = "e")
+        fl.flash(f"Saldo de {currency} insufficent", category = "e")
         return False
-    elif currency == "STN" and account.STN + quantity < de.Decimal("0"):
-        # The person is trying to withdraw more money than they have
-        fl.flash("Saldo de STN insufficent", category = "e")
-        return False
-    elif currency == "USD" and account.USD + quantity < de.Decimal("0"):
-        # The person is trying to withdraw more money than they have
-        fl.flash("Saldo de USD insufficent", category = "e")
-        return False
-    elif currency == "GBP" and account.GBP + quantity < de.Decimal("0"):
-        # The person is trying to withdraw more money than they have
-        fl.flash("Saldo de GBP insufficent", category = "e")
-        return False
-    elif currency == "JPY" and account.JPY + quantity < de.Decimal("0"):
-        # The person is trying to withdraw more money than they have
-        fl.flash("Saldo de JPY insufficent", category = "e")
-        return False
-    elif currency == "CAD" and account.CAD + quantity < de.Decimal("0"):
-        # The person is trying to withdraw more money than they have
-        fl.flash("Saldo de CAD insufficent", category = "e")
-        return False
-    elif currency == "AUD" and account.AUD + quantity < de.Decimal("0"):
-        # The person is trying to withdraw more money than they have
-        fl.flash("Saldo de AUD insufficent", category = "e")
-        return False
-    elif currency == "CHF" and account.CHF + quantity < de.Decimal("0"):
-        # The person is trying to withdraw more money than they have
-        fl.flash("Saldo de CHF insufficent", category = "e")
-        return False
-    elif False:
-        # Verify that the IBAN passes a checksum
-        return False
-    elif quantity < de.Decimal("0") and password != account.password:
+    elif quantity < de.Decimal("0") and hl.sha256(password.encode()).hexdigest() != account.hash:
         # Incorrect password during withdrawal
         fl.flash("Senha incorreta", category = "e")
         return False
@@ -80,22 +50,7 @@ def cancel_orders(account, currency, quantity):
     funds. This function finds those orders and cancels them.
     """
     balance_used = de.Decimal("0")
-    if currency == "STN":
-        balance_available = account.STN + quantity
-    elif currency == "EUR":
-        balance_available = account.EUR + quantity
-    elif currency == "USD":
-        balance_available = account.USD + quantity
-    elif currency == "GBP":
-        balance_available = account.GBP + quantity
-    elif currency == "JPY":
-        balance_available = account.JPY + quantity
-    elif currency == "CAD":
-        balance_available = account.CAD + quantity
-    elif currency == "AUD":
-        balance_available = account.AUD + quantity
-    elif currency == "CHF":
-        balance_available = account.CHF + quantity
+    balance_available = getattr(account, currency) + quantity
     
     # Bid, orders that are using the currency to purchase something else.
     my_orders = Order.query.filter_by(
@@ -177,30 +132,9 @@ def make_flow(admin: bool, currency: str, quantity: de.Decimal, account_id: int,
         else:
             fl.flash(f"Depósito de {currency} {quantity} criado oa sua conta", category = "s")
     else: # withdrawals
-        if currency == "EUR":
-            account.EUR = account.EUR + quantity
-            logger.info(f"AA account_id = {account_id}, EUR = {account.EUR}")
-        elif currency == "STN":
-            account.STN = account.STN + quantity
-            logger.info(f"AA account_id = {account_id}, STN = {account.STN}")
-        elif currency == "USD":
-            account.USD = account.USD + quantity
-            logger.info(f"AA account_id = {account_id}, USD = {account.USD}")
-        elif currency == "GBP":
-            account.GBP = account.GBP + quantity
-            logger.info(f"AA account_id = {account_id}, GBP = {account.GBP}")
-        elif currency == "JPY":
-            account.JPY = account.JPY + quantity
-            logger.info(f"AA account_id = {account_id}, JPY = {account.JPY}")
-        elif currency == "CAD":
-            account.CAD = account.CAD + quantity
-            logger.info(f"AA account_id = {account_id}, CAD = {account.CAD}")
-        elif currency == "AUD":
-            account.AUD = account.AUD + quantity
-            logger.info(f"AA account_id = {account_id}, AUD = {account.AUD}")
-        elif currency == "CHF":
-            account.CHF = account.CHF + quantity
-            logger.info(f"AA account_id = {account_id}, CHF = {account.CHF}")
+        # account.CUR = account.CUR + quantity
+        setattr(account, currency, getattr(account, currency) + quantity)
+        logger.info(f"AA account_id = {account_id}, {currency} = {getattr(account, currency)}")
         if admin:
             fl.flash(f"{currency} {abs(quantity)} tirou de conta {account_id}", category = "s")
         else:
@@ -214,34 +148,10 @@ def get_flow_table():
     flows = Flow.query.filter_by(status = 0)
     table = []
     for f in flows:
-        if f.currency == "EUR": # Withdrawal
+        if f.currency in ["EUR", "USD", "GBP", "JPY", "CAD", "AUD", "CHF"]: # Withdrawal
             a = Account.query.filter_by(account_id = f.paid_to_id).first()
-            IBAN = a.IBAN_EUR
-            name = a.name_EUR
-        elif f.currency == "USD": # Withdrawal
-            a = Account.query.filter_by(account_id = f.paid_to_id).first()
-            IBAN = a.IBAN_USD
-            name = a.name_USD
-        elif f.currency == "GBP": # Withdrawal
-            a = Account.query.filter_by(account_id = f.paid_to_id).first()
-            IBAN = a.IBAN_GBP
-            name = a.name_GBP
-        elif f.currency == "JPY": # Withdrawal
-            a = Account.query.filter_by(account_id = f.paid_to_id).first()
-            IBAN = a.IBAN_JPY
-            name = a.name_JPY
-        elif f.currency == "CAD": # Withdrawal
-            a = Account.query.filter_by(account_id = f.paid_to_id).first()
-            IBAN = a.IBAN_CAD
-            name = a.name_CAD
-        elif f.currency == "AUD": # Withdrawal
-            a = Account.query.filter_by(account_id = f.paid_to_id).first()
-            IBAN = a.IBAN_AUD
-            name = a.name_AUD
-        elif f.currency == "CHF": # Withdrawal
-            a = Account.query.filter_by(account_id = f.paid_to_id).first()
-            IBAN = a.IBAN_CHF
-            name = a.name_CHF
+            IBAN = getattr(a, f"IBAN_{f.currency}")
+            name = getattr(a, f"name_{f.currency}")
         else:
             IBAN, name = "", ""
         table.append([

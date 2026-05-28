@@ -53,37 +53,17 @@ def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, asset_
             buyer = Account.query.filter_by(account_id = user.account_id).first()
             seller = Account.query.filter_by(account_id = o.account_id).first()
 
-            if asset_0 == "STN":
-                buyer.STN -= quantity_traded * o.price
-                seller.STN += quantity_traded * o.price
-                logger.info(f"AA account_id = {buyer.account_id}, STN = {buyer.STN}")
-                logger.info(f"AA account_id = {seller.account_id}, STN = {seller.STN}")
-            elif asset_0 == "EUR":
-                buyer.EUR -= quantity_traded * o.price
-                seller.EUR += quantity_traded * o.price
-                logger.info(f"AA account_id = {buyer.account_id}, EUR = {buyer.EUR}")
-                logger.info(f"AA account_id = {seller.account_id}, EUR = {seller.EUR}")
-            if asset_0 == "USD":
-                buyer.USD -= quantity_traded * o.price
-                seller.USD += quantity_traded * o.price
-                logger.info(f"AA account_id = {buyer.account_id}, USD = {buyer.USD}")
-                logger.info(f"AA account_id = {seller.account_id}, USD = {seller.USD}")
+            # buyer.CUR -= quantity_traded * o.price
+            setattr(buyer, asset_0, getattr(buyer, asset_0) - quantity_traded * o.price)
+            setattr(seller, asset_0, getattr(seller, asset_0) + quantity_traded * o.price)
+            logger.info(f"AA account_id = {buyer.account_id}, STN = {getattr(buyer, asset_0)}")
+            logger.info(f"AA account_id = {seller.account_id}, STN = {getattr(seller, asset_0)}")
             
-            if asset_1 == "STN":
-                buyer.STN += quantity_traded
-                seller.STN -= quantity_traded
-                logger.info(f"AA account_id = {buyer.account_id}, STN = {buyer.STN}")
-                logger.info(f"AA account_id = {seller.account_id}, STN = {seller.STN}")
-            elif asset_1 == "EUR":
-                buyer.EUR += quantity_traded
-                seller.EUR -= quantity_traded
-                logger.info(f"AA account_id = {buyer.account_id}, EUR = {buyer.EUR}")
-                logger.info(f"AA account_id = {seller.account_id}, EUR = {seller.EUR}")
-            if asset_1 == "USD":
-                buyer.USD += quantity_traded
-                seller.USD -= quantity_traded
-                logger.info(f"AA account_id = {buyer.account_id}, USD = {buyer.USD}")
-                logger.info(f"AA account_id = {seller.account_id}, USD = {seller.USD}")
+            # buyer.CUR += quantity_traded
+            setattr(buyer, asset_1, getattr(buyer, asset_1) + quantity_traded)
+            setattr(seller, asset_1, getattr(seller, asset_1) - quantity_traded)
+            logger.info(f"AA account_id = {buyer.account_id}, STN = {getattr(buyer, asset_1)}")
+            logger.info(f"AA account_id = {seller.account_id}, STN = {getattr(seller, asset_1)}")
 
             if o.quantity == de.Decimal("0"):
                 o.active = False
@@ -122,37 +102,17 @@ def enter_order(user, side: str, quantity: de.Decimal, price: de.Decimal, asset_
             seller = Account.query.filter_by(account_id = user.account_id).first()
             buyer = Account.query.filter_by(account_id = o.account_id).first()
 
-            if asset_0 == "STN":
-                buyer.STN -= quantity_traded * o.price
-                seller.STN += quantity_traded * o.price
-                logger.info(f"AA account_id = {buyer.account_id}, STN = {buyer.STN}")
-                logger.info(f"AA account_id = {seller.account_id}, STN = {seller.STN}")
-            elif asset_0 == "EUR":
-                buyer.EUR -= quantity_traded * o.price
-                seller.EUR += quantity_traded * o.price
-                logger.info(f"AA account_id = {buyer.account_id}, EUR = {buyer.EUR}")
-                logger.info(f"AA account_id = {seller.account_id}, EUR = {seller.EUR}")
-            if asset_0 == "USD":
-                buyer.USD -= quantity_traded * o.price
-                seller.USD += quantity_traded * o.price
-                logger.info(f"AA account_id = {buyer.account_id}, USD = {buyer.USD}")
-                logger.info(f"AA account_id = {seller.account_id}, USD = {seller.USD}")
+            # buyer.CUR -= quantity_traded * o.price
+            setattr(buyer, asset_0, getattr(buyer, asset_0) - quantity_traded * o.price)
+            setattr(seller, asset_0, getattr(seller, asset_0) + quantity_traded * o.price)
+            logger.info(f"AA account_id = {buyer.account_id}, STN = {getattr(buyer, asset_0)}")
+            logger.info(f"AA account_id = {seller.account_id}, STN = {getattr(seller, asset_0)}")
             
-            if asset_1 == "STN":
-                buyer.STN += quantity_traded
-                seller.STN -= quantity_traded
-                logger.info(f"AA account_id = {buyer.account_id}, STN = {buyer.STN}")
-                logger.info(f"AA account_id = {seller.account_id}, STN = {seller.STN}")
-            elif asset_1 == "EUR":
-                buyer.EUR += quantity_traded
-                seller.EUR -= quantity_traded
-                logger.info(f"AA account_id = {buyer.account_id}, EUR = {buyer.EUR}")
-                logger.info(f"AA account_id = {seller.account_id}, EUR = {seller.EUR}")
-            if asset_1 == "USD":
-                buyer.USD += quantity_traded
-                seller.USD -= quantity_traded
-                logger.info(f"AA account_id = {buyer.account_id}, USD = {buyer.USD}")
-                logger.info(f"AA account_id = {seller.account_id}, USD = {seller.USD}")
+            # buyer.CUR += quantity_traded
+            setattr(buyer, asset_1, getattr(buyer, asset_1) + quantity_traded)
+            setattr(seller, asset_1, getattr(seller, asset_1) - quantity_traded)
+            logger.info(f"AA account_id = {buyer.account_id}, STN = {getattr(buyer, asset_1)}")
+            logger.info(f"AA account_id = {seller.account_id}, STN = {getattr(seller, asset_1)}")
 
             if o.quantity == de.Decimal("0"):
                 o.active = False

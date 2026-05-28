@@ -194,7 +194,7 @@
               </tr>
             </thead>
             <tbody>
-              {% for o in user.orders %}
+              {% for o in orders %}
                 {% if o.active %}
                   <tr>
                     <td> {% if o.side == "bid" %} Compra {% else %} Vende {% endif%} </td>

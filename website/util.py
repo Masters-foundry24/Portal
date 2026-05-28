@@ -56,3 +56,32 @@ def check_IBAN(IBAN: str):
         return True
     else:
         return False
+    
+def sanitise(value, type):
+    """
+    This function checks that the values we are about to insert into our SQL
+    code cannot be abused to preform an SQL injection.
+    """
+    if type == int:
+        try:
+            v = int(value)
+            return True
+        except:
+            return False
+    elif type == bool:
+        if type(value) == bool:
+            return True
+        else:
+            return False
+    elif type == str and type(value) == str:
+        allowed_chars = set(
+            "abcdefghijklmnopqrstuvwxyz",
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            "áàâãéêíóôõúüç",
+            "ÁÀÂÃÉÊÍÓÔÕÚÜÇ",
+            "0123456789",
+            "_-@."
+        )
+        return all(char in allowed_chars for char in value)
+    else:
+        return False

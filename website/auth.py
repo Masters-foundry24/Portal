@@ -2,6 +2,7 @@
 
 import flask as fl
 import flask_login as fo
+import hashlib as hl
 import decimal as de
 
 from website.models import Account
@@ -22,7 +23,8 @@ def login():
 
         account = Account.query.filter_by(account_id = account_id).first()
         if account:
-            if account.password == password:
+            # if account.password == password:
+            if account.hash == hl.sha256(password.encode()).hexdigest():
                 fl.flash("Conectado com sucesso", category = "s")
                 fo.login_user(account, remember = True)
                 return fl.redirect("/")
@@ -63,12 +65,10 @@ def admin_signup():
         password = data.get("password")
         password_admin = data.get("password_admin")
 
-        account = Account.query.filter_by(account_id = account_id).first()
-
         if password_admin != "Austria":
             # Incorrect password
             fl.flash("Senha do administrador não é certo.", category = "e")
-        elif account:
+        elif Account.query.filter_by(account_id = account_id).first():
             # There is already an account with this number
             fl.flash("Uma conta com este número já existe", category = "e")
         elif len(account_id) != 7:
@@ -76,29 +76,7 @@ def admin_signup():
             fl.flash("O número da conta deve ter exatamente 7 dígitos", category = "e")
         else:
             # Now that the account is valid we will add it to the database.
-            if email == "" and phone == "":
-                db.session.add(Account(
-                    account_id = account_id, name = name, password = password))
-                logger.info(f"AC account_id = {account_id}, name = {name}, password = {password}")
-            elif email == "":
-                db.session.add(Account(
-                    account_id = account_id, name = name, password = password, 
-                    phone = phone))
-                logger.info(f"AC account_id = {account_id}, name = {name}, password = {password}, phone = {phone}")
-            elif phone == "":
-                db.session.add(Account(
-                    account_id = account_id, name = name, password = password, 
-                    email = email))
-                logger.info(f"AC account_id = {account_id}, name = {name}, password = {password}, email = {email}")
-            else:
-                db.session.add(Account(
-                    account_id = account_id, name = name, password = password, 
-                    phone = phone, email = email))
-                logger.info(f"AC account_id = {account_id}, name = {name}, password = {password}, phone = {phone}, email = {email}")
-            db.session.commit()
-            logger.info(f"Database Commit")
-            fl.flash(f"Nova conta {account_id} criada para {name}", category = "s")
-            return fl.redirect("/")
+            return create_account(account_id, password, name, email, phone)
 
     return fl.render_template("/admin/signup.html", user = fo.current_user)
 
@@ -118,12 +96,10 @@ def signup():
         password_1 = data.get("password_1")
         password_2 = data.get("password__2")
 
-        account = Account.query.filter_by(account_id = account_id).first()
-
         if password_1 != password_2:
             # Incorrect password
             fl.flash("Senhas não são iguais.", category = "e")
-        elif account:
+        elif Account.query.filter_by(account_id = account_id).first():
             # There is already an account with this number
             fl.flash("Uma conta com este número já existe", category = "e")
         elif len(account_id) != 7:
@@ -131,29 +107,27 @@ def signup():
             fl.flash("O número da conta deve ter exatamente 7 dígitos", category = "e")
         else:
             # Now that the account is valid we will add it to the database.
-            if email == "" and phone == "":
-                db.session.add(Account(
-                    account_id = account_id, name = name, password = password_1))
-                logger.info(f"AC account_id = {account_id}, name = {name}, password = {password_1}")
-            elif email == "":
-                db.session.add(Account(
-                    account_id = account_id, name = name, password = password_1, 
-                    phone = phone))
-                logger.info(f"AC account_id = {account_id}, name = {name}, password = {password_1}, phone = {phone}")
-            elif phone == "":
-                db.session.add(Account(
-                    account_id = account_id, name = name, password = password_1, 
-                    email = email))
-                logger.info(f"AC account_id = {account_id}, name = {name}, password = {password_1}, email = {email}")
-            else:
-                db.session.add(Account(
-                    account_id = account_id, name = name, password = password_1, 
-                    phone = phone, email = email))
-                logger.info(f"AC account_id = {account_id}, name = {name}, password = {password_1}, phone = {phone}, email = {email}")
-            db.session.commit()
-            logger.info(f"Database Commit")
-            fl.flash(f"Nova conta {account_id} criada para {name}", category = "s")
-            return fl.redirect("/")
+            return create_account(account_id, password_1, name, email, phone)
 
     return fl.render_template("/signup.html", user = fo.current_user)
 
+def create_account(account_id, password, name, email, phone):
+    """
+    After an account has passed all it's validations then this function will add
+    it to the database.
+    """
+    hash = hl.sha256(password.encode()).hexdigest()
+    log_line = f"AC account_id = {account_id}, name = {name}, hash = {hash}"
+    if email == "":
+        email = None
+    else:
+        log_line += f", email = {email}"
+    if phone == "":
+        phone = None
+    else:
+        log_line += f", phone = {phone}"
+    logger.info(log_line)
+    db.session.commit()
+    logger.info(f"Database Commit")
+    fl.flash(f"Nova conta {account_id} criada para {name}", category = "s")
+    return fl.redirect("/")
