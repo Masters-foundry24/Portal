@@ -148,12 +148,20 @@ def get_flow_table():
     flows = Flow.query.filter_by(status = 0)
     table = []
     for f in flows:
-        if f.currency in ["EUR", "USD", "GBP", "JPY", "CAD", "AUD", "CHF"]: # Withdrawal
+        if f.currency in ["AOA"]:
             a = Account.query.filter_by(account_id = f.paid_to_id).first()
             IBAN = getattr(a, f"IBAN_{f.currency}")
             name = getattr(a, f"name_{f.currency}")
+            bank = getattr(a, f"bank_{f.currency}")
+            account = getattr(a, f"account_{f.currency}")
+        elif f.currency in ["EUR", "USD", "GBP", "JPY", "CAD", "AUD", "CHF"]: # Withdrawal
+            a = Account.query.filter_by(account_id = f.paid_to_id).first()
+            IBAN = getattr(a, f"IBAN_{f.currency}")
+            name = getattr(a, f"name_{f.currency}")
+            bank = ""
+            account = ""
         else:
-            IBAN, name = "", ""
+            IBAN, name, bank, account = "", "", "", ""
         table.append([
             f.flow_id,
             f.time.strftime("%d/%m/%y %H:%M:%S"),
@@ -161,6 +169,8 @@ def get_flow_table():
             f.currency,
             format_de(f.quantity),
             name,
-            IBAN
+            IBAN,
+            bank,
+            account
         ])
     return table

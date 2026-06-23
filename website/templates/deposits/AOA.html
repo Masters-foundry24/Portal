@@ -1,0 +1,45 @@
+{% extends "withdrawals/main.html" %}
+
+{% block content %} 
+  <article class = "post featured">
+    <header class = "major">
+      <section class = "post">
+        <header class = "major">
+          <h1> Depositos de AOA </h1>
+        </header>
+        <p> 
+          Primeiro, deves nos contamos quanto você quer depositar usando a 
+          formulário aqui. Segundo, envie o dinheiro para a nossa conta, (nome:
+          Scott Andrew Masters, IBAN: BE17 9677 9251 4921).
+          Quando nós recebemos o valor, o saldo será adicionado para a sua 
+          conta. Se você precisa de ajuda enviar uma mensagem para um agente 
+          (<a href = "https://wa.me/2399949365">+239 994 9365</a>).
+        </p>
+        <form method = "post">
+          <div class = "row gtr-uniform">
+            <div class = "col-6 col-12-small">
+              <label> VALOR: </label>
+              <input 
+                type = "number" name = "quantity" id = "quantity" value = "" 
+                placeholder = "0.00" step = "0.01" min = "0" required = true/>
+            </div>
+  
+            <div class = "col-6 col-12-small">
+              <label> MENSAGEM: </label>
+              <input 
+                type = "text" name = "message" id = "message" value = "" 
+                placeholder = "Mensagem para o destinatário" maxlength = "100"/>
+            </div>
+    
+            <div class = "col-12">
+              <ul class = "actions">
+                <li><input type = "submit" value = "Retirar" class = "primary" /></li>
+                <li><input type = "reset" value = "Reiniciar" /></li>
+              </ul>
+            </div>
+          </div>
+        </form>
+      </section>
+    </header>
+  </article>
+{% endblock %}

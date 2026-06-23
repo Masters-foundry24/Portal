@@ -1,0 +1,208 @@
+{% extends "withdrawals/main.html" %}
+
+{% block content %} 
+  <article class = "post featured">
+    <header class = "major">
+      <section class = "post">
+        <header class = "major">
+          <h1> Retiradas de AOA </h1>
+        </header>
+        <p> 
+          O Portal vai enviar uma transferência bancária eletrônica em kwanzas 
+          para uma conta na Angola. Existem três opçoes para nos contamos onde 
+          enviar o dinheiro, com o IBAN da sua conta, com o número da sua conta 
+          e o nome do seu banco ou se você deixa ambos campos vagos vamos usar o
+          número de telephone da sua conta. Se você precisa de ajuda enviar uma 
+          mensagem para um agente (<a href = "https://wa.me/2399949365">+239 994 9365</a>).
+        </p>
+        <form method = "post">
+          <div class = "row gtr-uniform">
+            <div class = "col-6 col-12-small">
+              <label> VALOR: </label>
+              <input 
+                type = "number" name = "quantity" id = "quantity" value = "" 
+                placeholder = "0.00" step = "0.01" min = "0" required = true/>
+            </div>
+            <div class="col-6 col-12-small">
+              <label> VALOR DISPONÍVEL: </label>
+              <div class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+                <p> {{ user.AOA }} </p>
+              </div>
+            </div>
+            
+            <!--div class = "col-6">
+              <input 
+                type = "radio" id = "old" name = "account" value = "old" required = true>
+              <label for = "old"> Usar Conta Salva </label>
+            </div>
+            <div class = "col-6">
+              <input 
+                type = "radio" id = "new" name = "account" value = "new" required = true>
+              <label for = "new"> Usar Nova Conta </label>
+            </div-->
+  
+            <div id = "name_space" class = "col-6 col-12-small">
+              {% if user.name_AOA %}
+                <label id = "name_lable"> Nome da Conta <a href = "#" onclick = "change_name();">(mudar)</a>: </label>
+                <div id = "name_box" class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+                  <p> {{ user.name_AOA }} </p>
+                </div>
+              {% else %}
+                <label> Nome da Conta: </label>
+                <input 
+                  type = "text" name = "name" id = "name" value = "" 
+                  placeholder = "James Lancaster"/>
+              {% endif %}
+            </div>
+  
+            <div id = "iban_space" class = "col-6 col-12-small">
+              {% if user.IBAN_AOA %}
+                <label id = "iban_lable"> IBAN da Conta <a href = "#" onclick = "change_iban();">(mudar)</a>: </label>
+                <div id = "iban_box" class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+                  <p> {{ user.IBAN_AOA }} </p>
+                </div>
+              {% else %}
+                <label> IBAN da Conta: </label>
+                <input 
+                  type = "text" name = "iban" id = "iban" value = "" 
+                  placeholder = "GB33 BUKB 2020 1555 5555 55"/>
+              {% endif %}
+            </div>
+
+            <div id = "bank_space" class = "col-6 col-12-small">
+              {% if user.bank_AOA %}
+                <label id = "bank_lable"> Número da Conta <a href = "#" onclick = "change_bank();">(mudar)</a>: </label>
+                <div id = "bank_box" class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+                  <p> {{ user.bank_AOA }} </p>
+                </div>
+              {% else %}
+                <label> Nome do Banco: </label>
+                <select id = "bank" name = "bank">
+                  <option value = "" disabled selected > Escolhe um banco </option>
+                  <option value = "BAI"> BAI </option>
+                  <option value = "Banco Atlantico"> Banco Atlantico </option>
+                </select>
+              {% endif %}
+            </div>
+
+            <div id = "account_space" class = "col-6 col-12-small">
+              {% if user.account_AOA %}
+                <label id = "account_lable"> Número da Conta <a href = "#" onclick = "change_account();">(mudar)</a>: </label>
+                <div id = "account_box" class = "box" style = "padding: 3.4px 16px 3.4px 16px;">
+                  <p> {{ user.account_AOA }} </p>
+                </div>
+              {% else %}
+                <label> Número da Conta: </label>
+                <input 
+                  type = "text" name = "account" id = "account" value = "" 
+                  placeholder = "099844745.10.001"/>
+              {% endif %}
+            </div>
+  
+            <div class = "col-6 col-12-small">
+              <label> MENSAGEM: </label>
+              <input 
+                type = "text" name = "message" id = "message" value = "" 
+                placeholder = "Mensagem para o destinatário" maxlength = "100"/>
+            </div>
+    
+            <div class = "col-6 col-12-small">
+              <label> SUA SENHA: </label>
+              <input 
+                type = "password" name = "password" id = "password" value = "" 
+                placeholder = "*******" required = true/>
+            </div>
+    
+            <div class = "col-12">
+              <ul class = "actions">
+                <li><input type = "submit" value = "Retirar" class = "primary" /></li>
+                <li><input type = "reset" value = "Reiniciar" /></li>
+              </ul>
+            </div>
+          </div>
+        </form>
+      </section>
+    </header>
+  </article>
+{% endblock %}
+
+{% block scripts %} 
+  <script>
+    let name_space = document.getElementById("name_space");
+    let name_lable = document.getElementById("name_lable");
+    let name_box = document.getElementById("name_box");
+
+    let iban_space = document.getElementById("iban_space");
+    let iban_lable = document.getElementById("iban_lable");
+    let iban_box = document.getElementById("iban_box");
+
+    let bank_space = document.getElementById("bank_space");
+    let bank_lable = document.getElementById("bank_lable");
+    let bank_box = document.getElementById("bank_box");
+
+    let account_space = document.getElementById("account_space");
+    let account_lable = document.getElementById("account_lable");
+    let account_box = document.getElementById("account_box");
+
+    function change_name() {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.name = "name";
+      input.id = "name";
+      input.value = "";
+      input.placeholder = "James Lancaster";
+      name_space.appendChild(input);
+      name_box.remove();
+      name_lable.textContent = "Nome da Conta:"
+    };
+
+    function change_iban() {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.name = "iban";
+      input.id = "iban";
+      input.value = "";
+      input.placeholder = "GB33 BUKB 2020 1555 5555 55";
+      iban_space.appendChild(input);
+      iban_box.remove();
+      iban_lable.textContent = "IBAN da Conta:"
+    };
+
+    function change_bank() {
+      const select = document.createElement("select");
+      select.id = "bank";
+      select.name = "bank";
+
+      const option_0 = document.createElement("option")
+      option_0.value = ""
+      option_0.textContent = ""
+      option_0.selected = true
+      option_0.disabled = true
+      select.appendChild(option_0)
+      const option_1 = document.createElement("option")
+      option_1.value = "BAI"
+      option_1.textContent = "BAI"
+      select.appendChild(option_1)
+      const option_2 = document.createElement("option")
+      option_2.value = "Banco Atlantico"
+      option_2.textContent = "Banco Atlantico"
+
+      select.appendChild(option_2)
+      bank_space.appendChild(select);
+      bank_box.remove();
+      bank_lable.textContent = "Nome do Banco:"
+    };
+
+    function change_account() {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.name = "account";
+      input.id = "account";
+      input.value = "";
+      input.placeholder = "099844745.10.001";
+      account_space.appendChild(input);
+      account_box.remove();
+      account_lable.textContent = "Número da Conta:"
+    };
+  </script>
+{% endblock %}

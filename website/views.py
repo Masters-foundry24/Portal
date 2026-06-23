@@ -148,6 +148,10 @@ def AUDEUR():
 def CHFEUR():
     return market("CHF", "EUR")
 
+@views.route("/markets/AOAEUR", methods = ["GET", "POST"])
+def AOAEUR():
+    return market("AOA", "EUR")
+
 # TAB: COMO FUNCIONA
 
 @views.route("/how_it_works")
@@ -327,12 +331,36 @@ def my_transfers():
 @fo.login_required
 @views.route("/deposits")
 def deposits():
-    """
-    Eventually, this will be the page where users can make deposits or 
-    withdrawals to/from the network however currently it is just some text 
-    telling users to contact Lázaro.
-    """
     return fl.render_template("deposits/main.html", user = fo.current_user)
+
+@fo.login_required
+@views.route("/deposits/<currency>", methods = ["GET", "POST"])
+def deposit(currency):
+    """
+    Allows the client to submit a deposit flow which then needs to be approved
+    by an admin.
+
+    Notes:
+        -> Since STN is not connected to bank accounts the STN deposits page
+           just says to message Lazaro.
+    """
+    currency = currency.upper()
+    
+    if currency == "STN":
+        return fl.render_template("deposits/STN.html", user = fo.current_user)
+
+    elif currency in ["EUR", "USD", "GBP", "JPY", "CAD", "AUD", "CHF", "AOA"]:
+        if fl.request.method == "POST":
+            data = fl.request.form
+            quantity = de.Decimal(data.get("quantity"))
+            message = data.get("message")
+
+            make_flow(False, currency, quantity, fo.current_user.account_id, message = message)
+    
+        return fl.render_template(f"deposits/{currency}.html", user = fo.current_user)
+    
+    else: # If the user inserts a currency like "COW"
+        fl.abort(404)
 
 # TAB: RETIRADA
 
@@ -387,6 +415,56 @@ def withdrawal(currency):
                     submit_withdrawal = False
             elif not getattr(fo.current_user, f"IBAN_{currency}"): # no iban on file:
                 fl.flash(f"Precisamos de um IBAN para enviar seu dinheiro.", category = "e")
+                submit_withdrawal = False
+
+            if submit_withdrawal:
+                make_flow(False, currency, quantity, fo.current_user.account_id, password, message)
+
+        return fl.render_template(f"withdrawals/{currency}.html", user = fo.current_user)
+
+    if currency == "AOA":
+        if fl.request.method == "POST":
+            submit_withdrawal = True
+            data = fl.request.form
+            quantity = - de.Decimal(data.get("quantity"))
+            password = data.get("password")
+            message = data.get("message")
+
+            if data.get("name"):
+                name = data.get("name")
+                setattr(fo.current_user, f"name_{currency}", name)
+                logger.info(f"AA account_id = {fo.current_user.account_id}, name_{currency} = {name}")
+                db.session.commit()
+                logger.info(f"Database Commit")
+            elif not getattr(fo.current_user, f"name_{currency}"): # no account name on file:
+                fl.flash(f"Precisamos de um nome de conta para enviar seu dinheiro.", category = "e")
+                submit_withdrawal = False
+
+            if data.get("iban"):
+                IBAN = data.get("iban")
+                if check_IBAN(IBAN):
+                    setattr(fo.current_user, f"IBAN_{currency}", IBAN)
+                    logger.info(f"AA account_id = {fo.current_user.account_id}, IBAN_{currency} = {IBAN}")
+                    db.session.commit()
+                    logger.info(f"Database Commit")
+                else:
+                    fl.flash(f"{IBAN} não é um IBAN válido.", category = "e")
+                    submit_withdrawal = False
+            elif not getattr(fo.current_user, f"IBAN_{currency}") and not data.get("account"): # no iban on file:
+                fl.flash(f"Precisamos de um IBAN para enviar seu dinheiro.", category = "e")
+                submit_withdrawal = False
+
+            elif data.get("bank") and data.get("account"):
+                bank = data.get("bank")
+                setattr(fo.current_user, f"bank_{currency}", bank)
+                logger.info(f"AA account_id = {fo.current_user.account_id}, bank_{currency} = {bank}")
+                account = data.get("account")
+                setattr(fo.current_user, f"account_{currency}", account)
+                logger.info(f"AA account_id = {fo.current_user.account_id}, account_{currency} = {account}")
+                db.session.commit()
+                logger.info(f"Database Commit")
+            elif not getattr(fo.current_user, f"account_{currency}"): # no account name on file:
+                fl.flash(f"Precisamos de uma conta para enviar seu dinheiro.", category = "e")
                 submit_withdrawal = False
 
             if submit_withdrawal:
@@ -604,14 +682,15 @@ def accounts():
     if fo.current_user.account_id in [1234567, 9875512]:
         totals = [
             de.Decimal(0), de.Decimal(0), de.Decimal(0), de.Decimal(0), 
-            de.Decimal(0), de.Decimal(0), de.Decimal(0), de.Decimal(0)]
+            de.Decimal(0), de.Decimal(0), de.Decimal(0), de.Decimal(0),
+            de.Decimal(0)]
         accounts = [[]] # the second brakets will be filled by the totals.
         for a in Account.query:
             accounts.append([
                 a.account_id, a.name, a.password, a.hash, format_de(a.EUR), 
                 format_de(a.STN), format_de(a.USD), format_de(a.GBP), 
                 format_de(a.JPY), format_de(a.CAD), format_de(a.AUD),
-                format_de(a.CHF)])
+                format_de(a.CHF), format_de(a.AOA)])
             totals[0] += a.EUR
             totals[1] += a.STN
             totals[2] += a.USD
@@ -620,10 +699,11 @@ def accounts():
             totals[5] += a.CAD
             totals[6] += a.AUD
             totals[7] += a.CHF
+            totals[8] += a.AOA
         accounts[0] = ["", "Total", "", "", format_de(totals[0]), 
             format_de(totals[1]), format_de(totals[2]), format_de(totals[3]), 
             format_de(totals[4]), format_de(totals[5]), format_de(totals[6]), 
-            format_de(totals[7])]
+            format_de(totals[7]), format_de(totals[8])]
     else: 
         accounts = []
 

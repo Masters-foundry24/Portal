@@ -12,6 +12,7 @@
       <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/CADEUR"> CAD/EUR </a></li>
       <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/AUDEUR"> AUD/EUR </a></li>
       <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/CHFEUR"> CHF/EUR </a></li>
+      <li><a style = "padding-left: 20px; padding-right: 20px;" href = "/markets/CHFEUR"> AOA/EUR </a></li>
     </ul>
   </li>
   <li><a href = "/how_it_works"> Como Funciona </a></li>
@@ -37,12 +38,54 @@
         <header class = "major">
           <h1> Depósitos </h1>
         </header>
-        <p> 
-          Para organizar um depósito ou retirada enviar uma mensagem para um 
-          agente (<a href = "https://wa.me/2399949365">+239 994 9365</a>). 
-          Podemos enviar e receber transferências bancárias eletrônicas em 
-          euros. Dobras funcionam com entrega de dinheiro. 
-        </p>
+        <p> Qual moeada você gostaria retirar? </p>
+        <div class = "row gtr-uniform">
+          <div class = "col-3 col-6-small">
+            <ul class = "actions special">
+              <li> <a href = "/deposits/EUR" class = "button" style = "background-image: url('{{ url_for('static', filename='images/EUR.png') }}'); background-size: cover;"> EUR </a> </li>
+            </ul>
+          </div>
+          <div class = "col-3 col-6-small">
+            <ul class = "actions special">
+              <li> <a href = "/deposits/STN" class = "button" style = "background-image: url('{{ url_for('static', filename='images/STN.png') }}'); background-size: cover;"> STN </a> </li>
+            </ul>
+          </div>
+          <div class = "col-3 col-6-small">
+            <ul class = "actions special">
+              <li> <a href = "/deposits/USD" class = "button" style = "background-image: url('{{ url_for('static', filename='images/USD.png') }}'); background-size: cover;"> USD </a> </li>
+            </ul>
+          </div>
+          <div class = "col-3 col-6-small">
+            <ul class = "actions special">
+              <li> <a href = "/deposits/GBP" class = "button" style = "background-image: url('{{ url_for('static', filename='images/GBP.png') }}'); background-size: cover;"> GBP </a> </li>
+            </ul>
+          </div>
+          <div class = "col-3 col-6-small">
+            <ul class = "actions special">
+              <li> <a href = "/deposits/JPY" class = "button" style = "background-image: url('{{ url_for('static', filename='images/JPY.png') }}'); background-size: cover;"> JPY </a> </li>
+            </ul>
+          </div>
+          <div class = "col-3 col-6-small">
+            <ul class = "actions special">
+              <li> <a href = "/deposits/CAD" class = "button" style = "background-image: url('{{ url_for('static', filename='images/CAD.png') }}'); background-size: cover;"> CAD </a> </li>
+            </ul>
+          </div>
+          <div class = "col-3 col-6-small">
+            <ul class = "actions special">
+              <li> <a href = "/deposits/AUD" class = "button" style = "background-image: url('{{ url_for('static', filename='images/AUD.png') }}'); background-size: cover;"> AUD </a> </li>
+            </ul>
+          </div>
+          <div class = "col-3 col-6-small">
+            <ul class = "actions special">
+              <li> <a href = "/deposits/CHF" class = "button" style = "background-image: url('{{ url_for('static', filename='images/CHF.png') }}'); background-size: cover;"> CHF </a> </li>
+            </ul>
+          </div>
+          <div class = "col-3 col-6-small">
+            <ul class = "actions special">
+              <li> <a href = "/deposits/AOA" class = "button" style = "background-image: url('{{ url_for('static', filename='images/AOA.png') }}'); background-size: cover;"> AOA </a> </li>
+            </ul>
+          </div>
+        </div>
       </section>
     </header>
   </article>
